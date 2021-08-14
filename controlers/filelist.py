@@ -18,9 +18,9 @@ import json
 import simplejson
 import codecs
 import logging
-import gspread
+import gspread # google
 import traceback
-import feedparser
+import feedparser # RSS/XML feeds
 import datetime
 import xml.etree.ElementTree as ET
 from oauth2client.service_account import ServiceAccountCredentials

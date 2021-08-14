@@ -23,7 +23,7 @@ logger.info('===================================================================
 
 class Movie:
 	
-	def __init__(self, id_imdb):	
+	def __init__(self, id_imdb):
 		self.id_imdb 	= id_imdb
 		self.title 		= None
 		self.year 		= None
