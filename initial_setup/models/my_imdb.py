@@ -94,7 +94,6 @@ class IMDB(Movie):
 		else:
 			logger.warning('no "contentRating" in imdb json')
 
-
 	def get_user_ratings(self, profile_id):
 		logger.info('get_user_ratings for {}'.format(profile_id))
 
