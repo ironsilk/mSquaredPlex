@@ -13,6 +13,10 @@ API_URL = 'https://filelist.io/api.php'
 USER = ''
 PASSKEY = ''
 DOWNLOAD_DIR = '/Gmedia/Movies'
+MOVIE_HDRO = 19
+MOVIE_4K = 26
+SOAP_HD = 21
+SOAP_4K = 27
 
 
 #TMDB & OMDB

@@ -8,10 +8,24 @@ logger = logging.getLogger('PlexService')
 
 
 def convert_imdb_id(id):
+    '''
+    289992 turns into tt0289992
+    :param id:
+    :return:
+    '''
     if len(str(id)) < 7:
         return 'tt' + str(id).zfill(7)
     else:
         return str(id)
+
+
+def deconvert_imdb_id(imdb_id):
+    '''
+    tt0289992 turns into 289992
+    :param imdb_id:
+    :return:
+    '''
+    return imdb_id.replace('tt', '').lstrip('0')
 
 
 def connect_mysql():

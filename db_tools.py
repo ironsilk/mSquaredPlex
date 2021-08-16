@@ -1,13 +1,13 @@
 import mysql.connector.errors
 
-from utils import connect_mysql, close_mysql, create_db, check_table, logger
-from settings import table_columns, DB_URI
-from pprint import pprint
+from utils import connect_mysql, close_mysql, create_db, check_table, logger, deconvert_imdb_id
+from settings import table_columns, DB_URI, custom_settings
 from torr_tools import get_torr_quality
 from imdb import IMDb
 
 """
 Database tools
+https://github.com/dlwhittenbury/MySQL_IMDb_Project
 """
 
 
@@ -30,7 +30,7 @@ def check_db():
     logger.info("All tables OK.")
 
 
-def check_movies(new_movies):
+def check_in_my_movies(new_movies):
     """
     checks if passed new movies are already in database.
     :param new_movies: dict, returned from FL API
@@ -61,7 +61,7 @@ def check_movies(new_movies):
         return lst
     conn, cursor = connect_mysql()
     q = "SELECT * FROM {table} WHERE imdb_id IN ('{values}')".format(
-        table='all_movies',
+        table='my_movies',
         values="','".join([x['imdb'] for x in new_movies])
     )
     cursor.execute(q)
@@ -73,18 +73,44 @@ def check_movies(new_movies):
     return new
 
 
-def get_movie(mId):
+def retrieve_bulk_from_dbs(items):
+    # Connection to IMDB
     ia = IMDb('s3', DB_URI)
+    items = [retrieve_one_from_dbs(item, ia) for item in items]
 
-    results = ia.search_movie(mId)
+
+def retrieve_one_from_dbs(item, ia):
+    """(self, vColor, vCount, vTitle, vYear, vIMDBid, vPoster, vResolution, vGenre, vRated, vCountry, vRuntime, vIMDBScore,
+    vTMDBScore, vRottenTScore, vMetaCScore, vPlot, vTrailer, vDirector, vActors, vSize, vFreeL, vFLISid, vMyScore,
+    vMyScoreDate)"""
+    imdb_id = deconvert_imdb_id(item['imdb'])
+    # Search in IMDB
+
+
+def get_movie_IMDB(imdb_id, ia=IMDb('s3', DB_URI)):
+    # ia = IMDb('s3', DB_URI)
+    # ia = IMDb()
+    results = ia.search_movie(imdb_id)
     for result in results:
         print(result.movieID, result)
 
     matrix = results[0]
     ia.update(matrix)
     print(matrix.keys())
+    return results
 
 
 if __name__ == '__main__':
-    check_db()
-    # get_movie()
+    x = get_movie_IMDB('tt0903624')[0]
+    print(x.keys())
+    print(x['original title'])
+
+
+    """
+    SELECT a.*, b.numVotes, b.averageRating, e.title, c.*, d.* FROM title_basics a
+    left join title_ratings b on a.tconst = b.tconst
+    left join tmdb_data c on a.tconst = c.imdb_id
+    left join omdb_data d on a.tconst = d.imdb_id
+    left join title_akas e on a.tconst = e.titleId
+    where a.tconst = 488 AND e.isOriginalTitle = 1
+    """

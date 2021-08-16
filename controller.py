@@ -1,7 +1,7 @@
 from utils import logger
 import requests
 from settings import API_URL, USER, PASSKEY, MOVIE_HDRO, MOVIE_4K, SOAP_HD, SOAP_4K
-from db_tools import check_movies
+from db_tools import check_in_my_movies
 from pprint import pprint
 
 # https://filelist.io/forums.php?action=viewtopic&topicid=120435
@@ -30,7 +30,7 @@ def get_latest_torrents(n=100, category=MOVIE_HDRO):
 
 
 def filter_results(new_movies):
-    filtered = check_movies(new_movies)
+    filtered = check_in_my_movies(new_movies)
     return filtered
 
 
@@ -42,8 +42,9 @@ def run():
     # filter out those already in database with same or better quality and mark
     # the rest if they are already in db
     filtered_movies = filter_results(new_movies)
+    pprint(filtered_movies[:3])
 
-    # get data for these new movies.
+    # get IMDB, TMDB and OMDB data for these new movies.
 
 
     # send to user to choose or choose automatically.
