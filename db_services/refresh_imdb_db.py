@@ -1,12 +1,17 @@
-from datetime import datetime
-import time
-from imdb_dump_import import run_import
-from settings import IMDB_DB_REFRESH_INTERVAL, DUMPS_URL, DUMPS_PATH, DB_URI, logger
-from dateutil import parser as d_util
-import requests
-import lxml
 import os
+import time
+from datetime import datetime, timedelta
+
+import lxml
+import requests
 import tqdm
+from dateutil import parser as d_util
+
+from imdb_dump_import import run_import
+from settings import IMDB_DB_REFRESH_INTERVAL, DUMPS_URL, DUMPS_PATH, DB_URI, setup_logger
+
+
+logger = setup_logger("IMDB_db_updater")
 
 
 def fetch_database_dumps():
@@ -37,7 +42,7 @@ def run():
     if refresh_interval_elapsed():
         start_time = datetime.now()
         # Update IMDB DB
-        # update_imdb_db()
+        update_imdb_db()
         time.sleep(2)
         # Loop
         end_time = datetime.now()
@@ -45,10 +50,10 @@ def run():
         if (end_time - start_time).days < IMDB_DB_REFRESH_INTERVAL:
             logger.info('Sleeping for {n} days.'.format(n=IMDB_DB_REFRESH_INTERVAL -
                                                           (end_time - start_time).days))
-            time.sleep(IMDB_DB_REFRESH_INTERVAL * 60 * 24 - (end_time - start_time).total_seconds())
+            time.sleep(IMDB_DB_REFRESH_INTERVAL * 3600 * 24 - (end_time - start_time).total_seconds())
     else:
-        sleep_time = (IMDB_DB_REFRESH_INTERVAL * 24 * 60 - (datetime.now() - read_last_run_time()).total_seconds())
-        logger.info('Sleeping for {n} days.'.format(n=round(sleep_time / 60 / 24)))
+        sleep_time = ((IMDB_DB_REFRESH_INTERVAL * 24 * 3600) - (datetime.now() - read_last_run_time()).total_seconds())
+        logger.info('Sleeping for {n} days.'.format(n=round(sleep_time / 3600 / 24)))
         time.sleep(sleep_time)
     run()
 
@@ -79,4 +84,3 @@ def read_last_run_time():
 
 if __name__ == '__main__':
     run()
-    # read_last_run_time()

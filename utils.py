@@ -153,13 +153,13 @@ def update_many(data_list=None, mysql_table=None):
     for data_dict in data_list:
 
         if not query:
-            columns = ', '.join('`{0}`'.format(k) for k in data_dict)
-            duplicates = ', '.join('{0}=VALUES({0})'.format(k) for k in data_dict)
-            place_holders = ', '.join('%s'.format(k) for k in data_dict)
-            query = "INSERT INTO {0} ({1}) VALUES ({2})".format(mysql_table, columns, place_holders)
-            query = "{0} ON DUPLICATE KEY UPDATE {1}".format(query, duplicates)
+            columns = ', '.join(['`{0}`'.format(k) for k in data_dict])
+            duplicates = ', '.join(['{0}=VALUES({0})'.format(k) for k in data_dict])
+            place_holders = ', '.join(['%s'.format(k) for k in data_dict])
+            query = f"INSERT INTO {mysql_table} ({columns}) VALUES ({place_holders})"
+            query = f"{query} ON DUPLICATE KEY UPDATE {duplicates}"
 
-        v = data_dict.values()
+        v = list(data_dict.values())
         values.append(v)
 
     try:

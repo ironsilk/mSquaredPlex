@@ -1,0 +1,20 @@
+# docker build -t tmdb_service . -f Dockerfile_tmdb_db_update_service
+FROM python:3.9.1
+
+LABEL Author="Mikael"
+
+RUN mkdir /app
+WORKDIR /app
+
+COPY db_services/refresh_tmdb_db.py ./
+COPY tmdb_omdb_tools.py ./
+COPY settings.py ./
+COPY utils.py ./
+COPY db_services/last_update.txt ./
+
+
+COPY requirements.txt ./
+RUN pip install -r requirements.txt
+
+
+ENTRYPOINT ["python", "refresh_tmdb_db.py"]

@@ -12,18 +12,14 @@ custom_settings = {
 API_URL = 'https://filelist.io/api.php'
 USER = ''
 PASSKEY = ''
-MAX_SIZE = 12000000000  # 12 GB
-CONCURRENT_DOWNLOADS = 10  # How many torrents to download simultaneously
 DOWNLOAD_DIR = '/Gmedia/Movies'
-MOVIE_HDRO = 19
-MOVIE_4K = 26
-SOAP_HD = 21
-SOAP_4K = 27
 
-#TMDB
+
+#TMDB & OMDB
 TMDB_API_KEY = ''
 OMDB_API_KEY = ''
-INSERT_BATCH_SIZE = 100
+INSERT_RATE = 100
+OMDB_API_LIMIT = 800
 
 # For imdb DB dumps
 IMDB_DB_REFRESH_INTERVAL = 30  # days
