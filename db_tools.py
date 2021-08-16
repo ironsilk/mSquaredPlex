@@ -23,7 +23,7 @@ def check_db():
         check_table(
             cursor,
             table=table,
-            columns=columns.keys(),
+            columns=list(columns.keys()),
             column_types=columns,
         )
     close_mysql(conn, cursor)

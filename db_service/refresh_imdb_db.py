@@ -1,8 +1,35 @@
 from datetime import datetime
 import time
-from imdb_db import update_imdb_db
-from settings import IMDB_DB_REFRESH_INTERVAL, logger
+from imdb_dump_import import run_import
+from settings import IMDB_DB_REFRESH_INTERVAL, DUMPS_URL, DUMPS_PATH, DB_URI, logger
 from dateutil import parser as d_util
+import requests
+import lxml
+import os
+import tqdm
+
+
+def fetch_database_dumps():
+    logger.info('Downloading dumps...')
+    dom = lxml.html.fromstring(requests.get(DUMPS_URL).content)
+    db_links = [x for x in dom.xpath('//a/@href') if '//' in x and 'interfaces' not in x]
+    for url in db_links:
+        name = url.split('/')[-1]
+        logger.info('Downloading {x} dump'.format(x=name))
+        response = requests.get(url, stream=True)
+
+        with open(os.path.join(DUMPS_PATH, name), "wb") as handle:
+            for data in tqdm(response.iter_content(chunk_size=1024)):
+                handle.write(data)
+
+    logger.info('Dumps ready.')
+
+
+def update_imdb_db():
+    # Download latest dumps
+    fetch_database_dumps()
+    # Update database with 'em
+    run_import(DB_URI, DUMPS_PATH)
 
 
 def run():
@@ -11,8 +38,6 @@ def run():
         start_time = datetime.now()
         # Update IMDB DB
         # update_imdb_db()
-        # Get extra data
-
         time.sleep(2)
         # Loop
         end_time = datetime.now()
