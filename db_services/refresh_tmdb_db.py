@@ -51,7 +51,7 @@ def process_items(items, session_not_found):
     for item in items:
         item = get_tmdb(item['tconst'])
         if not item['hit_tmdb']:
-            session_not_found.append(item['tconst'])
+            session_not_found.append(item['imdb_id'])
     return new_items, session_not_found
 
 

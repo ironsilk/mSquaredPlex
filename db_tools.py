@@ -1,9 +1,7 @@
 import mysql.connector.errors
-from pprint import pprint
 from utils import connect_mysql, close_mysql, create_db, check_table, logger, deconvert_imdb_id, update_many
-from settings import table_columns, DB_URI, custom_settings
+from settings import table_columns
 from torr_tools import get_torr_quality
-from imdb import IMDb
 from tmdb_omdb_tools import get_tmdb, get_omdb
 
 """
@@ -74,10 +72,30 @@ def check_in_my_movies(new_movies):
     return new
 
 
+def check_in_my_torrents(new_movies):
+    conn, cursor = connect_mysql()
+    q = "SELECT * FROM {table} WHERE torr_id IN ('{values}')".format(
+        table='my_torrents',
+        values="','".join([str(x['id']) for x in new_movies])
+    )
+    cursor.execute(q)
+    already_in_db = cursor.fetchall()
+    for movie in new_movies:
+        if movie['id'] in already_in_db:
+            movie['torr_already_seen'] = True
+        else:
+            movie['torr_already_seen'] = False
+    return new_movies
+
+
+def update_my_torrents_db(items):
+    ids = [x['id'] for x in items if not  x['torr_already_seen']]
+
+
 def retrieve_bulk_from_dbs(items):
     # Connections
     conn, cursor = connect_mysql()
-    items = [retrieve_one_from_dbs(item, cursor) for item in items]
+    return [retrieve_one_from_dbs(item, cursor) for item in items]
 
 
 def retrieve_one_from_dbs(item, cursor):
@@ -88,9 +106,6 @@ def retrieve_one_from_dbs(item, cursor):
     imdb_id_number = deconvert_imdb_id(item['imdb'])
     # Search in local_db
     imdb_keys = get_movie_IMDB(imdb_id_number, cursor)
-    print('imdb_keys:')
-    pprint(imdb_keys)
-    print('----------------------------------')
     # Search online if TMDB, OMDB not found in local DB
     if imdb_keys['hit_tmdb'] != 1:
         tmdb = get_tmdb(imdb_id_number)
@@ -105,8 +120,6 @@ def retrieve_one_from_dbs(item, cursor):
             # Update db
             update_many([omdb], 'omdb_data')
     return {**item, **imdb_keys}
-
-    #check these, join them into the response and update them in table.
 
 
 def get_movie_IMDB(imdb_id, cursor=None):
@@ -124,5 +137,4 @@ def get_movie_IMDB(imdb_id, cursor=None):
 
 
 if __name__ == '__main__':
-    x = get_movie_IMDB(31)
-    pprint(x)
+    check_db()

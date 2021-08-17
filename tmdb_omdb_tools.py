@@ -532,7 +532,7 @@ def get_omdb(idd):
     omdb.get_data()
     try:
         rated = float(omdb.rated)
-    except ValueError:
+    except (ValueError, TypeError):
         rated = None
 
     if all(v is None for v in [omdb.awards, omdb.country, omdb.lang, omdb.meta_score, omdb.rott_score, omdb.score]):

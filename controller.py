@@ -1,7 +1,7 @@
 from utils import logger
 import requests
 from settings import API_URL, USER, PASSKEY, MOVIE_HDRO, MOVIE_4K, SOAP_HD, SOAP_4K
-from db_tools import check_in_my_movies, retrieve_one_from_dbs
+from db_tools import check_in_my_movies, check_in_my_torrents, retrieve_bulk_from_dbs, update_my_torrents_db
 from pprint import pprint
 from utils import connect_mysql
 
@@ -31,25 +31,32 @@ def get_latest_torrents(n=100, category=MOVIE_HDRO):
 
 
 def filter_results(new_movies):
+    # Check against my_movies database
     filtered = check_in_my_movies(new_movies)
+    # Check against my_torrents_database
+    filtered = check_in_my_torrents(filtered)
+
     return filtered
 
 
 def run():
     # fetch latest movies
-    new_movies = get_latest_torrents()
-
-
+    new_movies = get_latest_torrents(n=5)
     # filter out those already in database with same or better quality and mark
     # the rest if they are already in db
-    filtered_movies = filter_results(new_movies)
+    new_movies = filter_results(new_movies)
+    # get if these torrents have been seen before
+
 
     # get IMDB, TMDB and OMDB data for these new movies.
-    conn, cursor = connect_mysql()
-    pprint(retrieve_one_from_dbs(filtered_movies[0], cursor))
+    new_movies = retrieve_bulk_from_dbs(new_movies)
+    pprint(new_movies)
+    exit()
+    # send to user to choose
 
-    # send to user to choose or choose automatically.
 
+    # update torrents in my_torrents db
+    update_my_torrents_db(new_movies)
 
     # download and update database.
 
