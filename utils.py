@@ -16,7 +16,7 @@ def convert_imdb_id(id):
     if len(str(id)) < 7:
         return 'tt' + str(id).zfill(7)
     else:
-        return str(id)
+        return 'tt' + str(id)
 
 
 def deconvert_imdb_id(imdb_id):

@@ -11,7 +11,7 @@ COPY tmdb_omdb_tools.py ./
 COPY settings.py ./
 COPY utils.py ./
 COPY db_services/last_update.txt ./
-
+COPY tmdb_omdb_tools.py ./
 
 COPY requirements.txt ./
 RUN pip install -r requirements.txt

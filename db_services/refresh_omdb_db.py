@@ -4,6 +4,7 @@ import time
 from settings import REVIEW_INTERVAL_REFRESH, OMDB_API_LIMIT, INSERT_RATE
 from tmdb_omdb_tools import OMDB
 from utils import logger, connect_mysql, close_mysql, update_many, convert_imdb_id
+from tmdb_omdb_tools import get_omdb
 
 
 def get_omdb_data(session_not_found=[]):
@@ -28,7 +29,8 @@ def get_omdb_data(session_not_found=[]):
             else:
                 calls_to_make = api_calls
                 stop = True
-            if calls_to_make < 0: calls_to_make = None
+            if calls_to_make < 0:
+                calls_to_make = 0
             batch = new_for_omdb_cursor.fetchmany(calls_to_make)
             batch, session_not_found = process_items(batch, session_not_found)
             update_many(batch, 'omdb_data')
@@ -48,7 +50,7 @@ def get_new_imdb_titles(target_table, session_not_found):
     conn, cursor = connect_mysql()
     refresh_interval_date = datetime.datetime.now() - datetime.timedelta(days=REVIEW_INTERVAL_REFRESH)
     q = f"SELECT tconst FROM title_basics WHERE  tconst NOT IN (SELECT imdb_id FROM {target_table} " \
-        f"WHERE last_update > '{str(refresh_interval_date)}')"
+        f"WHERE last_update_omdb > '{str(refresh_interval_date)}')"
     if session_not_found:
         q = q + f" AND tconst NOT IN ({values})"
     cursor.execute(q)
@@ -62,7 +64,7 @@ def get_omdb_api_limit():
     refresh_interval_date = datetime.datetime.now() - datetime.timedelta(days=1)
     conn, cursor = connect_mysql()
     q = f"SELECT imdb_id FROM  `omdb_data`" \
-        f"WHERE last_update > '{str(refresh_interval_date)}'"
+        f"WHERE last_update_omdb > '{str(refresh_interval_date)}'"
     cursor.execute(q)
     results = cursor.fetchall()
     return OMDB_API_LIMIT - len(results)
@@ -71,25 +73,8 @@ def get_omdb_api_limit():
 def process_items(items, session_not_found):
     new_items = []
     for item in items:
-        omdb = OMDB(convert_imdb_id(item['tconst']))
-        omdb.get_data()
-        try:
-            rated = float(omdb.rated)
-        except ValueError:
-            rated = None
-
-        new_items.append({
-            'imdb_id': item['tconst'],
-            'awards': omdb.awards,
-            'country': omdb.country,
-            'lang': omdb.lang,
-            'meta_score': omdb.meta_score,
-            'rated': rated,
-            'rott_score': omdb.rott_score,
-            'score': omdb.score,
-            'last_update': datetime.datetime.now(),
-        })
-        if not omdb.country:
+        item = get_omdb(item['tconst'])
+        if not item['hit_omdb']:
             session_not_found.append(item['tconst'])
     return new_items, session_not_found
 

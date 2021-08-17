@@ -1,9 +1,10 @@
 import mysql.connector.errors
-
-from utils import connect_mysql, close_mysql, create_db, check_table, logger, deconvert_imdb_id
+from pprint import pprint
+from utils import connect_mysql, close_mysql, create_db, check_table, logger, deconvert_imdb_id, update_many
 from settings import table_columns, DB_URI, custom_settings
 from torr_tools import get_torr_quality
 from imdb import IMDb
+from tmdb_omdb_tools import get_tmdb, get_omdb
 
 """
 Database tools
@@ -74,43 +75,54 @@ def check_in_my_movies(new_movies):
 
 
 def retrieve_bulk_from_dbs(items):
-    # Connection to IMDB
-    ia = IMDb('s3', DB_URI)
-    items = [retrieve_one_from_dbs(item, ia) for item in items]
+    # Connections
+    conn, cursor = connect_mysql()
+    items = [retrieve_one_from_dbs(item, cursor) for item in items]
 
 
-def retrieve_one_from_dbs(item, ia):
+def retrieve_one_from_dbs(item, cursor):
     """(self, vColor, vCount, vTitle, vYear, vIMDBid, vPoster, vResolution, vGenre, vRated, vCountry, vRuntime, vIMDBScore,
     vTMDBScore, vRottenTScore, vMetaCScore, vPlot, vTrailer, vDirector, vActors, vSize, vFreeL, vFLISid, vMyScore,
     vMyScoreDate)"""
-    imdb_id = deconvert_imdb_id(item['imdb'])
-    # Search in IMDB
+    # ID
+    imdb_id_number = deconvert_imdb_id(item['imdb'])
+    # Search in local_db
+    imdb_keys = get_movie_IMDB(imdb_id_number, cursor)
+    print('imdb_keys:')
+    pprint(imdb_keys)
+    print('----------------------------------')
+    # Search online if TMDB, OMDB not found in local DB
+    if imdb_keys['hit_tmdb'] != 1:
+        tmdb = get_tmdb(imdb_id_number)
+        if tmdb['hit_tmdb'] == 1:
+            imdb_keys.update(tmdb)
+            # Update db
+            update_many([tmdb], 'tmdb_data')
+    if imdb_keys['hit_omdb'] != 1:
+        omdb = get_omdb(imdb_id_number)
+        if omdb['hit_omdb'] == 1:
+            imdb_keys.update(omdb)
+            # Update db
+            update_many([omdb], 'omdb_data')
+    return {**item, **imdb_keys}
+
+    #check these, join them into the response and update them in table.
 
 
-def get_movie_IMDB(imdb_id, ia=IMDb('s3', DB_URI)):
-    # ia = IMDb('s3', DB_URI)
-    # ia = IMDb()
-    results = ia.search_movie(imdb_id)
-    for result in results:
-        print(result.movieID, result)
-
-    matrix = results[0]
-    ia.update(matrix)
-    print(matrix.keys())
-    return results
-
-
-if __name__ == '__main__':
-    x = get_movie_IMDB('tt0903624')[0]
-    print(x.keys())
-    print(x['original title'])
-
-
-    """
-    SELECT a.*, b.numVotes, b.averageRating, e.title, c.*, d.* FROM title_basics a
+def get_movie_IMDB(imdb_id, cursor=None):
+    if not cursor:
+        conn, cursor = connect_mysql()
+    q = f"""SELECT a.*, b.numVotes, b.averageRating, e.title, c.*, d.* FROM title_basics a
     left join title_ratings b on a.tconst = b.tconst
     left join tmdb_data c on a.tconst = c.imdb_id
     left join omdb_data d on a.tconst = d.imdb_id
     left join title_akas e on a.tconst = e.titleId
-    where a.tconst = 488 AND e.isOriginalTitle = 1
+    where a.tconst = {imdb_id} AND e.isOriginalTitle = 1
     """
+    cursor.execute(q)
+    return cursor.fetchone()
+
+
+if __name__ == '__main__':
+    x = get_movie_IMDB(31)
+    pprint(x)

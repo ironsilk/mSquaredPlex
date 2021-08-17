@@ -4,6 +4,7 @@ import time
 from settings import REVIEW_INTERVAL_REFRESH, INSERT_RATE
 from tmdb_omdb_tools import TMDB
 from utils import logger, connect_mysql, close_mysql, update_many, convert_imdb_id
+from tmdb_omdb_tools import get_tmdb
 
 
 def get_tmdb_data(session_not_found=[]):
@@ -37,7 +38,7 @@ def get_new_imdb_titles(target_table):
     conn, cursor = connect_mysql()
     refresh_interval_date = datetime.datetime.now() - datetime.timedelta(days=REVIEW_INTERVAL_REFRESH)
     q = f"SELECT tconst FROM title_basics WHERE  tconst NOT IN (SELECT imdb_id FROM {target_table} " \
-        f"WHERE last_update > '{str(refresh_interval_date)}')"
+        f"WHERE last_update_tmdb > '{str(refresh_interval_date)}')"
     cursor.execute(q)
     if cursor.with_rows:
         return conn, cursor
@@ -48,18 +49,8 @@ def get_new_imdb_titles(target_table):
 def process_items(items, session_not_found):
     new_items = []
     for item in items:
-        tmdb = TMDB(convert_imdb_id(item['tconst']), '', '')
-        tmdb.get_data()
-        new_items.append({
-            'imdb_id': item['tconst'],
-            'country': tmdb.country,
-            'lang': tmdb.lang,
-            'ovrw': tmdb.ovrw,
-            'score': tmdb.score,
-            'trailer_link': tmdb.trailer,
-            'last_update': datetime.datetime.now(),
-        })
-        if not tmdb.country:
+        item = get_tmdb(item['tconst'])
+        if not item['hit_tmdb']:
             session_not_found.append(item['tconst'])
     return new_items, session_not_found
 

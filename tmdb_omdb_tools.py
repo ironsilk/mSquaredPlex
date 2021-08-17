@@ -1,10 +1,11 @@
 import re
 import xml.etree.ElementTree as ET
-from utils import logger
+from utils import logger, convert_imdb_id
 import tmdbsimple as tmdb_api
 import omdb.api as omdb_api
 from settings import TMDB_API_KEY
 from settings import OMDB_API_KEY
+import datetime
 
 
 class Movie:
@@ -504,8 +505,57 @@ class OMDB(Movie):
             logger.debug('no "actors" in omdb json')
 
 
-if __name__ == '__main__':
-    tmdb = TMDB('tt0903624', '', '')
+def get_tmdb(idd):
+    tmdb = TMDB(convert_imdb_id(idd), '', '')
     tmdb.get_data()
-    omdb = OMDB('tt0903624')
+
+    if all(v is None for v in [tmdb.country, tmdb.lang, tmdb.ovrw, tmdb.score, tmdb.trailer]):
+        hit = False
+    else:
+        hit = True
+
+    item = {
+        'imdb_id': idd,
+        'country': tmdb.country,
+        'lang': tmdb.lang,
+        'ovrw': tmdb.ovrw,
+        'score': tmdb.score,
+        'trailer_link': tmdb.trailer,
+        'last_update_tmdb': datetime.datetime.now(),
+        'hit_tmdb': hit,
+    }
+    return item
+
+
+def get_omdb(idd):
+    omdb = OMDB(convert_imdb_id(idd))
     omdb.get_data()
+    try:
+        rated = float(omdb.rated)
+    except ValueError:
+        rated = None
+
+    if all(v is None for v in [omdb.awards, omdb.country, omdb.lang, omdb.meta_score, omdb.rott_score, omdb.score]):
+        hit = False
+    else:
+        hit = True
+
+    item = {
+        'imdb_id': idd,
+        'awards': omdb.awards,
+        'country': omdb.country,
+        'lang': omdb.lang,
+        'meta_score': omdb.meta_score,
+        'rated': rated,
+        'rott_score': omdb.rott_score,
+        'score': omdb.score,
+        'last_update_omdb': datetime.datetime.now(),
+        'hit_omdb': hit,
+    }
+    return item
+
+
+if __name__ == '__main__':
+    from pprint import pprint
+    pprint(get_omdb(2258285))
+    pprint(get_tmdb(2258285))
