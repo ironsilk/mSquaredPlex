@@ -100,6 +100,13 @@ table_columns = {
 }
 
 
+# EMAIL settings
+xml_trnt_path = r'C:\Users\mihai\Desktop\git\mSquaredPlex\views\new_trnt.xml'
+template_path = r'C:\Users\mihai\Desktop\git\mSquaredPlex\views\email_filelist.html'
+movie_template_path = r'C:\Users\mihai\Desktop\git\mSquaredPlex\views\_movie.html'
+trnt_template_path = r'C:\Users\mihai\Desktop\git\mSquaredPlex\views\_torrent.html'
+
+
 # Logger settings
 def setup_logger(name, log_file=None, level=logging.INFO):
     """Function to setup as many loggers as you want"""
