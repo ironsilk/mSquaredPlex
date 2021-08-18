@@ -51,14 +51,13 @@ def run():
     # get IMDB, TMDB and OMDB data for these new movies.
     new_movies = retrieve_bulk_from_dbs(new_movies)
     pprint(new_movies)
-    exit()
     # send to user to choose
 
 
     # update torrents in my_torrents db
     update_my_torrents_db(new_movies)
 
-    # download and update database.
+    # download and update my_movies db.
 
 
 

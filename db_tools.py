@@ -1,5 +1,5 @@
 import mysql.connector.errors
-from utils import connect_mysql, close_mysql, create_db, check_table, logger, deconvert_imdb_id, update_many
+from utils import connect_mysql, close_mysql, create_db, check_table, logger, deconvert_imdb_id, update_many, insert_sql
 from settings import table_columns
 from torr_tools import get_torr_quality
 from tmdb_omdb_tools import get_tmdb, get_omdb
@@ -79,7 +79,7 @@ def check_in_my_torrents(new_movies):
         values="','".join([str(x['id']) for x in new_movies])
     )
     cursor.execute(q)
-    already_in_db = cursor.fetchall()
+    already_in_db = [x['torr_id'] for x in cursor.fetchall()]
     for movie in new_movies:
         if movie['id'] in already_in_db:
             movie['torr_already_seen'] = True
@@ -89,7 +89,9 @@ def check_in_my_torrents(new_movies):
 
 
 def update_my_torrents_db(items):
-    ids = [x['id'] for x in items if not  x['torr_already_seen']]
+    ids = [{'torr_id': x['id']} for x in items if not x['torr_already_seen']]
+    print(len(ids))
+    update_many(ids, 'my_torrents')
 
 
 def retrieve_bulk_from_dbs(items):
