@@ -9,6 +9,11 @@ custom_settings = {
     'mysql_pass': 'pass',
 }
 
+# Routine settings
+FLIST_ROUTINE_SLEEP_TIME = 12  # hrs
+
+
+# TORR settings
 API_URL = 'https://filelist.io/api.php'
 USER = ''
 PASSKEY = ''
@@ -19,7 +24,7 @@ SOAP_HD = 21
 SOAP_4K = 27
 
 
-#TMDB & OMDB
+# TMDB & OMDB
 TMDB_API_KEY = ''
 OMDB_API_KEY = ''
 INSERT_RATE = 100
@@ -70,24 +75,29 @@ ID-uri categorii filelist
 | 27 | Seriale 4K   
 '''
 
+# First column will be the primary key, must be int.
 table_columns = {
     'my_movies': {
-        'imdb_id': 'CHAR(32)',
+        'imdb_id': 'INT(11)',
         'type': 'CHAR(32)',
         'resolution': 'int(11)',
         'torr_id': 'int(11)',
     },
+    'my_torrents': {
+        'torr_id': 'INT(11)',
+    },
     'tmdb_data': {
-        'imdb_id': 'CHAR(32)',
+        'imdb_id': 'INT(11)',
         'country': 'VARCHAR(128)',
         'lang': 'VARCHAR(128)',
         'ovrw': 'TEXT',
         'score': 'FLOAT',
         'trailer_link': 'VARCHAR(256)',
-        'last_update': 'DATETIME'
+        'last_update_tmdb': 'DATETIME',
+        'hit_tmdb': 'BOOL',
     },
     'omdb_data': {
-        'imdb_id': 'CHAR(32)',
+        'imdb_id': 'INT(11)',
         'awards': 'VARCHAR(256)',
         'country': 'VARCHAR(128)',
         'lang': 'VARCHAR(128)',
@@ -95,7 +105,8 @@ table_columns = {
         'rated': 'FLOAT',
         'rott_score': 'FLOAT',
         'score': 'FLOAT',
-        'last_update': 'DATETIME',
+        'last_update_omdb': 'DATETIME',
+        'hit_omdb': 'BOOL',
     },
 }
 
@@ -105,6 +116,10 @@ xml_trnt_path = r'C:\Users\mihai\Desktop\git\mSquaredPlex\views\new_trnt.xml'
 template_path = r'C:\Users\mihai\Desktop\git\mSquaredPlex\views\email_filelist.html'
 movie_template_path = r'C:\Users\mihai\Desktop\git\mSquaredPlex\views\_movie.html'
 trnt_template_path = r'C:\Users\mihai\Desktop\git\mSquaredPlex\views\_torrent.html'
+EMAIL_USER = ''
+EMAIL_PASS = ''
+EMAIL_HOSTNAME = 'smtp.gmail.com'
+EMAIL_TO = []  # TODO de luat din plex users
 
 
 # Logger settings

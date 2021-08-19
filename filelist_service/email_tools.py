@@ -1,13 +1,24 @@
 # -*- coding: utf-8 -*-
 import datetime
-import logging
 import os
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 from xml.etree.ElementTree import SubElement
 
+from settings import xml_trnt_path, template_path, movie_template_path, trnt_template_path, EMAIL_USER, \
+    EMAIL_PASS, EMAIL_HOSTNAME, EMAIL_TO, TORR_DOWNLOAD_URI, TORR_DOWNLOAD_FOLDER, TORR_SEED_FOLDER, setup_logger
 from tmdb_omdb_tools import OMDB
 from tmdb_omdb_tools import TMDB
+from torr_tools import get_torr_quality
+
+logger = setup_logger('EmailSender')
+
+# seen_type:
+'''
+0 = new movie
+1 = new torrent
+2 = seen or dw movie
+'''
 
 
 class Mtls:
@@ -51,8 +62,7 @@ class Mtls:
 
         if vFLISid is not None:
             sDW = (
-                u'<tr><td style="text-align: center;" colspan="2"><strong><a id="btnDw" href="http://gsmatei.go.ro:5080/dwtrnt?idFlist={0}&idFolder=new">DOWNLOAD</a>&emsp;|&emsp;<a id="btnSd" href="http://gsmatei.go.ro:5080/dwtrnt?idFlist={0}&idFolder=seed">SEED ONLY</a></strong></td></tr>'.format(
-                    vFLISid))
+                f'<tr><td style="text-align: center;" colspan="2"><strong><a id="btnDw" href="{TORR_DOWNLOAD_URI}?idFlist={vFLISid}&idFolder={TORR_DOWNLOAD_FOLDER}">DOWNLOAD</a>&emsp;|&emsp;<a id="btnSd" href="{TORR_DOWNLOAD_URI}?idFlist={0}&idFolder={TORR_SEED_FOLDER}">SEED ONLY</a></strong></td></tr>')
         else:
             sDW = ''
 
@@ -66,8 +76,7 @@ class Mtls:
                                                 '<span style="color: #ff0000;"><strong>{0}</strong></span>'.format(
                                                     genre))
         except Exception as vErr:
-            print('err generate_html_list - Genre bck color:', vErr)
-
+            logger.debug('err generate_html_list - Genre bck color:', vErr)
 
         sCountry = vCountry
         try:
@@ -79,7 +88,7 @@ class Mtls:
                                                     '<span style="color: #ff0000;"><strong>{0}</strong></span>'.format(
                                                         country))
         except Exception as vErr:
-            print( 'err generate_html_list - Country bck color:', vErr)
+            logger.debug('err generate_html_list - Country bck color:', vErr)
 
         try:
             if float(vIMDBScore) < 5:
@@ -136,30 +145,29 @@ class Mtls:
             html = u'<table width="600"><tbody>\n'
             html = html + (
                 u'\n<tr><td colspan="2" style="font-size: 20px; color: #136cb2;" bgcolor="{0}"><span style="color: #666; font-size: 13px">{1}.&ensp;</span><strong>{2}</strong>&ensp;({3}){4}</td></tr>\n'
-                .format(vColor, str(vCount), self.n2d(vTitle), self.n2d(vYear), sFreeL))
+                    .format(vColor, str(vCount), self.n2d(vTitle), self.n2d(vYear), sFreeL))
             html = html + (
                 u'\n<tr><td rowspan="5"><a href="https://www.imdb.com/title/{0}" target="_blank" rel="noopener"><img src="{1}" alt="poster" height="209"/></a></td></tr>\n'
-                .format(self.n2d(vIMDBid), self.n2d(vPoster)))
+                    .format(self.n2d(vIMDBid), self.n2d(vPoster)))
             html = html + (
                 u'\n<tr><td style="font-size: 11px; color: #666;">{0}&ensp;<span style="color: #ccc;">|</span>&ensp;{1}&ensp;<span style="color: #ccc;">|</span>&ensp;{2}&ensp;<span style="color: #ccc;">|</span>&ensp;{3}&ensp;<span style="color: #ccc;">|</span>&ensp;{4}{5}&ensp;<span style="color: #ccc;">|</span></td></tr>\n'
-                .format(self.n2d(vResolution), self.n2d(sGenre), self.n2d(vRated), self.n2d(sCountry),
-                        self.n2d(vRuntime), sSize))
+                    .format(self.n2d(vResolution), self.n2d(sGenre), self.n2d(vRated), self.n2d(sCountry),
+                            self.n2d(vRuntime), sSize))
             html = html + (
                 u'\n<tr><td style="font-size: 11px; color: #666;">IMDB:{0}<strong>&ensp;{1}&ensp;</strong></span><span style="color: #ccc;">|</span>&ensp;TMDB:{2}<strong>&ensp;{3}&ensp;</strong></span><span style="color: #ccc;">|</span>&ensp;Rotten T:{4}<strong>&ensp;{5}&ensp;</strong></span><span style="color: #ccc;">|</span>&ensp;Meta C:{6}<strong>&ensp;{7}&ensp;</strong></span><span style="color: #ccc;">|</span>{8}</td></tr>\n'
-                .format(SStyleIMDB, self.n2d(vIMDBScore), SStyleTMDB, self.n2d(vTMDBScore), SStyleRottenT,
-                        self.n2d(vRottenTScore), SStyleMetaC, self.n2d(vMetaCScore), vMyScoreHTML))
+                    .format(SStyleIMDB, self.n2d(vIMDBScore), SStyleTMDB, self.n2d(vTMDBScore), SStyleRottenT,
+                            self.n2d(vRottenTScore), SStyleMetaC, self.n2d(vMetaCScore), vMyScoreHTML))
             html = html + (u'\n<tr><td style="font-size: 10px;">{0}{1}</td></tr>\n'
                            .format(self.n2d(vPlot), vTrailerHTML))
             html = html + (
                 u'\n<tr><td style="font-size: 11px; color: #666;">Director:<span style="color: #333333;"><strong>&ensp;{0}&ensp;</strong></span><span style="color: #ccc;">|</span>&ensp;Stars:<span style="color: #333333;"><strong>&ensp;{1}</strong></span></td></tr>\n'
-                .format(self.n2d(vDirector), self.n2d(vActors)))
+                    .format(self.n2d(vDirector), self.n2d(vActors)))
             html = html + sDW
             html = html + u'</tbody></table><br>\n\n'
 
         except Exception as vErr:
             html = html + u'</tbody></table><br>\n\n'
-            print('err generate_html_list - Nu am putut genera lista html: ' + str(vErr))
-
+            logger.debug('err generate_html_list - Nu am putut genera lista html: ' + str(vErr))
 
         return html
 
@@ -223,28 +231,21 @@ class Mtls:
                     attachedfile.add_header('content-disposition', 'attachment', filename=os.path.basename(f))
                 msg.attach(attachedfile)
 
-            # fp = open('/home/matei/Dropbox/Python/HelloAnalytics/pageviews.jpg', 'rb')
-            # msgImage1 = MIMEImage(fp.read())
-            # fp.close()
-
-            # msgImage1.add_header('Content-ID', '<image1>')
-            # msg.attach(msgImage1)
-
-            server = smtplib.SMTP(tSMTP)
+            server = smtplib.SMTP(tSMTP, 587)
+            server.ehlo()
             server.starttls()
             server.login(tUser, tPass)
             server.sendmail(tFromEmail, tToList, msg.as_string())
             server.quit()
 
         except Exception as vErr:
-            print('[send_email] Nu am putut trimite email: ', str(vErr))
+            logger.debug('[send_email] Nu am putut trimite email: ', str(vErr))
 
     def xml_pritify(self, xml_file_path):
         try:
             tree = ET.parse(xml_file_path)
         except Exception as e:
-            print
-            'fisier XML corupt: ' + str(e)
+            logger.debug('fisier XML corupt: ' + str(e))
 
         root = tree.getroot()
 
@@ -257,15 +258,14 @@ class Mtls:
 
     def add_movie_to_xml(self, xml_file_path, id_imdb, id_filelist, **kwargs):
         if id_imdb is None:
-            print('id_imdb is None')
+            logger.debug('id_imdb is None')
 
             id_imdb = 'tt0'
 
         try:
             tree = ET.parse(xml_file_path)
         except Exception as e:
-            print('fisier XML corupt: ' + str(e))
-
+            logger.debug('fisier XML corupt: ' + str(e))
 
         root = tree.getroot()
 
@@ -274,12 +274,18 @@ class Mtls:
         for arg_label, arg_value in zip(kwargs, kwargs.values()):
             if arg_label == 'movie_data':
                 for param_label, param_value in arg_value.items():
+                    if type(param_value) == str:
+                        param_value = param_value.replace('"', '\'')
+
                     exec('{0} = SubElement(movie, "{0}")'.format(param_label))
                     exec('{0}.text = "{1}"'.format(param_label, param_value))
 
             if arg_label == 'trnt_data':
                 trnt = ET.SubElement(movie, 'trnt', id=id_filelist)
                 for param_label, param_value in arg_value.items():
+                    if type(param_value) == str:
+                        param_value = param_value.replace('"', '\'')
+
                     exec('{0} = SubElement(trnt, "{0}")'.format(param_label))
                     exec('{0}.text = "{1}"'.format(param_label, param_value))
 
@@ -291,8 +297,7 @@ class Mtls:
         try:
             tree = ET.parse(xml_file_path)
         except Exception as e:
-            print('fisier XML corupt: ' + str(e))
-
+            logger.debug('fisier XML corupt: ' + str(e))
 
         root = tree.getroot()
 
@@ -305,15 +310,14 @@ class Mtls:
 
     def update_trnt_child_xml(self, xml_file_path, id_imdb, child_name, child_value):
         if id_imdb is None:
-            print('id_imdb is None')
+            logger.debug('id_imdb is None')
 
             id_imdb = 'tt0'
 
         try:
             tree = ET.parse(xml_file_path)
         except Exception as e:
-            print('fisier XML corupt: ' + str(e))
-
+            logger.debug('fisier XML corupt: ' + str(e))
 
         root = tree.getroot()
 
@@ -321,7 +325,7 @@ class Mtls:
             try:
                 target.find(child_name).text = child_value
             except:
-                # print 'lipsa child', child_name
+                # logger.debug 'lipsa child', child_name
                 pass
 
         dom = minidom.parseString(ET.tostring(root))
@@ -332,8 +336,7 @@ class Mtls:
         try:
             tree = ET.parse(xml_file_path)
         except Exception as e:
-            print('fisier XML corupt: ' + str(e))
-
+            logger.debug('fisier XML corupt: ' + str(e))
 
         root = tree.getroot()
 
@@ -343,7 +346,7 @@ class Mtls:
             else:
                 self.find = False
         except Exception as e:
-            print('' + str(e))
+            logger.debug('' + str(e))
 
             self.find = False
 
@@ -351,8 +354,7 @@ class Mtls:
         try:
             tree = ET.parse(xml_file_path)
         except Exception as e:
-            print('fisier XML corupt: ' + str(e))
-
+            logger.debug('fisier XML corupt: ' + str(e))
 
         root = tree.getroot()
 
@@ -362,6 +364,9 @@ class Mtls:
             if arg_label == 'trnt_data':
                 trnt = ET.SubElement(movie, 'trnt', id=id_filelist)
                 for param_label, param_value in arg_value.items():
+                    if type(param_value) == str:
+                        param_value = param_value.replace('"', '\'')
+
                     exec('{0} = SubElement(trnt, "{0}")'.format(param_label))
                     exec('{0}.text = "{1}"'.format(param_label, param_value))
 
@@ -373,17 +378,15 @@ class Mtls:
         try:
             tree = ET.parse(xml_file_path)
         except Exception as e:
-            print('fisier XML corupt: ' + str(e))
-
+            logger.debug('fisier XML corupt: ' + str(e))
 
         root = tree.getroot()
 
-        print('\ntorrenti noi:', len(root.findall(".//trnt")))
+        logger.debug('\ntorrenti noi:', len(root.findall(".//trnt")))
 
-        print('total filme:', len(list(root)))
+        logger.debug('total filme:', len(list(root)))
 
-        print('din care')
-
+        logger.debug('din care')
 
         new = 0
         tr = 0
@@ -398,11 +401,11 @@ class Mtls:
                 seen += 1
                 list_seen.append(movie.attrib['id_imdb'])
 
-        print('- filme noi:', new)
+        logger.debug('- filme noi:', new)
 
-        print('- torrenti noi:', tr)
+        logger.debug('- torrenti noi:', tr)
 
-        print('- vazute sau descarcate:', seen)
+        logger.debug('- vazute sau descarcate:', seen)
 
         self.new_movies = len(list(root))
 
@@ -410,14 +413,13 @@ class Mtls:
         try:
             tree = ET.parse(xml_file_path)
         except Exception as e:
-            print('fisier XML corupt: ' + str(e))
+            logger.debug('fisier XML corupt: ' + str(e))
 
         root = tree.getroot()
 
         movie_count = len(root)
         for x in range(movie_count):
             movie = list(root)[0]
-            print(movie)
             root.remove(movie)
 
         dom = minidom.parseString(ET.tostring(root))
@@ -578,11 +580,9 @@ class Mtls:
         try:
             tree = ET.parse(xml_file_path)
         except Exception as e:
-            print('fisier XML corupt: ' + str(e))
-
+            logger.debug('fisier XML corupt: ' + str(e))
 
         root = tree.getroot()
-
         for movie in root:
 
             if movie.find("title").text is None:
@@ -609,8 +609,7 @@ class Mtls:
         try:
             tree = ET.parse(xml_file_path)
         except Exception as e:
-            print('fisier XML corupt: ' + str(e))
-
+            logger.debug('fisier XML corupt: ' + str(e))
 
         root = tree.getroot()
 
@@ -630,12 +629,12 @@ class Mtls:
                              'bck_color': 'F4CCCC'}
                 all_trnt = {}
                 for trnt in movie.iter('trnt'):
-                    # print trnt.attrib['id']
-                    for subelem in movie.getchildren():
+                    # logger.debug trnt.attrib['id']
+                    for subelem in list(movie):
                         all_movie[subelem.tag] = subelem.text
 
                     one_trnt = {}
-                    for subelem in trnt.getchildren():
+                    for subelem in list(trnt):
                         one_trnt[subelem.tag] = subelem.text
                     all_trnt[trnt.attrib['id']] = one_trnt
 
@@ -647,7 +646,7 @@ class Mtls:
                              'bck_color': 'FFF2CC'}
                 all_trnt = {}
                 for trnt in movie.iter('trnt'):
-                    # print trnt.attrib['id']
+                    # logger.debug trnt.attrib['id']
                     for subelem in list(movie):
                         all_movie[subelem.tag] = subelem.text
 
@@ -664,12 +663,12 @@ class Mtls:
                              'bck_color': 'CFE2F3'}
                 all_trnt = {}
                 for trnt in movie.iter('trnt'):
-                    # print trnt.attrib['id']
-                    for subelem in movie.getchildren():
+                    # logger.debug trnt.attrib['id']
+                    for subelem in list(movie):
                         all_movie[subelem.tag] = subelem.text
 
                     one_trnt = {}
-                    for subelem in trnt.getchildren():
+                    for subelem in list(trnt):
                         one_trnt[subelem.tag] = subelem.text
                     all_trnt[trnt.attrib['id']] = one_trnt
 
@@ -698,17 +697,17 @@ class Mtls:
                 new_value = 'std'
 
         elif key == 'rott_score':
-            if int(value) < 60:
+            if int(float(value)) < 60:
                 new_value = 'neg'
-            elif int(value) >= 75:
+            elif int(float(value)) >= 75:
                 new_value = 'poz'
             else:
                 new_value = 'std'
 
         elif key == 'meta_score':
-            if int(value) < 40:
+            if int(float(value)) < 40:
                 new_value = 'neg'
-            elif int(value) > 60:
+            elif int(float(value)) > 60:
                 new_value = 'poz'
             else:
                 new_value = 'std'
@@ -721,3 +720,131 @@ class Mtls:
 
         return new_value
 
+
+def send_email(items):
+    if items:
+        logger.info("Starting emailing routine")
+        mtls = Mtls()
+        mtls.empty_xml(xml_trnt_path)
+
+        for item in items:
+            mtls = prepare_item_for_email(item, mtls)
+
+        mtls.update_filelist_xml(xml_trnt_path)
+        mtls.count_xml(xml_trnt_path)
+
+        list_new, list_trnt, list_seen = mtls.read_filelist_xml(xml_trnt_path, movie_template_path,
+                                                                trnt_template_path)
+        email_body = mtls.generate_email_html(template_path, list_new, list_trnt, list_seen, datetime.datetime.now())
+
+        if mtls.new_movies == 1:
+            mail_subject = 'Film nou pe FileList'
+        elif mtls.new_movies > 1:
+            mail_subject = '{0} filme noi pe FileList'.format(mtls.new_movies)
+        else:
+            mail_subject = 'Nou pe FileList'
+
+        with open('../test.html', 'w') as f:
+            f.write(email_body)
+
+        if email_body:
+            logger.info('Sending email')
+            mtls.send_email('TeleCinemateca', EMAIL_USER, EMAIL_TO, mail_subject, email_body, '',
+                            EMAIL_HOSTNAME, EMAIL_USER, EMAIL_PASS)
+            return
+    logger.info('Nothing left to send')
+
+
+def prepare_item_for_email(item, mtls):
+    # Change here for seen types
+    if item['hit_tmdb'] == 0:
+        item['seen_type'] = 0
+    else:
+        item['seen_type'] = 1
+    if item['already_in_db']:
+        item['seen_type'] = 2
+
+    item['size'] = "%.1f" % (item['size'] / 1000000000)
+    item['year'] = item['startYear']
+    item['genre'] = item['genres']
+    item['runtime'] = item['runtimeMinutes']
+    item['imdb_score'] = item['averageRating']
+    item['director'] = 'DIRECTOR'  # TODO
+    item['cast'] = 'CAST'  # TODO
+    item['poster'] = None  # TODO
+    item['my_imdb_score'] = None  # TODO
+    item['seen_date'] = None  # TODO
+
+    item['resolution'] = get_torr_quality(item['name'])
+    item['trend'] = ''  # TODO
+    item['id'] = str(item['id'])
+
+    mtls.find_trnt_elem_xml(xml_trnt_path, 'movie', 'id_imdb', item['imdb'])
+    if mtls.find is False:
+        mtls.add_movie_to_xml(xml_trnt_path, item['imdb'], item['id'], movie_data=item,
+                              trnt_data=item)
+    elif mtls.find is True:
+        mtls.find_trnt_elem_xml(xml_trnt_path, 'trnt', 'id', item['id'])
+        if mtls.find is False:
+            mtls.new_trnt_link_xml(xml_trnt_path, item['imdb'], item['id'],
+                                   trnt_data=item)
+    mtls.xml_pritify(xml_trnt_path)
+    return mtls
+
+
+if __name__ == '__main__':
+    # test package
+    x = {
+        'already_in_db': False,
+        # Daca e sau nu in baza de date my_movies - adica alea vazute (prin intermediul serviciului astuia)
+        'averageRating': 5.4,
+        'awards': '3 nominations',
+        'better_quality': False,
+        'category': 'Filme HD-RO',
+        'comments': 0,
+        'country': 'Italy',
+        'doubleup': 0,
+        'download_link': 'https://filelist.io/download.php?id=748320&passkey=f5684696415b6f98834f1872bd03a8c1',
+        'endYear': None,
+        'files': 1,
+        'freeleech': 0,
+        'genres': 'Comedy,Drama,Romance',
+        'hit_omdb': 1,  # Daca am gasit sau nu pe omdb date
+        'hit_tmdb': 1,  # Daca am gasit sau nu pe tmdb date
+        'id': 748320,
+        'imdb': 'tt11154906',
+        'imdb_id': 11154906,
+        'internal': 0,
+        'isAdult': 0,
+        'lang': 'Italian',
+        'last_update_omdb': datetime.datetime(2021, 8, 18, 15, 19, 56),
+        'last_update_tmdb': datetime.datetime(2021, 8, 18, 15, 19, 55),
+        'leechers': 0,
+        'meta_score': None,
+        'moderated': 1,
+        'name': 'Out.of.My.League.2020.720p.WEB-DL.DD+5.1.H.264-NAISU',
+        'numVotes': 338,
+        'originalTitle': 'Sul più bello',
+        'ovrw': 'Marta may be an orphan, and she may be affected by a lethal '
+                'illness, yet she is the most positive person one can meet. She '
+                'wants a boy to fall for her. Not any boy - the most handsome of '
+                'them all. One day, she may have found her match.',
+        'primaryTitle': 'Out of My League',
+        'rated': None,
+        'rott_score': None,
+        'runtimeMinutes': 91,
+        'score': None,
+        'seeders': 20,
+        'size': 1340928446,
+        'small_description': 'Comedy, Drama, Romance',
+        'startYear': 2020,
+        't_soundex': 'O3154',
+        'tconst': 11154906,
+        'times_completed': 28,
+        'title': 'Sul più bello',
+        'titleType': 'movie',
+        'torr_already_seen': False,  # Daca torrentul a fost procesat pana acum si trimis prin email
+        'trailer_link': 'https://www.youtube.com/watch?v=PQM54p9IKZs',
+        'upload_date': '2021-08-18 11:30:23'
+    }
+    send_email([x])

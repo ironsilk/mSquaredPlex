@@ -90,11 +90,11 @@ def check_in_my_torrents(new_movies):
 
 def update_my_torrents_db(items):
     ids = [{'torr_id': x['id']} for x in items if not x['torr_already_seen']]
-    print(len(ids))
     update_many(ids, 'my_torrents')
 
 
 def retrieve_bulk_from_dbs(items):
+    logger.info("Getting IMDB TMDB and OMDB metadata...")
     # Connections
     conn, cursor = connect_mysql()
     return [retrieve_one_from_dbs(item, cursor) for item in items]
