@@ -3,56 +3,63 @@ from email_tools import Mtls
 from torr_tools import get_torr_quality
 from settings import xml_trnt_path, template_path, movie_template_path, trnt_template_path
 
-x = {'already_in_db': False,
- 'averageRating': 5.4,
- 'awards': '3 nominations',
- 'better_quality': False,
- 'category': 'Filme HD-RO',
- 'comments': 0,
- 'country': 'Italy',
- 'doubleup': 0,
- 'download_link': 'https://filelist.io/download.php?id=748320&passkey=f5684696415b6f98834f1872bd03a8c1',
- 'endYear': None,
- 'files': 1,
- 'freeleech': 0,
- 'genres': 'Comedy,Drama,Romance',
- 'hit_omdb': 1,
- 'hit_tmdb': 1,
- 'id': 748320,
- 'imdb': 'tt11154906',
- 'imdb_id': 11154906,
- 'internal': 0,
- 'isAdult': 0,
- 'lang': 'Italian',
- 'last_update_omdb': datetime.datetime(2021, 8, 18, 15, 19, 56),
- 'last_update_tmdb': datetime.datetime(2021, 8, 18, 15, 19, 55),
- 'leechers': 0,
- 'meta_score': None,
- 'moderated': 1,
- 'name': 'Out.of.My.League.2020.720p.WEB-DL.DD+5.1.H.264-NAISU',
- 'numVotes': 338,
- 'originalTitle': 'Sul più bello',
- 'ovrw': 'Marta may be an orphan, and she may be affected by a lethal '
-         'illness, yet she is the most positive person one can meet. She '
-         'wants a boy to fall for her. Not any boy - the most handsome of '
-         'them all. One day, she may have found her match.',
- 'primaryTitle': 'Out of My League',
- 'rated': None,
- 'rott_score': None,
- 'runtimeMinutes': 91,
- 'score': None,
- 'seeders': 20,
- 'size': 1340928446,
- 'small_description': 'Comedy, Drama, Romance',
- 'startYear': 2020,
- 't_soundex': 'O3154',
- 'tconst': 11154906,
- 'times_completed': 28,
- 'title': 'Sul più bello',
- 'titleType': 'movie',
- 'torr_already_seen': False,
- 'trailer_link': 'https://www.youtube.com/watch?v=PQM54p9IKZs',
- 'upload_date': '2021-08-18 11:30:23'}
+x = {
+    'already_in_db': False,  # Daca e sau nu in baza de date my_movies - adica alea vazute (prin intermediul serviciului astuia)
+    'averageRating': 5.4,
+    'awards': '3 nominations',
+    'better_quality': False,
+    'category': 'Filme HD-RO',
+    'comments': 0,
+    'country': 'Italy',
+    'doubleup': 0,
+    'download_link': 'https://filelist.io/download.php?id=748320&passkey=f5684696415b6f98834f1872bd03a8c1',
+    'endYear': None,
+    'files': 1,
+    'freeleech': 0,
+    'genres': 'Comedy,Drama,Romance',
+    'hit_omdb': 1,  # Daca am gasit sau nu pe omdb date
+    'hit_tmdb': 1,  # Daca am gasit sau nu pe tmdb date
+    'id': 748320,
+    'imdb': 'tt11154906',
+    'imdb_id': 11154906,
+    'internal': 0,
+    'isAdult': 0,
+    'lang': 'Italian',
+    'last_update_omdb': datetime.datetime(2021, 8, 18, 15, 19, 56),
+    'last_update_tmdb': datetime.datetime(2021, 8, 18, 15, 19, 55),
+    'leechers': 0,
+    'meta_score': None,
+    'moderated': 1,
+    'name': 'Out.of.My.League.2020.720p.WEB-DL.DD+5.1.H.264-NAISU',
+    'numVotes': 338,
+    'originalTitle': 'Sul più bello',
+    'ovrw': 'Marta may be an orphan, and she may be affected by a lethal '
+            'illness, yet she is the most positive person one can meet. She '
+            'wants a boy to fall for her. Not any boy - the most handsome of '
+            'them all. One day, she may have found her match.',
+    'primaryTitle': 'Out of My League',
+    'rated': None,
+    'rott_score': None,
+    'runtimeMinutes': 91,
+    'score': None,
+    'seeders': 20,
+    'size': 1340928446,
+    'small_description': 'Comedy, Drama, Romance',
+    'startYear': 2020,
+    't_soundex': 'O3154',
+    'tconst': 11154906,
+    'times_completed': 28,
+    'title': 'Sul più bello',
+    'titleType': 'movie',
+    'torr_already_seen': False,  # Daca torrentul a fost procesat pana acum si trimis prin email
+    'trailer_link': 'https://www.youtube.com/watch?v=PQM54p9IKZs',
+    'upload_date': '2021-08-18 11:30:23'
+}
+
+# seen_type:
+# 0 = Film nou pe IMDB
+# 1 = Torrent nou?
+# 2 = L-am vazut (e in my_imdb sau l-am vazut pe PLEX)
 
 
 def prepare_for_email(item):
@@ -92,7 +99,9 @@ mtls = Mtls()
 
 mtls.empty_xml(xml_trnt_path)
 
-for item in [x]:
+for pos, item in enumerate([x]*3):
+    item['seen_type'] = pos
+    item['title'] = f"Seen type {str(pos)}"
     prepare_for_email(item)
 
 mtls.update_filelist_xml(xml_trnt_path)
