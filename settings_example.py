@@ -17,14 +17,16 @@ FLIST_ROUTINE_SLEEP_TIME = 12  # hrs
 API_URL = 'https://filelist.io/api.php'
 USER = ''
 PASSKEY = ''
-TORR_DOWNLOAD_URI = '/Gmedia/Movies'
+TORR_HOST = ''  # Listening path for torrent service.
+TORR_PORT = ''  # Listening path for torrent service.
+TORR_USER = ''
+TORR_PASS = ''
 TORR_DOWNLOAD_FOLDER = '/Gmedia/Movies'
 TORR_SEED_FOLDER = '/Gmedia/Movies'
 MOVIE_HDRO = 19
 MOVIE_4K = 26
 SOAP_HD = 21
 SOAP_4K = 27
-
 
 # TMDB & OMDB
 TMDB_API_KEY = ''
