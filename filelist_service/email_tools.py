@@ -6,10 +6,11 @@ from xml.dom import minidom
 from xml.etree.ElementTree import SubElement
 
 from settings import xml_trnt_path, template_path, movie_template_path, trnt_template_path, EMAIL_USER, \
-    EMAIL_PASS, EMAIL_HOSTNAME, EMAIL_TO, TORR_DOWNLOAD_URI, TORR_DOWNLOAD_FOLDER, TORR_SEED_FOLDER, setup_logger
+    EMAIL_PASS, EMAIL_HOSTNAME, EMAIL_TO, setup_logger
 from tmdb_omdb_tools import OMDB
 from tmdb_omdb_tools import TMDB
-from torr_tools import get_torr_quality
+from torr_service.torr_tools import get_torr_quality, generate_torr_links
+
 
 logger = setup_logger('EmailSender')
 
@@ -26,186 +27,6 @@ class Mtls:
     def __init__(self):
         self.description = 'my tools'
 
-    def n2d(self, x):
-        if (x is None) or (x == 'N/A') or (x == 'NOT RATED'):
-            newX = '-'
-        else:
-            newX = u'{0}'.format(x)
-
-        return newX
-
-    '''************************ generate_html_list ***********************************
-    Genereaza item/tabel HTML pentru un film dat
-    Input:	vColor - fundal film (gri pt film nou, rosu pentru filme de sters),
-        vCount - crt index item/film in lista, plus alte detalii pt fiecare film in parte
-    Output:	cod HTML pt un item/film
-    *******************************************************************************'''
-
-    def generate_html_list(self, vColor, vCount, vTitle, vYear, vIMDBid, vPoster, vResolution, vGenre, vRated, vCountry,
-                           vRuntime, vIMDBScore, vTMDBScore, vRottenTScore, vMetaCScore, vPlot, vTrailer, vDirector,
-                           vActors, vSize, vFreeL, vFLISid, vMyScore, vMyScoreDate):
-
-        styleSScore = '<span style="color: #333333;">'  # Standard score
-        styleNScore = '<span style="color: #ffffff; background-color: #ff0000;">'  # Negative score
-        stylePScore = '<span style="color: #ffffff; background-color: #008000;">'  # Positive score
-        styleMScore = '<span style="color: #ffffff; background-color: #000000;">'  # Personal score
-
-        if vSize is not None:
-            sSize = ('&ensp;<span style="color: #ccc;">|</span>&ensp;{0} Gb'.format(vSize))
-        else:
-            sSize = ''
-
-        if vFreeL is not None:
-            sFreeL = '&emsp;<img src="https://filelist.io/styles/images/tags/freeleech.png"/>'
-        else:
-            sFreeL = ''
-
-        if vFLISid is not None:
-            sDW = (
-                f'<tr><td style="text-align: center;" colspan="2"><strong><a id="btnDw" href="{TORR_DOWNLOAD_URI}?idFlist={vFLISid}&idFolder={TORR_DOWNLOAD_FOLDER}">DOWNLOAD</a>&emsp;|&emsp;<a id="btnSd" href="{TORR_DOWNLOAD_URI}?idFlist={0}&idFolder={TORR_SEED_FOLDER}">SEED ONLY</a></strong></td></tr>')
-        else:
-            sDW = ''
-
-        sGenre = vGenre
-        try:
-            if sGenre is not None:
-                genreDict = ['Horror', 'Animation']
-                for genre in genreDict:
-                    if genre.lower() in sGenre.lower():
-                        sGenre = sGenre.replace(genre,
-                                                '<span style="color: #ff0000;"><strong>{0}</strong></span>'.format(
-                                                    genre))
-        except Exception as vErr:
-            logger.debug('err generate_html_list - Genre bck color:', vErr)
-
-        sCountry = vCountry
-        try:
-            if sCountry is not None:
-                countryDict = ['India', 'Bahasa indonesia']
-                for country in countryDict:
-                    if country.lower() in sCountry.lower():
-                        sCountry = sCountry.replace(country,
-                                                    '<span style="color: #ff0000;"><strong>{0}</strong></span>'.format(
-                                                        country))
-        except Exception as vErr:
-            logger.debug('err generate_html_list - Country bck color:', vErr)
-
-        try:
-            if float(vIMDBScore) < 5:
-                SStyleIMDB = styleNScore
-            elif float(vIMDBScore) >= 7:
-                SStyleIMDB = stylePScore
-            else:
-                SStyleIMDB = styleSScore
-        except:
-            SStyleIMDB = styleSScore
-
-        try:
-            if float(vTMDBScore) < 5:
-                SStyleTMDB = styleNScore
-            elif float(vTMDBScore) >= 7:
-                SStyleTMDB = stylePScore
-            else:
-                SStyleTMDB = styleSScore
-        except:
-            SStyleTMDB = styleSScore
-
-        try:
-            if int(vRottenTScore) < 60:
-                SStyleRottenT = styleNScore
-            elif int(vRottenTScore) >= 75:
-                SStyleRottenT = stylePScore
-            else:
-                SStyleRottenT = styleSScore
-        except:
-            SStyleRottenT = styleSScore
-
-        try:
-            if int(vMetaCScore) < 40:
-                SStyleMetaC = styleNScore
-            elif int(vMetaCScore) > 60:
-                SStyleMetaC = stylePScore
-            else:
-                SStyleMetaC = styleSScore
-        except:
-            SStyleMetaC = styleSScore
-
-        if vMyScore is not None and vMyScoreDate is not None:
-            vMyScoreHTML = '&ensp;{0}:{1}<strong>&ensp;{2}&ensp;</strong></span><span style="color: #ccc;">|</span>'.format(
-                vMyScoreDate, styleMScore, self.n2d(vMyScore))
-        else:
-            vMyScoreHTML = ''
-
-        if vTrailer is not None:
-            vTrailerHTML = '<a href="{0}" target="_blank" rel="noopener">(vezi trailer)</a>'.format(vTrailer)
-        else:
-            vTrailerHTML = ''
-
-        try:
-            html = u'<table width="600"><tbody>\n'
-            html = html + (
-                u'\n<tr><td colspan="2" style="font-size: 20px; color: #136cb2;" bgcolor="{0}"><span style="color: #666; font-size: 13px">{1}.&ensp;</span><strong>{2}</strong>&ensp;({3}){4}</td></tr>\n'
-                    .format(vColor, str(vCount), self.n2d(vTitle), self.n2d(vYear), sFreeL))
-            html = html + (
-                u'\n<tr><td rowspan="5"><a href="https://www.imdb.com/title/{0}" target="_blank" rel="noopener"><img src="{1}" alt="poster" height="209"/></a></td></tr>\n'
-                    .format(self.n2d(vIMDBid), self.n2d(vPoster)))
-            html = html + (
-                u'\n<tr><td style="font-size: 11px; color: #666;">{0}&ensp;<span style="color: #ccc;">|</span>&ensp;{1}&ensp;<span style="color: #ccc;">|</span>&ensp;{2}&ensp;<span style="color: #ccc;">|</span>&ensp;{3}&ensp;<span style="color: #ccc;">|</span>&ensp;{4}{5}&ensp;<span style="color: #ccc;">|</span></td></tr>\n'
-                    .format(self.n2d(vResolution), self.n2d(sGenre), self.n2d(vRated), self.n2d(sCountry),
-                            self.n2d(vRuntime), sSize))
-            html = html + (
-                u'\n<tr><td style="font-size: 11px; color: #666;">IMDB:{0}<strong>&ensp;{1}&ensp;</strong></span><span style="color: #ccc;">|</span>&ensp;TMDB:{2}<strong>&ensp;{3}&ensp;</strong></span><span style="color: #ccc;">|</span>&ensp;Rotten T:{4}<strong>&ensp;{5}&ensp;</strong></span><span style="color: #ccc;">|</span>&ensp;Meta C:{6}<strong>&ensp;{7}&ensp;</strong></span><span style="color: #ccc;">|</span>{8}</td></tr>\n'
-                    .format(SStyleIMDB, self.n2d(vIMDBScore), SStyleTMDB, self.n2d(vTMDBScore), SStyleRottenT,
-                            self.n2d(vRottenTScore), SStyleMetaC, self.n2d(vMetaCScore), vMyScoreHTML))
-            html = html + (u'\n<tr><td style="font-size: 10px;">{0}{1}</td></tr>\n'
-                           .format(self.n2d(vPlot), vTrailerHTML))
-            html = html + (
-                u'\n<tr><td style="font-size: 11px; color: #666;">Director:<span style="color: #333333;"><strong>&ensp;{0}&ensp;</strong></span><span style="color: #ccc;">|</span>&ensp;Stars:<span style="color: #333333;"><strong>&ensp;{1}</strong></span></td></tr>\n'
-                    .format(self.n2d(vDirector), self.n2d(vActors)))
-            html = html + sDW
-            html = html + u'</tbody></table><br>\n\n'
-
-        except Exception as vErr:
-            html = html + u'</tbody></table><br>\n\n'
-            logger.debug('err generate_html_list - Nu am putut genera lista html: ' + str(vErr))
-
-        return html
-
-    def css(self):
-
-        css = '\n'
-        css = css + '<style>\n'
-
-        css = css + '#btnSd {\n'
-        css = css + 'background:    #6aa84f;\n'
-        css = css + 'background:    -webkit-linear-gradient(#6aa84f, #274e13);\n'
-        css = css + 'background:    linear-gradient(#6aa84f, #274e13);\n'
-        css = css + 'border-radius: 5px;\n'
-        css = css + 'padding:       5px 23px;\n'
-        css = css + 'color:         #ffffff;\n'
-        css = css + 'display:       inline-block;\n'
-        css = css + 'font:          normal 700 14px/1 "Calibri", sans-serif;\n'
-        css = css + 'text-align:    center;\n'
-        css = css + 'text-shadow:   1px 1px #000000;\n'
-        css = css + '}\n'
-
-        css = css + '#btnDw {\n'
-        css = css + 'background:    #3d85c6;\n'
-        css = css + 'background:    -webkit-linear-gradient(#3d85c6, #073763);\n'
-        css = css + 'background:    linear-gradient(#3d85c6, #073763);\n'
-        css = css + 'border-radius: 5px;\n'
-        css = css + 'padding:       5px 20px;\n'
-        css = css + 'color:         #ffffff;\n'
-        css = css + 'display:       inline-block;\n'
-        css = css + 'font:          normal 700 14px/1 "Calibri", sans-serif;\n'
-        css = css + 'text-align:    center;\n'
-        css = css + 'text-shadow:   1px 1px #000000;\n'
-        css = css + '}\n'
-
-        css = css + '</style>\n'
-
-        return css
-
     def send_email(self, tFromName, tFromEmail, tToList, tSubject, tBody, lFiles, tSMTP, tUser, tPass):
         try:
             import smtplib
@@ -216,7 +37,6 @@ class Mtls:
             from email.mime.application import MIMEApplication
 
             msg = MIMEMultipart()
-            # msg.set_charset('utf8')
             msg['From'] = '{0} <{1}>'.format(tFromName, tFromEmail)
             msg['To'] = tFromEmail
             msg['Date'] = formatdate(localtime=True)
@@ -288,21 +108,6 @@ class Mtls:
 
                     exec('{0} = SubElement(trnt, "{0}")'.format(param_label))
                     exec('{0}.text = "{1}"'.format(param_label, param_value))
-
-        dom = minidom.parseString(ET.tostring(root))
-        with open(xml_file_path, 'wb') as f:
-            f.write(dom.toprettyxml(encoding='utf-8'))
-
-    def update_trnt_type_xml(self, xml_file_path, id_imdb, trnt_type):
-        try:
-            tree = ET.parse(xml_file_path)
-        except Exception as e:
-            logger.debug('fisier XML corupt: ' + str(e))
-
-        root = tree.getroot()
-
-        for target in root.findall(".//movie[@id_imdb='" + id_imdb + "']"):
-            target.set('trnt_type', trnt_type)
 
         dom = minidom.parseString(ET.tostring(root))
         with open(xml_file_path, 'wb') as f:
@@ -427,37 +232,15 @@ class Mtls:
             f.write(dom.toprettyxml(encoding='utf-8'))
 
     def generate_movie_table(self, movie_template_path, trnt_template_path, mprm, tprm):
-        # template_file = open('/home/matei/Documents/Python/MoviePediaV2/views/_movie.html', 'r')
         template_file = open(movie_template_path, 'r')
         template = template_file.read()
         template_file.close()
 
-        # with open('/home/matei/Documents/Python/MoviePediaV2/views/movie.html', 'w+') as f:
-        # 	f.write('')
-        # f.close
-
-        # replace param without values
         for key, value in mprm.items():
             if key in template:
-                # 		if value != 'None' and value != 'False' and value != 'N/A' and value is not None:
-                # 			key_list = ('imdb_score', 'score', 'rott_score', 'meta_score', 'my_imdb_score')
-                # 			if key in key_list:
-                # 				class_value = self.get_key_class(key, value)
-                # 				template = template.replace('mprm_{0}'.format(key), value)
-                # 				template = template.replace('class_{0}'.format(key), class_value)
-                # 			template = template.replace('mprm_{0}'.format(key), value)
-
-                # # replace all param without values with dash/'---'
-                # for key, value in mprm.items():
-                # 	template = template.replace('mprm_{0}'.format(key), '---')
-
                 template = self.template_replace(template, key, value)
 
         template = template.replace('trnt_tbody', self.generate_trnt_table(trnt_template_path, tprm))
-
-        # with open('/home/matei/Documents/Python/MoviePediaV2/views/movie.html', 'w+') as f:
-        # 	f.write(template)
-        # f.close
 
         return template + '\n'
 
@@ -508,7 +291,6 @@ class Mtls:
         return template
 
     def generate_trnt_table(self, trnt_template_path, tprm):
-        # template_file = open('/home/matei/Documents/Python/MoviePediaV2/views/_torrent.html', 'r')
         template_file = open(trnt_template_path, 'r')
         template = template_file.read()
         template_file.close()
@@ -521,7 +303,6 @@ class Mtls:
                 for key2, value2 in value.items():
                     trnt_tbody = trnt_tbody.replace('trnt_id_filelist', key)
                     if value2 == 'True':
-                        # trnt_tbody = trnt_tbody.replace('trnt_{0}'.format(key2), 'freeleech')
                         trnt_tbody = trnt_tbody.replace('trnt_{0}'.format(key2),
                                                         '<img src="https://filelist.io/styles/images/tags/freeleech.png" alt="freeleech" />')
                     elif value2 != 'None' and value2 != 'False' and value2 != 'N/A' and value2 is not None:
@@ -721,14 +502,14 @@ class Mtls:
         return new_value
 
 
-def send_email(items):
+def send_email(items, cypher):
     if items:
         logger.info("Starting emailing routine")
         mtls = Mtls()
         mtls.empty_xml(xml_trnt_path)
 
         for item in items:
-            mtls = prepare_item_for_email(item, mtls)
+            mtls = prepare_item_for_email(item, mtls, cypher)
 
         mtls.update_filelist_xml(xml_trnt_path)
         mtls.count_xml(xml_trnt_path)
@@ -755,8 +536,8 @@ def send_email(items):
     logger.info('Nothing left to send')
 
 
-def prepare_item_for_email(item, mtls):
-    # Change here for seen types
+def prepare_item_for_email(item, mtls, cypher):
+    # Add seen type keys
     if item['hit_tmdb'] == 0:
         item['seen_type'] = 0
     else:
@@ -764,6 +545,7 @@ def prepare_item_for_email(item, mtls):
     if item['already_in_db']:
         item['seen_type'] = 2
 
+    # Convert some keys
     item['size'] = "%.1f" % (item['size'] / 1000000000)
     item['year'] = item['startYear']
     item['genre'] = item['genres']
@@ -774,11 +556,14 @@ def prepare_item_for_email(item, mtls):
     item['poster'] = None  # TODO
     item['my_imdb_score'] = None  # TODO
     item['seen_date'] = None  # TODO
-
     item['resolution'] = get_torr_quality(item['name'])
     item['trend'] = ''  # TODO
     item['id'] = str(item['id'])
 
+    # Add keys for torrent API and generate AES hash for each torrent
+    item['torr_link_seed'], item['torr_link_download'] = generate_torr_links(item, cypher)
+
+    # Build HTML and return
     mtls.find_trnt_elem_xml(xml_trnt_path, 'movie', 'id_imdb', item['imdb'])
     if mtls.find is False:
         mtls.add_movie_to_xml(xml_trnt_path, item['imdb'], item['id'], movie_data=item,
@@ -793,6 +578,7 @@ def prepare_item_for_email(item, mtls):
 
 
 if __name__ == '__main__':
+    from crypto_tools import torr_cypher
     # test package
     x = {
         'already_in_db': False,
@@ -847,4 +633,4 @@ if __name__ == '__main__':
         'trailer_link': 'https://www.youtube.com/watch?v=PQM54p9IKZs',
         'upload_date': '2021-08-18 11:30:23'
     }
-    send_email([x])
+    send_email([x], torr_cypher)

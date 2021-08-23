@@ -17,10 +17,14 @@ FLIST_ROUTINE_SLEEP_TIME = 12  # hrs
 API_URL = 'https://filelist.io/api.php'
 USER = ''
 PASSKEY = ''
-TORR_HOST = ''  # Listening path for torrent service.
-TORR_PORT = ''  # Listening path for torrent service.
+TORR_API_HOST = 'localhost'  # Listening path for torrent API service.
+TORR_API_PATH = '/torr_api'  # Listening path for torrent API service.
+TORR_API_PORT = 9092  # Listening path for torrent API service.
+TORR_HOST = 'localhost'  # Listening path for torrent RPC service.
+TORR_PORT = 9091  # Listening path for torrent RPC service.
 TORR_USER = ''
 TORR_PASS = ''
+TORR_HASH_KEY = 'this my hash key'  # Used to secure incoming calls to API
 TORR_DOWNLOAD_FOLDER = '/Gmedia/Movies'
 TORR_SEED_FOLDER = '/Gmedia/Movies'
 MOVIE_HDRO = 19
@@ -89,6 +93,8 @@ table_columns = {
     },
     'my_torrents': {
         'torr_id': 'INT(11)',
+        'torr_client_id': 'INT(11)',
+        'status': 'CHAR(32)',
     },
     'tmdb_data': {
         'imdb_id': 'INT(11)',

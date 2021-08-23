@@ -4,6 +4,7 @@ import requests
 
 from db_tools import check_in_my_movies, check_in_my_torrents, retrieve_bulk_from_dbs, update_my_torrents_db
 from email_tools import send_email
+from crypto_tools import torr_cypher
 from settings import API_URL, USER, PASSKEY, MOVIE_HDRO, MOVIE_4K, FLIST_ROUTINE_SLEEP_TIME
 from utils import logger
 from utils import timing
@@ -48,7 +49,7 @@ def filter_results(new_movies):
 
 
 @timing
-def feed_routine():
+def feed_routine(cypher):
     # fetch latest movies
     new_movies = get_latest_torrents(n=5)
     # filter out those already in database with same or better quality and mark
@@ -61,21 +62,22 @@ def feed_routine():
     new_movies = retrieve_bulk_from_dbs(new_movies)
 
     # send to user to choose
-    send_email(new_movies)
+    send_email(new_movies, cypher)
 
     # update torrents in my_torrents db
     update_my_torrents_db(new_movies)
 
 
-def run_forever(sleep_time=60*60*FLIST_ROUTINE_SLEEP_TIME):
+def run_forever(cypher=torr_cypher, sleep_time=60*60*FLIST_ROUTINE_SLEEP_TIME):
     # TODO maybe make it run at a certain hour, 8AM 8 PM for example
     """
     Run routine - run time is negligible, will sleep for full time provided in settings.
+    :param cypher: AES cypher for torrent API hashes
     :param sleep_time: default at 12 hrs
     :return: happiness
     """
     while True:
-        feed_routine()
+        feed_routine(cypher)
         logger.info(f"Finished routine, sleeping for {FLIST_ROUTINE_SLEEP_TIME} hours")
         time.sleep(sleep_time)
 

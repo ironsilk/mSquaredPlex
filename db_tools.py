@@ -1,7 +1,7 @@
 import mysql.connector.errors
-from utils import connect_mysql, close_mysql, create_db, check_table, logger, deconvert_imdb_id, update_many, insert_sql
+from utils import connect_mysql, close_mysql, create_db, check_table, logger, deconvert_imdb_id, update_many
 from settings import table_columns
-from torr_tools import get_torr_quality
+from torr_service.torr_tools import get_torr_quality
 from tmdb_omdb_tools import get_tmdb, get_omdb
 
 """
