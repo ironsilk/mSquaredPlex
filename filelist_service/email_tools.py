@@ -550,15 +550,14 @@ def prepare_item_for_email(item, mtls, cypher):
     item['year'] = item['startYear']
     item['genre'] = item['genres']
     item['runtime'] = item['runtimeMinutes']
-    item['imdb_score'] = item['averageRating']
-    item['director'] = 'DIRECTOR'  # TODO
-    item['cast'] = 'CAST'  # TODO
-    item['poster'] = None  # TODO
-    item['my_imdb_score'] = None  # TODO
-    item['seen_date'] = None  # TODO
-    item['resolution'] = get_torr_quality(item['name'])
-    item['trend'] = ''  # TODO
+    item['imdb_score'] = item['averageRating']  # TODO asta nu iese momentan
+    item['score'] = item['tmdb_score']
+    item['my_imdb_score'] = None  # TODO n-am momentan
+    item['seen_date'] = None  # TODO PLEX?
+    item['resolution'] = str(get_torr_quality(item['name'])) + 'p'
+    item['trend'] = ''  # TODO asta nu stiu de unde sa-l iau
     item['id'] = str(item['id'])
+    item['freeleech'] = True if item['freeleech'] == 1 else False
 
     # Add keys for torrent API and generate AES hash for each torrent
     item['torr_link_seed'], item['torr_link_download'] = generate_torr_links(item, cypher)

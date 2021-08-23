@@ -1,128 +1,782 @@
 <?xml version="1.0" encoding="utf-8"?><movies>
-	<movie id_imdb="tt11154906">
-		<already_in_db>False</already_in_db>
-		<averageRating>5.4</averageRating>
-		<awards>3 nominations</awards>
-		<better_quality>False</better_quality>
-		<category>Filme HD-RO</category>
-		<comments>0</comments>
-		<country>Italy</country>
+	<movie id_imdb="tt1617661">
+		<id>748752</id>
+		<name>Jupiter.Ascending.2015.1080p.BluRay.DD5.1.x264-DON</name>
+		<imdb>tt1617661</imdb>
+		<freeleech>True</freeleech>
 		<doubleup>0</doubleup>
-		<download_link>https://filelist.io/download.php?id=748320&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
-		<endYear>None</endYear>
-		<files>1</files>
-		<freeleech>0</freeleech>
-		<genres>Comedy,Drama,Romance</genres>
-		<hit_omdb>1</hit_omdb>
-		<hit_tmdb>1</hit_tmdb>
-		<id>748320</id>
-		<imdb>tt11154906</imdb>
-		<imdb_id>11154906</imdb_id>
+		<upload_date>2021-08-23 22:36:46</upload_date>
+		<download_link>https://filelist.io/download.php?id=748752&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
+		<size>11.3</size>
 		<internal>0</internal>
-		<isAdult>0</isAdult>
-		<lang>Italian</lang>
-		<last_update_omdb>2021-08-18 15:19:56</last_update_omdb>
-		<last_update_tmdb>2021-08-18 15:19:55</last_update_tmdb>
-		<leechers>0</leechers>
-		<meta_score>None</meta_score>
 		<moderated>1</moderated>
-		<name>Out.of.My.League.2020.720p.WEB-DL.DD+5.1.H.264-NAISU</name>
-		<numVotes>338</numVotes>
-		<originalTitle>Sul più bello</originalTitle>
-		<ovrw>Marta may be an orphan, and she may be affected by a lethal illness, yet she is the most positive person one can meet. She wants a boy to fall for her. Not any boy - the most handsome of them all. One day, she may have found her match.</ovrw>
-		<primaryTitle>Out of My League</primaryTitle>
-		<rated>None</rated>
-		<rott_score>None</rott_score>
-		<runtimeMinutes>91</runtimeMinutes>
-		<score>None</score>
-		<seeders>20</seeders>
-		<size>1.3</size>
-		<small_description>Comedy, Drama, Romance</small_description>
-		<startYear>2020</startYear>
-		<t_soundex>O3154</t_soundex>
-		<tconst>11154906</tconst>
-		<times_completed>28</times_completed>
-		<title>Sul più bello</title>
-		<titleType>movie</titleType>
+		<category>Filme HD-RO</category>
+		<seeders>26</seeders>
+		<leechers>16</leechers>
+		<times_completed>26</times_completed>
+		<comments>0</comments>
+		<files>2</files>
+		<small_description>Action, Adventure, Sci-Fi</small_description>
+		<already_in_db>False</already_in_db>
+		<better_quality>False</better_quality>
 		<torr_already_seen>False</torr_already_seen>
-		<trailer_link>https://www.youtube.com/watch?v=PQM54p9IKZs</trailer_link>
-		<upload_date>2021-08-18 11:30:23</upload_date>
+		<originalTitle>Jupiter Ascending</originalTitle>
+		<t_soundex>J1362</t_soundex>
+		<runtimeMinutes>127</runtimeMinutes>
+		<titleType>movie</titleType>
+		<isAdult>0</isAdult>
+		<genres>Action,Adventure,Sci-Fi</genres>
+		<tconst>1617661</tconst>
+		<startYear>2015</startYear>
+		<endYear>None</endYear>
+		<primaryTitle>Jupiter Ascending</primaryTitle>
+		<numVotes>182718</numVotes>
+		<averageRating>5.3</averageRating>
+		<title>Jupiter Ascending</title>
+		<imdb_id>1617661</imdb_id>
+		<country>United States, Australia</country>
+		<lang>English, Russian</lang>
+		<ovrw>In a universe where human genetic material is the most precious commodity, an impoverished young Earth woman becomes the key to strategic maneuvers and internal strife within a powerful dynasty…</ovrw>
+		<tmdb_score>5.4</tmdb_score>
+		<trailer_link>https://www.youtube.com/watch?v=gQHKolIqBGs</trailer_link>
+		<poster>https://image.tmdb.org/t/p/w300_and_h450_bestv2/2NCcAZ3M3F0FxENYmammBknwpVn.jpg</poster>
+		<last_update_tmdb>2021-08-23 22:40:22</last_update_tmdb>
+		<hit_tmdb>1</hit_tmdb>
+		<awards>4 wins &amp; 16 nominations</awards>
+		<meta_score>40.0</meta_score>
+		<rated>None</rated>
+		<rott_score>27.0</rott_score>
+		<omdb_score>None</omdb_score>
+		<last_update_omdb>2021-08-23 22:40:22</last_update_omdb>
+		<hit_omdb>1</hit_omdb>
+		<cast>Channing Tatum,Eddie Redmayne,Sean Bean</cast>
+		<director>Lilly Wachowski</director>
 		<seen_type>1</seen_type>
-		<year>2020</year>
-		<genre>Comedy,Drama,Romance</genre>
-		<runtime>91</runtime>
-		<imdb_score>5.4</imdb_score>
-		<director>DIRECTOR</director>
-		<cast>CAST</cast>
-		<poster>None</poster>
+		<year>2015</year>
+		<genre>Action,Adventure,Sci-Fi</genre>
+		<runtime>127</runtime>
+		<imdb_score>5.3</imdb_score>
+		<score>5.4</score>
 		<my_imdb_score>None</my_imdb_score>
 		<seen_date>None</seen_date>
-		<resolution>720</resolution>
+		<resolution>1080p</resolution>
 		<trend/>
-		<torr_link_seed>http://localhost:9092/torr_api?f+sWAnHsEPJe8Zzou21Y9fZaGShz2564Rth4JaoQkWQTjK+YeWjHrIMNrg4=</torr_link_seed>
-		<torr_link_download>http://localhost:9092/torr_api?f+sWAnHsEPJe8Zzou21Y9fZaGShz2564Rth4JaoQkWQTjK+YeWjHrIMNrg4=</torr_link_download>
-		<trnt id="748320">
-			<already_in_db>False</already_in_db>
-			<averageRating>5.4</averageRating>
-			<awards>3 nominations</awards>
-			<better_quality>False</better_quality>
-			<category>Filme HD-RO</category>
-			<comments>0</comments>
-			<country>Italy</country>
+		<torr_link_seed>http://localhost:9092/torr_api?f+sWAnHsEPJe8ZzsvG9Y9fZaGShz2564Rth4Jao6k3cegL2VSQ==</torr_link_seed>
+		<torr_link_download>http://localhost:9092/torr_api?f+sWAnHsEPJe8ZzsvG9Y9fZaGShz2564Rth4Jao6k3cegL2VSQ==</torr_link_download>
+		<trnt id="748752">
+			<id>748752</id>
+			<name>Jupiter.Ascending.2015.1080p.BluRay.DD5.1.x264-DON</name>
+			<imdb>tt1617661</imdb>
+			<freeleech>True</freeleech>
 			<doubleup>0</doubleup>
-			<download_link>https://filelist.io/download.php?id=748320&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
-			<endYear>None</endYear>
-			<files>1</files>
-			<freeleech>0</freeleech>
-			<genres>Comedy,Drama,Romance</genres>
-			<hit_omdb>1</hit_omdb>
-			<hit_tmdb>1</hit_tmdb>
-			<id>748320</id>
-			<imdb>tt11154906</imdb>
-			<imdb_id>11154906</imdb_id>
+			<upload_date>2021-08-23 22:36:46</upload_date>
+			<download_link>https://filelist.io/download.php?id=748752&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
+			<size>11.3</size>
 			<internal>0</internal>
-			<isAdult>0</isAdult>
-			<lang>Italian</lang>
-			<last_update_omdb>2021-08-18 15:19:56</last_update_omdb>
-			<last_update_tmdb>2021-08-18 15:19:55</last_update_tmdb>
-			<leechers>0</leechers>
-			<meta_score>None</meta_score>
 			<moderated>1</moderated>
-			<name>Out.of.My.League.2020.720p.WEB-DL.DD+5.1.H.264-NAISU</name>
-			<numVotes>338</numVotes>
-			<originalTitle>Sul più bello</originalTitle>
-			<ovrw>Marta may be an orphan, and she may be affected by a lethal illness, yet she is the most positive person one can meet. She wants a boy to fall for her. Not any boy - the most handsome of them all. One day, she may have found her match.</ovrw>
-			<primaryTitle>Out of My League</primaryTitle>
-			<rated>None</rated>
-			<rott_score>None</rott_score>
-			<runtimeMinutes>91</runtimeMinutes>
-			<score>None</score>
-			<seeders>20</seeders>
-			<size>1.3</size>
-			<small_description>Comedy, Drama, Romance</small_description>
-			<startYear>2020</startYear>
-			<t_soundex>O3154</t_soundex>
-			<tconst>11154906</tconst>
-			<times_completed>28</times_completed>
-			<title>Sul più bello</title>
-			<titleType>movie</titleType>
+			<category>Filme HD-RO</category>
+			<seeders>26</seeders>
+			<leechers>16</leechers>
+			<times_completed>26</times_completed>
+			<comments>0</comments>
+			<files>2</files>
+			<small_description>Action, Adventure, Sci-Fi</small_description>
+			<already_in_db>False</already_in_db>
+			<better_quality>False</better_quality>
 			<torr_already_seen>False</torr_already_seen>
-			<trailer_link>https://www.youtube.com/watch?v=PQM54p9IKZs</trailer_link>
-			<upload_date>2021-08-18 11:30:23</upload_date>
+			<originalTitle>Jupiter Ascending</originalTitle>
+			<t_soundex>J1362</t_soundex>
+			<runtimeMinutes>127</runtimeMinutes>
+			<titleType>movie</titleType>
+			<isAdult>0</isAdult>
+			<genres>Action,Adventure,Sci-Fi</genres>
+			<tconst>1617661</tconst>
+			<startYear>2015</startYear>
+			<endYear>None</endYear>
+			<primaryTitle>Jupiter Ascending</primaryTitle>
+			<numVotes>182718</numVotes>
+			<averageRating>5.3</averageRating>
+			<title>Jupiter Ascending</title>
+			<imdb_id>1617661</imdb_id>
+			<country>United States, Australia</country>
+			<lang>English, Russian</lang>
+			<ovrw>In a universe where human genetic material is the most precious commodity, an impoverished young Earth woman becomes the key to strategic maneuvers and internal strife within a powerful dynasty…</ovrw>
+			<tmdb_score>5.4</tmdb_score>
+			<trailer_link>https://www.youtube.com/watch?v=gQHKolIqBGs</trailer_link>
+			<poster>https://image.tmdb.org/t/p/w300_and_h450_bestv2/2NCcAZ3M3F0FxENYmammBknwpVn.jpg</poster>
+			<last_update_tmdb>2021-08-23 22:40:22</last_update_tmdb>
+			<hit_tmdb>1</hit_tmdb>
+			<awards>4 wins &amp; 16 nominations</awards>
+			<meta_score>40.0</meta_score>
+			<rated>None</rated>
+			<rott_score>27.0</rott_score>
+			<omdb_score>None</omdb_score>
+			<last_update_omdb>2021-08-23 22:40:22</last_update_omdb>
+			<hit_omdb>1</hit_omdb>
+			<cast>Channing Tatum,Eddie Redmayne,Sean Bean</cast>
+			<director>Lilly Wachowski</director>
 			<seen_type>1</seen_type>
-			<year>2020</year>
-			<genre>Comedy,Drama,Romance</genre>
-			<runtime>91</runtime>
-			<imdb_score>5.4</imdb_score>
-			<director>DIRECTOR</director>
-			<cast>CAST</cast>
-			<poster>None</poster>
+			<year>2015</year>
+			<genre>Action,Adventure,Sci-Fi</genre>
+			<runtime>127</runtime>
+			<imdb_score>5.3</imdb_score>
+			<score>5.4</score>
 			<my_imdb_score>None</my_imdb_score>
 			<seen_date>None</seen_date>
-			<resolution>720</resolution>
+			<resolution>1080p</resolution>
 			<trend/>
-			<torr_link_seed>http://localhost:9092/torr_api?f+sWAnHsEPJe8Zzou21Y9fZaGShz2564Rth4JaoQkWQTjK+YeWjHrIMNrg4=</torr_link_seed>
-			<torr_link_download>http://localhost:9092/torr_api?f+sWAnHsEPJe8Zzou21Y9fZaGShz2564Rth4JaoQkWQTjK+YeWjHrIMNrg4=</torr_link_download>
+			<torr_link_seed>http://localhost:9092/torr_api?f+sWAnHsEPJe8ZzsvG9Y9fZaGShz2564Rth4Jao6k3cegL2VSQ==</torr_link_seed>
+			<torr_link_download>http://localhost:9092/torr_api?f+sWAnHsEPJe8ZzsvG9Y9fZaGShz2564Rth4Jao6k3cegL2VSQ==</torr_link_download>
+		</trnt>
+	</movie>
+	<movie id_imdb="tt2088003">
+		<id>748750</id>
+		<name>Big.Game.2014.1080p.BluRay.DTS.x264-TayTO</name>
+		<imdb>tt2088003</imdb>
+		<freeleech>True</freeleech>
+		<doubleup>0</doubleup>
+		<upload_date>2021-08-23 22:19:49</upload_date>
+		<download_link>https://filelist.io/download.php?id=748750&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
+		<size>9.9</size>
+		<internal>0</internal>
+		<moderated>1</moderated>
+		<category>Filme HD-RO</category>
+		<seeders>30</seeders>
+		<leechers>14</leechers>
+		<times_completed>31</times_completed>
+		<comments>0</comments>
+		<files>3</files>
+		<small_description>Action, Adventure</small_description>
+		<already_in_db>False</already_in_db>
+		<better_quality>False</better_quality>
+		<torr_already_seen>False</torr_already_seen>
+		<originalTitle>Big Game</originalTitle>
+		<t_soundex>B25</t_soundex>
+		<runtimeMinutes>90</runtimeMinutes>
+		<titleType>movie</titleType>
+		<isAdult>0</isAdult>
+		<genres>Action,Adventure</genres>
+		<tconst>2088003</tconst>
+		<startYear>2014</startYear>
+		<endYear>None</endYear>
+		<primaryTitle>Big Game</primaryTitle>
+		<numVotes>32025</numVotes>
+		<averageRating>5.4</averageRating>
+		<title>Big Game</title>
+		<imdb_id>2088003</imdb_id>
+		<country>Finland, United Kingdom, Germany</country>
+		<lang>English, Finnish</lang>
+		<ovrw>Air Force One is shot down by terrorists, leaving the President of the United States stranded in the wilderness. 13-year old Oskari is also in that wilderness, on a hunting mission to prove his maturity to his kinsfolk by tracking down a deer, but instead discovers the President in an escape pod. With the terrorists closing in to capture their prize, the unlikely duo team up to escape their hunters.</ovrw>
+		<tmdb_score>5.4</tmdb_score>
+		<trailer_link>https://www.youtube.com/watch?v=-30Ib-la1TA</trailer_link>
+		<poster>https://image.tmdb.org/t/p/w300_and_h450_bestv2/eWFH7P8A9t8Bg6MkLPYmvS4t6di.jpg</poster>
+		<last_update_tmdb>2021-08-23 22:41:05</last_update_tmdb>
+		<hit_tmdb>1</hit_tmdb>
+		<awards>1 win &amp; 8 nominations</awards>
+		<meta_score>53.0</meta_score>
+		<rated>None</rated>
+		<rott_score>78.0</rott_score>
+		<omdb_score>None</omdb_score>
+		<last_update_omdb>2021-08-23 22:41:05</last_update_omdb>
+		<hit_omdb>1</hit_omdb>
+		<cast>Samuel L. Jackson,Onni Tommila,Ray Stevenson,Victor Garber</cast>
+		<director>Jalmari Helander</director>
+		<seen_type>1</seen_type>
+		<year>2014</year>
+		<genre>Action,Adventure</genre>
+		<runtime>90</runtime>
+		<imdb_score>5.4</imdb_score>
+		<score>5.4</score>
+		<my_imdb_score>None</my_imdb_score>
+		<seen_date>None</seen_date>
+		<resolution>1080p</resolution>
+		<trend/>
+		<torr_link_seed>http://localhost:9092/torr_api?f+sWAnHsEPJe8ZzsvG1Y9fZaGShz2564Rth4Jao6k3cegL2VSQ==</torr_link_seed>
+		<torr_link_download>http://localhost:9092/torr_api?f+sWAnHsEPJe8ZzsvG1Y9fZaGShz2564Rth4Jao6k3cegL2VSQ==</torr_link_download>
+		<trnt id="748750">
+			<id>748750</id>
+			<name>Big.Game.2014.1080p.BluRay.DTS.x264-TayTO</name>
+			<imdb>tt2088003</imdb>
+			<freeleech>True</freeleech>
+			<doubleup>0</doubleup>
+			<upload_date>2021-08-23 22:19:49</upload_date>
+			<download_link>https://filelist.io/download.php?id=748750&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
+			<size>9.9</size>
+			<internal>0</internal>
+			<moderated>1</moderated>
+			<category>Filme HD-RO</category>
+			<seeders>30</seeders>
+			<leechers>14</leechers>
+			<times_completed>31</times_completed>
+			<comments>0</comments>
+			<files>3</files>
+			<small_description>Action, Adventure</small_description>
+			<already_in_db>False</already_in_db>
+			<better_quality>False</better_quality>
+			<torr_already_seen>False</torr_already_seen>
+			<originalTitle>Big Game</originalTitle>
+			<t_soundex>B25</t_soundex>
+			<runtimeMinutes>90</runtimeMinutes>
+			<titleType>movie</titleType>
+			<isAdult>0</isAdult>
+			<genres>Action,Adventure</genres>
+			<tconst>2088003</tconst>
+			<startYear>2014</startYear>
+			<endYear>None</endYear>
+			<primaryTitle>Big Game</primaryTitle>
+			<numVotes>32025</numVotes>
+			<averageRating>5.4</averageRating>
+			<title>Big Game</title>
+			<imdb_id>2088003</imdb_id>
+			<country>Finland, United Kingdom, Germany</country>
+			<lang>English, Finnish</lang>
+			<ovrw>Air Force One is shot down by terrorists, leaving the President of the United States stranded in the wilderness. 13-year old Oskari is also in that wilderness, on a hunting mission to prove his maturity to his kinsfolk by tracking down a deer, but instead discovers the President in an escape pod. With the terrorists closing in to capture their prize, the unlikely duo team up to escape their hunters.</ovrw>
+			<tmdb_score>5.4</tmdb_score>
+			<trailer_link>https://www.youtube.com/watch?v=-30Ib-la1TA</trailer_link>
+			<poster>https://image.tmdb.org/t/p/w300_and_h450_bestv2/eWFH7P8A9t8Bg6MkLPYmvS4t6di.jpg</poster>
+			<last_update_tmdb>2021-08-23 22:41:05</last_update_tmdb>
+			<hit_tmdb>1</hit_tmdb>
+			<awards>1 win &amp; 8 nominations</awards>
+			<meta_score>53.0</meta_score>
+			<rated>None</rated>
+			<rott_score>78.0</rott_score>
+			<omdb_score>None</omdb_score>
+			<last_update_omdb>2021-08-23 22:41:05</last_update_omdb>
+			<hit_omdb>1</hit_omdb>
+			<cast>Samuel L. Jackson,Onni Tommila,Ray Stevenson,Victor Garber</cast>
+			<director>Jalmari Helander</director>
+			<seen_type>1</seen_type>
+			<year>2014</year>
+			<genre>Action,Adventure</genre>
+			<runtime>90</runtime>
+			<imdb_score>5.4</imdb_score>
+			<score>5.4</score>
+			<my_imdb_score>None</my_imdb_score>
+			<seen_date>None</seen_date>
+			<resolution>1080p</resolution>
+			<trend/>
+			<torr_link_seed>http://localhost:9092/torr_api?f+sWAnHsEPJe8ZzsvG1Y9fZaGShz2564Rth4Jao6k3cegL2VSQ==</torr_link_seed>
+			<torr_link_download>http://localhost:9092/torr_api?f+sWAnHsEPJe8ZzsvG1Y9fZaGShz2564Rth4Jao6k3cegL2VSQ==</torr_link_download>
+		</trnt>
+		<trnt id="748749">
+			<id>748749</id>
+			<name>Big.Game.2014.720p.BluRay.DTS.x264-DON</name>
+			<imdb>tt2088003</imdb>
+			<freeleech>True</freeleech>
+			<doubleup>0</doubleup>
+			<upload_date>2021-08-23 22:19:47</upload_date>
+			<download_link>https://filelist.io/download.php?id=748749&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
+			<size>4.3</size>
+			<internal>0</internal>
+			<moderated>1</moderated>
+			<category>Filme HD-RO</category>
+			<seeders>26</seeders>
+			<leechers>6</leechers>
+			<times_completed>27</times_completed>
+			<comments>0</comments>
+			<files>3</files>
+			<small_description>Action, Adventure</small_description>
+			<already_in_db>False</already_in_db>
+			<better_quality>False</better_quality>
+			<torr_already_seen>False</torr_already_seen>
+			<originalTitle>Big Game</originalTitle>
+			<t_soundex>B25</t_soundex>
+			<runtimeMinutes>90</runtimeMinutes>
+			<titleType>movie</titleType>
+			<isAdult>0</isAdult>
+			<genres>Action,Adventure</genres>
+			<tconst>2088003</tconst>
+			<startYear>2014</startYear>
+			<endYear>None</endYear>
+			<primaryTitle>Big Game</primaryTitle>
+			<numVotes>32025</numVotes>
+			<averageRating>5.4</averageRating>
+			<title>Big Game</title>
+			<imdb_id>2088003</imdb_id>
+			<country>Finland, United Kingdom, Germany</country>
+			<lang>English, Finnish</lang>
+			<ovrw>Air Force One is shot down by terrorists, leaving the President of the United States stranded in the wilderness. 13-year old Oskari is also in that wilderness, on a hunting mission to prove his maturity to his kinsfolk by tracking down a deer, but instead discovers the President in an escape pod. With the terrorists closing in to capture their prize, the unlikely duo team up to escape their hunters.</ovrw>
+			<tmdb_score>5.4</tmdb_score>
+			<trailer_link>https://www.youtube.com/watch?v=-30Ib-la1TA</trailer_link>
+			<poster>https://image.tmdb.org/t/p/w300_and_h450_bestv2/eWFH7P8A9t8Bg6MkLPYmvS4t6di.jpg</poster>
+			<last_update_tmdb>2021-08-23 22:41:05</last_update_tmdb>
+			<hit_tmdb>1</hit_tmdb>
+			<awards>1 win &amp; 8 nominations</awards>
+			<meta_score>53.0</meta_score>
+			<rated>None</rated>
+			<rott_score>78.0</rott_score>
+			<omdb_score>None</omdb_score>
+			<last_update_omdb>2021-08-23 22:41:05</last_update_omdb>
+			<hit_omdb>1</hit_omdb>
+			<cast>Samuel L. Jackson,Onni Tommila,Ray Stevenson,Victor Garber</cast>
+			<director>Jalmari Helander</director>
+			<seen_type>1</seen_type>
+			<year>2014</year>
+			<genre>Action,Adventure</genre>
+			<runtime>90</runtime>
+			<imdb_score>5.4</imdb_score>
+			<score>5.4</score>
+			<my_imdb_score>None</my_imdb_score>
+			<seen_date>None</seen_date>
+			<resolution>720p</resolution>
+			<trend/>
+			<torr_link_seed>http://localhost:9092/torr_api?f+sWAnHsEPJe8ZzsvWRY9fZaGShz2564Rth4Jao6k3cegL2VSQ==</torr_link_seed>
+			<torr_link_download>http://localhost:9092/torr_api?f+sWAnHsEPJe8ZzsvWRY9fZaGShz2564Rth4Jao6k3cegL2VSQ==</torr_link_download>
+		</trnt>
+	</movie>
+	<movie id_imdb="tt11657662">
+		<id>748747</id>
+		<name>The.Witcher.Nightmare.of.the.Wolf.2021.720p.NF.WEB-DL.DDP5.1.Atmos.H.264-TEPES</name>
+		<imdb>tt11657662</imdb>
+		<freeleech>False</freeleech>
+		<doubleup>0</doubleup>
+		<upload_date>2021-08-23 21:49:54</upload_date>
+		<download_link>https://filelist.io/download.php?id=748747&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
+		<size>1.4</size>
+		<internal>0</internal>
+		<moderated>1</moderated>
+		<category>Filme HD-RO</category>
+		<seeders>72</seeders>
+		<leechers>7</leechers>
+		<times_completed>87</times_completed>
+		<comments>0</comments>
+		<files>1</files>
+		<small_description>Animation, Action, Adventure</small_description>
+		<already_in_db>False</already_in_db>
+		<better_quality>False</better_quality>
+		<torr_already_seen>False</torr_already_seen>
+		<originalTitle>The Witcher: Nightmare of the Wolf</originalTitle>
+		<t_soundex>W3265</t_soundex>
+		<runtimeMinutes>81</runtimeMinutes>
+		<titleType>movie</titleType>
+		<isAdult>0</isAdult>
+		<genres>Action,Adventure,Animation</genres>
+		<tconst>11657662</tconst>
+		<startYear>2021</startYear>
+		<endYear>None</endYear>
+		<primaryTitle>The Witcher: Nightmare of the Wolf</primaryTitle>
+		<numVotes>None</numVotes>
+		<averageRating>None</averageRating>
+		<title>The Witcher: Nightmare of the Wolf</title>
+		<imdb_id>11657662</imdb_id>
+		<country>United States, South Korea</country>
+		<lang>English</lang>
+		<ovrw>Escaping from poverty to become a witcher, Vesemir slays monsters for coin and glory, but when a new menace rises, he must face the demons of his past.</ovrw>
+		<tmdb_score>7.6</tmdb_score>
+		<trailer_link>https://www.youtube.com/watch?v=J365hQpaWRw</trailer_link>
+		<poster>https://image.tmdb.org/t/p/w300_and_h450_bestv2/3sLz2yv6vBDWqBbd8rdnNeoJ2kJ.jpg</poster>
+		<last_update_tmdb>2021-08-23 22:41:05</last_update_tmdb>
+		<hit_tmdb>1</hit_tmdb>
+		<awards>N/A</awards>
+		<meta_score>None</meta_score>
+		<rated>None</rated>
+		<rott_score>None</rott_score>
+		<omdb_score>None</omdb_score>
+		<last_update_omdb>2021-08-23 22:41:05</last_update_omdb>
+		<hit_omdb>1</hit_omdb>
+		<cast>Graham McTavish,Theo James</cast>
+		<director>Kwang Il Han</director>
+		<seen_type>1</seen_type>
+		<year>2021</year>
+		<genre>Action,Adventure,Animation</genre>
+		<runtime>81</runtime>
+		<imdb_score>None</imdb_score>
+		<score>7.6</score>
+		<my_imdb_score>None</my_imdb_score>
+		<seen_date>None</seen_date>
+		<resolution>720p</resolution>
+		<trend/>
+		<torr_link_seed>http://localhost:9092/torr_api?f+sWAnHsEPJe8ZzsvWpY9fZaGShz2564Rth4Jao6k3cegL2VSQ==</torr_link_seed>
+		<torr_link_download>http://localhost:9092/torr_api?f+sWAnHsEPJe8ZzsvWpY9fZaGShz2564Rth4Jao6k3cegL2VSQ==</torr_link_download>
+		<trnt id="748747">
+			<id>748747</id>
+			<name>The.Witcher.Nightmare.of.the.Wolf.2021.720p.NF.WEB-DL.DDP5.1.Atmos.H.264-TEPES</name>
+			<imdb>tt11657662</imdb>
+			<freeleech>False</freeleech>
+			<doubleup>0</doubleup>
+			<upload_date>2021-08-23 21:49:54</upload_date>
+			<download_link>https://filelist.io/download.php?id=748747&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
+			<size>1.4</size>
+			<internal>0</internal>
+			<moderated>1</moderated>
+			<category>Filme HD-RO</category>
+			<seeders>72</seeders>
+			<leechers>7</leechers>
+			<times_completed>87</times_completed>
+			<comments>0</comments>
+			<files>1</files>
+			<small_description>Animation, Action, Adventure</small_description>
+			<already_in_db>False</already_in_db>
+			<better_quality>False</better_quality>
+			<torr_already_seen>False</torr_already_seen>
+			<originalTitle>The Witcher: Nightmare of the Wolf</originalTitle>
+			<t_soundex>W3265</t_soundex>
+			<runtimeMinutes>81</runtimeMinutes>
+			<titleType>movie</titleType>
+			<isAdult>0</isAdult>
+			<genres>Action,Adventure,Animation</genres>
+			<tconst>11657662</tconst>
+			<startYear>2021</startYear>
+			<endYear>None</endYear>
+			<primaryTitle>The Witcher: Nightmare of the Wolf</primaryTitle>
+			<numVotes>None</numVotes>
+			<averageRating>None</averageRating>
+			<title>The Witcher: Nightmare of the Wolf</title>
+			<imdb_id>11657662</imdb_id>
+			<country>United States, South Korea</country>
+			<lang>English</lang>
+			<ovrw>Escaping from poverty to become a witcher, Vesemir slays monsters for coin and glory, but when a new menace rises, he must face the demons of his past.</ovrw>
+			<tmdb_score>7.6</tmdb_score>
+			<trailer_link>https://www.youtube.com/watch?v=J365hQpaWRw</trailer_link>
+			<poster>https://image.tmdb.org/t/p/w300_and_h450_bestv2/3sLz2yv6vBDWqBbd8rdnNeoJ2kJ.jpg</poster>
+			<last_update_tmdb>2021-08-23 22:41:05</last_update_tmdb>
+			<hit_tmdb>1</hit_tmdb>
+			<awards>N/A</awards>
+			<meta_score>None</meta_score>
+			<rated>None</rated>
+			<rott_score>None</rott_score>
+			<omdb_score>None</omdb_score>
+			<last_update_omdb>2021-08-23 22:41:05</last_update_omdb>
+			<hit_omdb>1</hit_omdb>
+			<cast>Graham McTavish,Theo James</cast>
+			<director>Kwang Il Han</director>
+			<seen_type>1</seen_type>
+			<year>2021</year>
+			<genre>Action,Adventure,Animation</genre>
+			<runtime>81</runtime>
+			<imdb_score>None</imdb_score>
+			<score>7.6</score>
+			<my_imdb_score>None</my_imdb_score>
+			<seen_date>None</seen_date>
+			<resolution>720p</resolution>
+			<trend/>
+			<torr_link_seed>http://localhost:9092/torr_api?f+sWAnHsEPJe8ZzsvWpY9fZaGShz2564Rth4Jao6k3cegL2VSQ==</torr_link_seed>
+			<torr_link_download>http://localhost:9092/torr_api?f+sWAnHsEPJe8ZzsvWpY9fZaGShz2564Rth4Jao6k3cegL2VSQ==</torr_link_download>
+		</trnt>
+	</movie>
+	<movie id_imdb="tt0089853">
+		<id>748746</id>
+		<name>The.Purple.Rose.of.Cairo.1985.720p.BluRay.AAC.1.0.x264-TDD</name>
+		<imdb>tt0089853</imdb>
+		<freeleech>True</freeleech>
+		<doubleup>0</doubleup>
+		<upload_date>2021-08-23 21:22:58</upload_date>
+		<download_link>https://filelist.io/download.php?id=748746&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
+		<size>7.7</size>
+		<internal>0</internal>
+		<moderated>0</moderated>
+		<category>Filme HD-RO</category>
+		<seeders>27</seeders>
+		<leechers>6</leechers>
+		<times_completed>31</times_completed>
+		<comments>0</comments>
+		<files>2</files>
+		<small_description>Comedy, Fantasy, Romance</small_description>
+		<already_in_db>False</already_in_db>
+		<better_quality>False</better_quality>
+		<torr_already_seen>False</torr_already_seen>
+		<originalTitle>The Purple Rose of Cairo</originalTitle>
+		<t_soundex>P6146</t_soundex>
+		<runtimeMinutes>82</runtimeMinutes>
+		<titleType>movie</titleType>
+		<isAdult>0</isAdult>
+		<genres>Comedy,Fantasy,Romance</genres>
+		<tconst>89853</tconst>
+		<startYear>1985</startYear>
+		<endYear>None</endYear>
+		<primaryTitle>The Purple Rose of Cairo</primaryTitle>
+		<numVotes>49740</numVotes>
+		<averageRating>7.7</averageRating>
+		<title>The Purple Rose of Cairo</title>
+		<imdb_id>89853</imdb_id>
+		<country>United States</country>
+		<lang>English</lang>
+		<ovrw>Cecilia is a waitress in New Jersey, living a dreary life during the Great Depression. Her only escape from her mundane reality is the movie theatre. After losing her job, Cecilia goes to see 'The Purple Rose of Cairo' in hopes of raising her spirits, where she watches dashing archaeologist Tom Baxter time and again.</ovrw>
+		<tmdb_score>7.4</tmdb_score>
+		<trailer_link>https://www.youtube.com/watch?v=Bp6YDZVVbj0</trailer_link>
+		<poster>https://image.tmdb.org/t/p/w300_and_h450_bestv2/ccsint43E44B7NGceEhVimD93Yt.jpg</poster>
+		<last_update_tmdb>2021-08-23 22:41:06</last_update_tmdb>
+		<hit_tmdb>1</hit_tmdb>
+		<awards>Nominated for 1 Oscar. 15 wins &amp; 15 nominations total</awards>
+		<meta_score>75.0</meta_score>
+		<rated>None</rated>
+		<rott_score>92.0</rott_score>
+		<omdb_score>None</omdb_score>
+		<last_update_omdb>2021-08-23 22:41:06</last_update_omdb>
+		<hit_omdb>1</hit_omdb>
+		<cast>Jeff Daniels,Danny Aiello,Irving Metzman</cast>
+		<director>Woody Allen</director>
+		<seen_type>1</seen_type>
+		<year>1985</year>
+		<genre>Comedy,Fantasy,Romance</genre>
+		<runtime>82</runtime>
+		<imdb_score>7.7</imdb_score>
+		<score>7.4</score>
+		<my_imdb_score>None</my_imdb_score>
+		<seen_date>None</seen_date>
+		<resolution>720p</resolution>
+		<trend/>
+		<torr_link_seed>http://localhost:9092/torr_api?f+sWAnHsEPJe8ZzsvWtY9fZaGShz2564Rth4Jao6k3cegL2VSQ==</torr_link_seed>
+		<torr_link_download>http://localhost:9092/torr_api?f+sWAnHsEPJe8ZzsvWtY9fZaGShz2564Rth4Jao6k3cegL2VSQ==</torr_link_download>
+		<trnt id="748746">
+			<id>748746</id>
+			<name>The.Purple.Rose.of.Cairo.1985.720p.BluRay.AAC.1.0.x264-TDD</name>
+			<imdb>tt0089853</imdb>
+			<freeleech>True</freeleech>
+			<doubleup>0</doubleup>
+			<upload_date>2021-08-23 21:22:58</upload_date>
+			<download_link>https://filelist.io/download.php?id=748746&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
+			<size>7.7</size>
+			<internal>0</internal>
+			<moderated>0</moderated>
+			<category>Filme HD-RO</category>
+			<seeders>27</seeders>
+			<leechers>6</leechers>
+			<times_completed>31</times_completed>
+			<comments>0</comments>
+			<files>2</files>
+			<small_description>Comedy, Fantasy, Romance</small_description>
+			<already_in_db>False</already_in_db>
+			<better_quality>False</better_quality>
+			<torr_already_seen>False</torr_already_seen>
+			<originalTitle>The Purple Rose of Cairo</originalTitle>
+			<t_soundex>P6146</t_soundex>
+			<runtimeMinutes>82</runtimeMinutes>
+			<titleType>movie</titleType>
+			<isAdult>0</isAdult>
+			<genres>Comedy,Fantasy,Romance</genres>
+			<tconst>89853</tconst>
+			<startYear>1985</startYear>
+			<endYear>None</endYear>
+			<primaryTitle>The Purple Rose of Cairo</primaryTitle>
+			<numVotes>49740</numVotes>
+			<averageRating>7.7</averageRating>
+			<title>The Purple Rose of Cairo</title>
+			<imdb_id>89853</imdb_id>
+			<country>United States</country>
+			<lang>English</lang>
+			<ovrw>Cecilia is a waitress in New Jersey, living a dreary life during the Great Depression. Her only escape from her mundane reality is the movie theatre. After losing her job, Cecilia goes to see 'The Purple Rose of Cairo' in hopes of raising her spirits, where she watches dashing archaeologist Tom Baxter time and again.</ovrw>
+			<tmdb_score>7.4</tmdb_score>
+			<trailer_link>https://www.youtube.com/watch?v=Bp6YDZVVbj0</trailer_link>
+			<poster>https://image.tmdb.org/t/p/w300_and_h450_bestv2/ccsint43E44B7NGceEhVimD93Yt.jpg</poster>
+			<last_update_tmdb>2021-08-23 22:41:06</last_update_tmdb>
+			<hit_tmdb>1</hit_tmdb>
+			<awards>Nominated for 1 Oscar. 15 wins &amp; 15 nominations total</awards>
+			<meta_score>75.0</meta_score>
+			<rated>None</rated>
+			<rott_score>92.0</rott_score>
+			<omdb_score>None</omdb_score>
+			<last_update_omdb>2021-08-23 22:41:06</last_update_omdb>
+			<hit_omdb>1</hit_omdb>
+			<cast>Jeff Daniels,Danny Aiello,Irving Metzman</cast>
+			<director>Woody Allen</director>
+			<seen_type>1</seen_type>
+			<year>1985</year>
+			<genre>Comedy,Fantasy,Romance</genre>
+			<runtime>82</runtime>
+			<imdb_score>7.7</imdb_score>
+			<score>7.4</score>
+			<my_imdb_score>None</my_imdb_score>
+			<seen_date>None</seen_date>
+			<resolution>720p</resolution>
+			<trend/>
+			<torr_link_seed>http://localhost:9092/torr_api?f+sWAnHsEPJe8ZzsvWtY9fZaGShz2564Rth4Jao6k3cegL2VSQ==</torr_link_seed>
+			<torr_link_download>http://localhost:9092/torr_api?f+sWAnHsEPJe8ZzsvWtY9fZaGShz2564Rth4Jao6k3cegL2VSQ==</torr_link_download>
+		</trnt>
+	</movie>
+	<movie id_imdb="tt0088847">
+		<id>748735</id>
+		<name>The.Breakfast.Club.1985.RERIP.1080p.BluRay.DTS.x264-NTb</name>
+		<imdb>tt0088847</imdb>
+		<freeleech>True</freeleech>
+		<doubleup>0</doubleup>
+		<upload_date>2021-08-23 15:01:13</upload_date>
+		<download_link>https://filelist.io/download.php?id=748735&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
+		<size>17.4</size>
+		<internal>0</internal>
+		<moderated>1</moderated>
+		<category>Filme HD-RO</category>
+		<seeders>52</seeders>
+		<leechers>1</leechers>
+		<times_completed>62</times_completed>
+		<comments>0</comments>
+		<files>2</files>
+		<small_description>Comedy, Drama</small_description>
+		<already_in_db>False</already_in_db>
+		<better_quality>False</better_quality>
+		<torr_already_seen>False</torr_already_seen>
+		<originalTitle>The Breakfast Club</originalTitle>
+		<t_soundex>B6212</t_soundex>
+		<runtimeMinutes>97</runtimeMinutes>
+		<titleType>movie</titleType>
+		<isAdult>0</isAdult>
+		<genres>Comedy,Drama</genres>
+		<tconst>88847</tconst>
+		<startYear>1985</startYear>
+		<endYear>None</endYear>
+		<primaryTitle>The Breakfast Club</primaryTitle>
+		<numVotes>369580</numVotes>
+		<averageRating>7.8</averageRating>
+		<title>The Breakfast Club</title>
+		<imdb_id>88847</imdb_id>
+		<country>United States</country>
+		<lang>English</lang>
+		<ovrw>Five high school students from different walks of life endure a Saturday detention under a power-hungry principal. The disparate group includes rebel John, princess Claire, outcast Allison, brainy Brian and Andrew, the jock. Each has a chance to tell his or her story, making the others see them a little differently -- and when the day ends, they question whether school will ever be the same.</ovrw>
+		<tmdb_score>7.8</tmdb_score>
+		<trailer_link>https://www.youtube.com/watch?v=BSXBvor47Zs</trailer_link>
+		<poster>https://image.tmdb.org/t/p/w300_and_h450_bestv2/c0bdxKVRevkw50LOnk6B8d3e4s.jpg</poster>
+		<last_update_tmdb>2021-08-23 22:54:19</last_update_tmdb>
+		<hit_tmdb>1</hit_tmdb>
+		<awards>4 wins</awards>
+		<meta_score>66.0</meta_score>
+		<rated>None</rated>
+		<rott_score>89.0</rott_score>
+		<omdb_score>None</omdb_score>
+		<last_update_omdb>2021-08-23 22:54:19</last_update_omdb>
+		<hit_omdb>1</hit_omdb>
+		<cast>Emilio Estevez,Judd Nelson</cast>
+		<director>John Hughes</director>
+		<seen_type>1</seen_type>
+		<year>1985</year>
+		<genre>Comedy,Drama</genre>
+		<runtime>97</runtime>
+		<imdb_score>7.8</imdb_score>
+		<score>7.8</score>
+		<my_imdb_score>None</my_imdb_score>
+		<seen_date>None</seen_date>
+		<resolution>1080p</resolution>
+		<trend/>
+		<torr_link_seed>http://localhost:9092/torr_api?f+sWAnHsEPJe8ZzsumhY9fZaGShz2564Rth4Jao6k3cegL2VSQ==</torr_link_seed>
+		<torr_link_download>http://localhost:9092/torr_api?f+sWAnHsEPJe8ZzsumhY9fZaGShz2564Rth4Jao6k3cegL2VSQ==</torr_link_download>
+		<trnt id="748735">
+			<id>748735</id>
+			<name>The.Breakfast.Club.1985.RERIP.1080p.BluRay.DTS.x264-NTb</name>
+			<imdb>tt0088847</imdb>
+			<freeleech>True</freeleech>
+			<doubleup>0</doubleup>
+			<upload_date>2021-08-23 15:01:13</upload_date>
+			<download_link>https://filelist.io/download.php?id=748735&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
+			<size>17.4</size>
+			<internal>0</internal>
+			<moderated>1</moderated>
+			<category>Filme HD-RO</category>
+			<seeders>52</seeders>
+			<leechers>1</leechers>
+			<times_completed>62</times_completed>
+			<comments>0</comments>
+			<files>2</files>
+			<small_description>Comedy, Drama</small_description>
+			<already_in_db>False</already_in_db>
+			<better_quality>False</better_quality>
+			<torr_already_seen>False</torr_already_seen>
+			<originalTitle>The Breakfast Club</originalTitle>
+			<t_soundex>B6212</t_soundex>
+			<runtimeMinutes>97</runtimeMinutes>
+			<titleType>movie</titleType>
+			<isAdult>0</isAdult>
+			<genres>Comedy,Drama</genres>
+			<tconst>88847</tconst>
+			<startYear>1985</startYear>
+			<endYear>None</endYear>
+			<primaryTitle>The Breakfast Club</primaryTitle>
+			<numVotes>369580</numVotes>
+			<averageRating>7.8</averageRating>
+			<title>The Breakfast Club</title>
+			<imdb_id>88847</imdb_id>
+			<country>United States</country>
+			<lang>English</lang>
+			<ovrw>Five high school students from different walks of life endure a Saturday detention under a power-hungry principal. The disparate group includes rebel John, princess Claire, outcast Allison, brainy Brian and Andrew, the jock. Each has a chance to tell his or her story, making the others see them a little differently -- and when the day ends, they question whether school will ever be the same.</ovrw>
+			<tmdb_score>7.8</tmdb_score>
+			<trailer_link>https://www.youtube.com/watch?v=BSXBvor47Zs</trailer_link>
+			<poster>https://image.tmdb.org/t/p/w300_and_h450_bestv2/c0bdxKVRevkw50LOnk6B8d3e4s.jpg</poster>
+			<last_update_tmdb>2021-08-23 22:54:19</last_update_tmdb>
+			<hit_tmdb>1</hit_tmdb>
+			<awards>4 wins</awards>
+			<meta_score>66.0</meta_score>
+			<rated>None</rated>
+			<rott_score>89.0</rott_score>
+			<omdb_score>None</omdb_score>
+			<last_update_omdb>2021-08-23 22:54:19</last_update_omdb>
+			<hit_omdb>1</hit_omdb>
+			<cast>Emilio Estevez,Judd Nelson</cast>
+			<director>John Hughes</director>
+			<seen_type>1</seen_type>
+			<year>1985</year>
+			<genre>Comedy,Drama</genre>
+			<runtime>97</runtime>
+			<imdb_score>7.8</imdb_score>
+			<score>7.8</score>
+			<my_imdb_score>None</my_imdb_score>
+			<seen_date>None</seen_date>
+			<resolution>1080p</resolution>
+			<trend/>
+			<torr_link_seed>http://localhost:9092/torr_api?f+sWAnHsEPJe8ZzsumhY9fZaGShz2564Rth4Jao6k3cegL2VSQ==</torr_link_seed>
+			<torr_link_download>http://localhost:9092/torr_api?f+sWAnHsEPJe8ZzsumhY9fZaGShz2564Rth4Jao6k3cegL2VSQ==</torr_link_download>
+		</trnt>
+		<trnt id="748729">
+			<id>748729</id>
+			<name>The.Breakfast.Club.1985.720p.BluRay.DD5.1.x264-EbP</name>
+			<imdb>tt0088847</imdb>
+			<freeleech>True</freeleech>
+			<doubleup>0</doubleup>
+			<upload_date>2021-08-23 11:53:11</upload_date>
+			<download_link>https://filelist.io/download.php?id=748729&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
+			<size>7.9</size>
+			<internal>0</internal>
+			<moderated>1</moderated>
+			<category>Filme HD-RO</category>
+			<seeders>48</seeders>
+			<leechers>2</leechers>
+			<times_completed>78</times_completed>
+			<comments>0</comments>
+			<files>2</files>
+			<small_description>Comedy, Drama</small_description>
+			<already_in_db>False</already_in_db>
+			<better_quality>False</better_quality>
+			<torr_already_seen>False</torr_already_seen>
+			<originalTitle>The Breakfast Club</originalTitle>
+			<t_soundex>B6212</t_soundex>
+			<runtimeMinutes>97</runtimeMinutes>
+			<titleType>movie</titleType>
+			<isAdult>0</isAdult>
+			<genres>Comedy,Drama</genres>
+			<tconst>88847</tconst>
+			<startYear>1985</startYear>
+			<endYear>None</endYear>
+			<primaryTitle>The Breakfast Club</primaryTitle>
+			<numVotes>369580</numVotes>
+			<averageRating>7.8</averageRating>
+			<title>The Breakfast Club</title>
+			<imdb_id>88847</imdb_id>
+			<country>United States</country>
+			<lang>English</lang>
+			<ovrw>Five high school students from different walks of life endure a Saturday detention under a power-hungry principal. The disparate group includes rebel John, princess Claire, outcast Allison, brainy Brian and Andrew, the jock. Each has a chance to tell his or her story, making the others see them a little differently -- and when the day ends, they question whether school will ever be the same.</ovrw>
+			<tmdb_score>7.8</tmdb_score>
+			<trailer_link>https://www.youtube.com/watch?v=BSXBvor47Zs</trailer_link>
+			<poster>https://image.tmdb.org/t/p/w300_and_h450_bestv2/c0bdxKVRevkw50LOnk6B8d3e4s.jpg</poster>
+			<last_update_tmdb>2021-08-23 22:54:19</last_update_tmdb>
+			<hit_tmdb>1</hit_tmdb>
+			<awards>4 wins</awards>
+			<meta_score>66.0</meta_score>
+			<rated>None</rated>
+			<rott_score>89.0</rott_score>
+			<omdb_score>None</omdb_score>
+			<last_update_omdb>2021-08-23 22:54:19</last_update_omdb>
+			<hit_omdb>1</hit_omdb>
+			<cast>Emilio Estevez,Judd Nelson</cast>
+			<director>John Hughes</director>
+			<seen_type>1</seen_type>
+			<year>1985</year>
+			<genre>Comedy,Drama</genre>
+			<runtime>97</runtime>
+			<imdb_score>7.8</imdb_score>
+			<score>7.8</score>
+			<my_imdb_score>None</my_imdb_score>
+			<seen_date>None</seen_date>
+			<resolution>720p</resolution>
+			<trend/>
+			<torr_link_seed>http://localhost:9092/torr_api?f+sWAnHsEPJe8Zzsu2RY9fZaGShz2564Rth4Jao6k3cegL2VSQ==</torr_link_seed>
+			<torr_link_download>http://localhost:9092/torr_api?f+sWAnHsEPJe8Zzsu2RY9fZaGShz2564Rth4Jao6k3cegL2VSQ==</torr_link_download>
 		</trnt>
 	</movie>
 </movies>

@@ -519,8 +519,9 @@ def get_tmdb(idd):
         'country': tmdb.country,
         'lang': tmdb.lang,
         'ovrw': tmdb.ovrw,
-        'score': tmdb.score,
+        'tmdb_score': tmdb.score,
         'trailer_link': tmdb.trailer,
+        'poster': tmdb.poster,
         'last_update_tmdb': datetime.datetime.now(),
         'hit_tmdb': hit,
     }
@@ -548,7 +549,7 @@ def get_omdb(idd):
         'meta_score': omdb.meta_score,
         'rated': rated,
         'rott_score': omdb.rott_score,
-        'score': omdb.score,
+        'omdb_score': omdb.score,
         'last_update_omdb': datetime.datetime.now(),
         'hit_omdb': hit,
     }
@@ -557,5 +558,5 @@ def get_omdb(idd):
 
 if __name__ == '__main__':
     from pprint import pprint
-    pprint(get_omdb(2258285))
-    pprint(get_tmdb(2258285))
+    pprint(get_omdb(2088003))
+    pprint(get_tmdb(2088003))

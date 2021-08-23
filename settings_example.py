@@ -25,8 +25,10 @@ TORR_PORT = 9091  # Listening path for torrent RPC service.
 TORR_USER = ''
 TORR_PASS = ''
 TORR_HASH_KEY = 'this my hash key'  # Used to secure incoming calls to API
-TORR_DOWNLOAD_FOLDER = '/Gmedia/Movies'
-TORR_SEED_FOLDER = '/Gmedia/Movies'
+TORR_DOWNLOAD_FOLDER = '/movies'
+TORR_SEED_FOLDER = '/movies'
+TORR_KEEP_TIME = 5  # days, to be used in TORR_REFRESHER, check_seeding_status
+TORR_CLEAN_ROUTINE_INTERVAL = 15  # minutes between torrent client status checks
 MOVIE_HDRO = 19
 MOVIE_4K = 26
 SOAP_HD = 21
@@ -101,8 +103,9 @@ table_columns = {
         'country': 'VARCHAR(128)',
         'lang': 'VARCHAR(128)',
         'ovrw': 'TEXT',
-        'score': 'FLOAT',
+        'tmdb_score': 'FLOAT',
         'trailer_link': 'VARCHAR(256)',
+        'poster': 'VARCHAR(256)',
         'last_update_tmdb': 'DATETIME',
         'hit_tmdb': 'BOOL',
     },
@@ -114,7 +117,7 @@ table_columns = {
         'meta_score': 'FLOAT',
         'rated': 'FLOAT',
         'rott_score': 'FLOAT',
-        'score': 'FLOAT',
+        'omdb_score': 'FLOAT',
         'last_update_omdb': 'DATETIME',
         'hit_omdb': 'BOOL',
     },
@@ -129,7 +132,7 @@ trnt_template_path = r'C:\Users\mihai\Desktop\git\mSquaredPlex\views\_torrent.ht
 EMAIL_USER = ''
 EMAIL_PASS = ''
 EMAIL_HOSTNAME = 'smtp.gmail.com'
-EMAIL_TO = []  # TODO de luat din plex users
+EMAIL_TO = []  # TODO PLEX de luat din users
 
 
 # Logger settings

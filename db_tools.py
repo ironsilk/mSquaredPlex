@@ -1,8 +1,9 @@
+import PTN
 import mysql.connector.errors
-from utils import connect_mysql, close_mysql, create_db, check_table, logger, deconvert_imdb_id, update_many
+
 from settings import table_columns
-from torr_service.torr_tools import get_torr_quality
 from tmdb_omdb_tools import get_tmdb, get_omdb
+from utils import connect_mysql, close_mysql, create_db, check_table, logger, deconvert_imdb_id, update_many
 
 """
 Database tools
@@ -52,7 +53,7 @@ def check_in_my_movies(new_movies):
             }
             if new_m['imdb'] in [x['imdb_id'] for x in old]:
                 old_quality = [x['resolution'] for x in old if x['imdb_id'] == new_m['imdb']][0]
-                new_quality = get_torr_quality(new_m['name'])
+                new_quality = int(PTN.parse(new_m['name'])['resolution'][:-1])
                 d['already_in_db'] = True
                 if int(new_quality) > int(old_quality):
                     d['better_quality'] = True
@@ -133,10 +134,31 @@ def get_movie_IMDB(imdb_id, cursor=None):
     left join omdb_data d on a.tconst = d.imdb_id
     left join title_akas e on a.tconst = e.titleId
     where a.tconst = {imdb_id} AND e.isOriginalTitle = 1
+    
     """
+    q_crew = f"""SELECT group_concat(primaryName) as 'cast' 
+    FROM name_basics WHERE nconst in 
+    (SELECT nconst FROM title_principals where tconst = {imdb_id} and category = 'actor')
+    """
+
+    q_director = f"""SELECT primaryName as 'director' FROM name_basics 
+    WHERE nconst = (SELECT directors FROM title_crew  where tconst = {imdb_id})
+    """
+
     cursor.execute(q)
-    return cursor.fetchone()
+    item = cursor.fetchone()
+    # Add crew
+    cursor.execute((q_crew))
+    item .update(cursor.fetchone())
+
+    # Add director
+    cursor.execute((q_director))
+    item.update(**cursor.fetchone())
+
+    return item
 
 
 if __name__ == '__main__':
-    check_db()
+    from pprint import pprint
+    pprint(get_movie_IMDB(89853))
+    # check_db()
