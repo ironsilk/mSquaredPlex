@@ -6,6 +6,7 @@ from telegram import (
     Update,
 )
 from telegram.ext import Updater, MessageHandler, Filters, CallbackContext, ConversationHandler
+from pprint import pprint
 
 # Enable logging
 logging.basicConfig(
@@ -90,9 +91,19 @@ def parse_imdb_title(update: Update, context: CallbackContext) -> int:
 
 
 def accept_reject_title(update: Update, context: CallbackContext) -> int:
+    movie = context.user_data['pkg']
     if update.message.text == 'Yes':
+        pprint(context.user_data)
+        # Check if you've already seen it and send info
+        if movie['already_in_my_movies']:
+            message = f"Movie already in DB."
+            if movie['my_score']:
+                message += f"\nYour score: {movie['my_score']}"
+            if movie['seen_date']:
+                message += f"\nAnd you've seen it on {movie['seen_date']}"
+            update.message.reply_text(message)
+            # TODO ask if he still wants to download it
         # Warn the user if movie is already in DB and if's already downloaded - need to search for the torrent also.
-        # TODO change my_movies table to have an autoincrement primary key or change tables altogether.
         update.message.reply_text("Searching for available torrents...")
         # check if torrent is already downloaded
 
@@ -101,9 +112,6 @@ def accept_reject_title(update: Update, context: CallbackContext) -> int:
     else:
         update.message.reply_text("Please re-enter your search query or type 'suka' to exit")
         return IDENTIFY_MOVIE
-    print(context.user_data)
-    print('accept reject')
-    print(update.message.text)
     return confirm_action(update, context)
 
 

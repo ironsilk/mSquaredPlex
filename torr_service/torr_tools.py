@@ -13,7 +13,6 @@ from settings import TORR_HOST, TORR_PORT, TORR_USER, TORR_PASS, TORR_API_HOST, 
 from utils import timing
 from utils import update_many
 
-
 transmission_client = Client(host=TORR_HOST, port=TORR_PORT, username=TORR_USER, password=TORR_PASS)
 
 
@@ -34,7 +33,7 @@ def compose_link(id):
 
 class TORRAPI:
 
-    def __init__(self, cypher, torr_client,logger):
+    def __init__(self, cypher, torr_client, logger):
         self.cy = cypher
         self.torr = torr_client
         self.logger = logger
@@ -68,9 +67,18 @@ class TORRAPI:
         update_many([{
             'torr_id': pkg['id'],
             'torr_client_id': torr_response.id,
+            'imdb_id': pkg['imdb_id'],
             'status': 'requested download',
         }],
             'my_torrents')
+
+        # TODO update in my_movies also.
+        # Update in DB
+        update_many([{
+            'imdb_id': pkg['imdb_id'],
+            'resolution': pkg['resolution'],
+        }],
+            'my_movies')
 
         # Give response
         resp.media = 'Torrent successfully queued for download.'
@@ -150,10 +158,14 @@ def generate_torr_links(item, cypher):
 
     seed = {
         'id': item['id'],
+        'imdb_id': item['imdb_id'],
+        'resolution': get_torr_quality(item['name']),
         'folder': TORR_SEED_FOLDER
     }
     download = {
         'id': item['id'],
+        'imdb_id': item['imdb_id'],
+        'resolution': get_torr_quality(item['name']),
         'folder': TORR_DOWNLOAD_FOLDER
     }
     return compose_link(seed), compose_link(download)

@@ -33,7 +33,7 @@ def check_db():
 def check_one_in_my_movies(idd, cursor=None):
     if not cursor:
         conn, cursor = connect_mysql()
-    q = f"SELECT imdb_id FROM my_movies WHERE imdb_id = {idd}"
+    q = f"SELECT * FROM my_movies WHERE imdb_id = {idd}"
     cursor.execute(q)
     return cursor.fetchone()
 
@@ -84,13 +84,22 @@ def check_in_my_movies(new_movies):
 def check_one_in_my_torrents(idd, cursor=None):
     if not cursor:
         conn, cursor = connect_mysql()
-    q = f"SELECT torr_id FROM my_torrents WHERE torr_id = {idd}"
+    q = f"SELECT * FROM my_torrents WHERE torr_id = {idd}"
     cursor.execute(q)
     return cursor.fetchone()
 
 
-def check_in_my_torrents(new_movies):
-    conn, cursor = connect_mysql()
+def check_one_in_my_torrents_by_imdb(idd, cursor=None):
+    if not cursor:
+        conn, cursor = connect_mysql()
+    q = f"SELECT * FROM my_torrents WHERE imdb_id = {idd}"
+    cursor.execute(q)
+    return cursor.fetchall()
+
+
+def check_in_my_torrents(new_movies, cursor=None):
+    if not cursor:
+        conn, cursor = connect_mysql()
     q = "SELECT * FROM {table} WHERE torr_id IN ('{values}')".format(
         table='my_torrents',
         values="','".join([str(x['id']) for x in new_movies])
@@ -177,6 +186,8 @@ def get_movie_from_all_databases(imdb_id):
     conn, cursor = connect_mysql()
     # Check if it's in my_movies:
     my_item = check_one_in_my_movies(imdb_id, cursor)
+    # Check if it's in my_torrents
+    my_item['torr_results'] = check_one_in_my_torrents_by_imdb(imdb_id, cursor)
     # Get rest of the data
     pkg = retrieve_one_from_dbs({'imdb': imdb_id}, cursor)
     if my_item:
@@ -184,11 +195,10 @@ def get_movie_from_all_databases(imdb_id):
         # TODO add here more columns
     else:
         pkg['already_in_my_movies'] = False
-
-    return pkg
+    return {**pkg, **my_item}
 
 if __name__ == '__main__':
     from pprint import pprint
     # pprint(get_movie_IMDB(89853))
-    # check_db()
-    print(check_one_in_my_torrents(748752))
+    check_db()
+    # print(get_movie_from_all_databases(3910814))

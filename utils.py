@@ -25,7 +25,9 @@ def deconvert_imdb_id(imdb_id):
     :param imdb_id:
     :return:
     '''
-    return imdb_id.replace('tt', '').lstrip('0')
+    if type(imdb_id) != int:
+        return imdb_id.replace('tt', '').lstrip('0')
+    return imdb_id
 
 
 def connect_mysql():
