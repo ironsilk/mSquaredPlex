@@ -30,6 +30,14 @@ def check_db():
     logger.info("All tables OK.")
 
 
+def check_one_in_my_movies(idd, cursor=None):
+    if not cursor:
+        conn, cursor = connect_mysql()
+    q = f"SELECT imdb_id FROM my_movies WHERE imdb_id = {idd}"
+    cursor.execute(q)
+    return cursor.fetchone()
+
+
 def check_in_my_movies(new_movies):
     """
     checks if passed new movies are already in database.
@@ -73,6 +81,14 @@ def check_in_my_movies(new_movies):
     return new
 
 
+def check_one_in_my_torrents(idd, cursor=None):
+    if not cursor:
+        conn, cursor = connect_mysql()
+    q = f"SELECT torr_id FROM my_torrents WHERE torr_id = {idd}"
+    cursor.execute(q)
+    return cursor.fetchone()
+
+
 def check_in_my_torrents(new_movies):
     conn, cursor = connect_mysql()
     q = "SELECT * FROM {table} WHERE torr_id IN ('{values}')".format(
@@ -101,10 +117,9 @@ def retrieve_bulk_from_dbs(items):
     return [retrieve_one_from_dbs(item, cursor) for item in items]
 
 
-def retrieve_one_from_dbs(item, cursor):
-    """(self, vColor, vCount, vTitle, vYear, vIMDBid, vPoster, vResolution, vGenre, vRated, vCountry, vRuntime, vIMDBScore,
-    vTMDBScore, vRottenTScore, vMetaCScore, vPlot, vTrailer, vDirector, vActors, vSize, vFreeL, vFLISid, vMyScore,
-    vMyScoreDate)"""
+def retrieve_one_from_dbs(item, cursor=None):
+    if not cursor:
+        conn, cursor = connect_mysql()
     # ID
     imdb_id_number = deconvert_imdb_id(item['imdb'])
     # Search in local_db
@@ -158,7 +173,22 @@ def get_movie_IMDB(imdb_id, cursor=None):
     return item
 
 
+def get_movie_from_all_databases(imdb_id):
+    conn, cursor = connect_mysql()
+    # Check if it's in my_movies:
+    my_item = check_one_in_my_movies(imdb_id, cursor)
+    # Get rest of the data
+    pkg = retrieve_one_from_dbs({'imdb': imdb_id}, cursor)
+    if my_item:
+        pkg['already_in_my_movies'] = True
+        # TODO add here more columns
+    else:
+        pkg['already_in_my_movies'] = False
+
+    return pkg
+
 if __name__ == '__main__':
     from pprint import pprint
-    pprint(get_movie_IMDB(89853))
+    # pprint(get_movie_IMDB(89853))
     # check_db()
+    print(check_one_in_my_torrents(748752))
