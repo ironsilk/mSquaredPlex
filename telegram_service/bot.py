@@ -200,7 +200,6 @@ def download_torrent(update: Update, context: CallbackContext) -> int:
             send_torrent(compose_link(query.data))
             message = f"Download started, have a great day!"
         except TransmissionError as e:
-            raise (e)
             message = f"Download failed, please check logs and try again."
         query.answer()
         query.edit_message_text(text=message)
