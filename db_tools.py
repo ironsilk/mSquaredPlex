@@ -187,15 +187,23 @@ def get_movie_from_all_databases(imdb_id):
     # Check if it's in my_movies:
     my_item = check_one_in_my_movies(imdb_id, cursor)
     # Check if it's in my_torrents
-    my_item['torr_results'] = check_one_in_my_torrents_by_imdb(imdb_id, cursor)
+    if my_item:
+        torr_results = check_one_in_my_torrents_by_imdb(imdb_id, cursor)
+        if torr_results:
+            max_res_item = max(torr_results, key=lambda x: x['resolution'])
+            my_item['torr_result'] = True
+            my_item['torr_status'] = max_res_item['status']
+        else:
+            my_item['torr_result'] = False
     # Get rest of the data
     pkg = retrieve_one_from_dbs({'imdb': imdb_id}, cursor)
     if my_item:
         pkg['already_in_my_movies'] = True
-        # TODO add here more columns
+        return {**pkg, **my_item}
     else:
         pkg['already_in_my_movies'] = False
-    return {**pkg, **my_item}
+        return pkg
+
 
 if __name__ == '__main__':
     from pprint import pprint

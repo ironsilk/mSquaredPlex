@@ -1,17 +1,17 @@
 import datetime
 import json
 from urllib.parse import unquote
-
+from itertools import groupby
 import PTN
 import falcon
 from transmission_rpc import Client
-
+import requests
 from db_tools import connect_mysql, close_mysql
 from settings import PASSKEY, TORR_KEEP_TIME, setup_logger
 from settings import TORR_HOST, TORR_PORT, TORR_USER, TORR_PASS, TORR_API_HOST, TORR_API_PORT, TORR_API_PATH, \
-    TORR_SEED_FOLDER, TORR_DOWNLOAD_FOLDER
+    TORR_SEED_FOLDER, TORR_DOWNLOAD_FOLDER, API_URL, USER, MOVIE_HDRO, MOVIE_4K
 from utils import timing
-from utils import update_many
+from utils import update_many, convert_imdb_id
 
 transmission_client = Client(host=TORR_HOST, port=TORR_PORT, username=TORR_USER, password=TORR_PASS)
 
@@ -68,12 +68,12 @@ class TORRAPI:
             'torr_id': pkg['id'],
             'torr_client_id': torr_response.id,
             'imdb_id': pkg['imdb_id'],
+            'resolution': pkg['resolution'],
             'status': 'requested download',
         }],
             'my_torrents')
 
-        # TODO update in my_movies also.
-        # Update in DB
+        # Update in DB - we will always have ONLY the last version of the movie
         update_many([{
             'imdb_id': pkg['imdb_id'],
             'resolution': pkg['resolution'],
@@ -97,7 +97,7 @@ class TORR_REFRESHER:
         close_mysql(self.conn, self.cursor)
 
     def get_torrents(self):
-        q = "SELECT * FROM my_torrents WHERE status != 'closed'"
+        q = "SELECT * FROM my_torrents WHERE status != 'removed'"
         self.cursor.execute(q)
         results = self.cursor.fetchall()
         return results
@@ -106,8 +106,11 @@ class TORR_REFRESHER:
         self.logger.info("Updating torrent statuses...")
         # Get torrents
         torrents = self.get_torrents()
+        # Remove any duplicatd torrents by IMDB ID, keep only higher resolution
+        self.logger.info("Checking for duplicate lower res movies...")
+        torrents = self.remove_low_res(torrents)
+
         for torr in torrents:
-            torr['torr_client_id'] = 57
             torr_response = self.torr_client.get_torrent(torr['torr_client_id'])
             if torr_response.status == 'seeding':
                 # Decide whether to remove it or keep it
@@ -115,17 +118,39 @@ class TORR_REFRESHER:
                     # keep it
                     pass
                 else:
-                    # remove it
-                    self.remove_torrent(torr['torr_client_id'])
+                    # remove torrent and data
+                    self.remove_torrent_and_files(torr['torr_client_id'])
                     # change status
-                    torr['status'] = 'closed'
+                    torr['status'] = 'removed'
                     update_many([torr], 'my_torrents')
             elif torr_response.status == 'downloading' and torr['status'] == 'requested download':
                 torr['status'] = 'downloading'
                 update_many([torr], 'my_torrents')
 
+    def remove_low_resp(self, torrents):
+        to_remove = []
+        # Sort
+        torrents = sorted(torrents, key=lambda x: x['imdb_id'])
+        for k, v in groupby(torrents, key=lambda x: x['imdb_id']):
+            items = list(v)
+            if len(items) > 1:
+                resolutions = sorted(items, key=lambda x: x['resolution'])
+                to_remove.extend([x for x in resolutions[:-1]])
+        torrents = [x for x in torrents if x not in to_remove]
+        # Remove those torrents / update status in DB
+        for x in to_remove:
+            self.remove_torrent_and_files(x['torr_id'])
+            x['status'] = 'removed'
+        update_many(to_remove, 'my_torrents')
+        if to_remove:
+            self.logger.info(f"Removed {len(to_remove)} lower res movies")
+        else:
+            self.logger.info("None found.")
+        return torrents
+
     def check_seeding_status(self, torr):
         # TODO PLEX check here if it was seen in plex and mb change logic, mb go after seed ratio
+        # need third state here, 2 - for torrent and data removal.
         if (datetime.datetime.now() - torr.date_done.replace(tzinfo=None)).days < TORR_KEEP_TIME:
             return True
         else:
@@ -137,7 +162,6 @@ class TORR_REFRESHER:
         pass
 
     def remove_torrent_and_files(self, id):
-        raise NotImplementedError
         self.torr_client.remove_torrent(id, delete_data=True)
 
 
@@ -181,3 +205,34 @@ def parse_torr_name(name):
 
 def get_torr_quality(name):
     return int(PTN.parse(name)['resolution'][:-1])
+
+
+def get_torrents_for_imdb_id(idd):
+    r = requests.get(
+        url=API_URL,
+        params={
+            'username': USER,
+            'passkey': PASSKEY,
+            'action': 'search-torrents',
+            'type': 'imdb',
+            'query': convert_imdb_id(idd),
+            'category': ','.join([str(MOVIE_HDRO), str(MOVIE_4K)])
+        },
+    )
+    # Remove 4K if they're not Remux
+    response = []
+    for x in r.json():
+        if x['category'] == MOVIE_4K:
+            if 'Remux' in x['name']:
+                x['resolution'] = get_torr_quality(x['name'])
+                response.append(x)
+        else:
+            x['resolution'] = get_torr_quality(x['name'])
+            response.append(x)
+    return response
+
+
+if __name__ == '__main__':
+    from pprint import pprint
+    # pprint(get_torrents_for_imdb_id(1763303))  # 281433
+    pprint(send_torrent(1763303))

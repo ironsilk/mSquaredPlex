@@ -1,12 +1,17 @@
 import logging
-from db_tools import get_movie_from_all_databases
-from telegram import ForceReply
+import re
+
 from telegram import (
     ReplyKeyboardMarkup,
+    InlineKeyboardMarkup,
+    InlineKeyboardButton,
     Update,
 )
-from telegram.ext import Updater, MessageHandler, Filters, CallbackContext, ConversationHandler
-from pprint import pprint
+from telegram.ext import Updater, MessageHandler, Filters, CallbackContext, ConversationHandler, CallbackQueryHandler
+from transmission_rpc.error import TransmissionError
+
+from db_tools import get_movie_from_all_databases
+from torr_tools import get_torrents_for_imdb_id, send_torrent, compose_link
 
 # Enable logging
 logging.basicConfig(
@@ -16,7 +21,8 @@ logging.basicConfig(
 logger = logging.getLogger('MovieTimeBot')
 
 # Stages
-IDENTIFY_MOVIE, CHOOSE_MOVIE, CONFIRM_ACTION = range(3)
+CHOOSE_TASK, IDENTIFY_MOVIE, CHOOSE_MOVIE, CONFIRM_REDOWNLOAD_ACTION, SEARCH_FOR_TORRENTS, \
+DOWNLOAD_TORRENT = range(6)
 
 # Keyboards
 menu_keyboard = [
@@ -29,33 +35,44 @@ bool_keyboard = [
 ]
 
 
-def start(update: Update, context: CallbackContext) -> None:
+def start(update: Update, context: CallbackContext) -> int:
     """Send a message when the command /start is issued."""
     user = update.effective_user
     update.message.reply_markdown_v2(
-        fr'Hi {user.mention_markdown_v2()}\!',
-        reply_markup=ForceReply(selective=True),
+        f"Hi {user.mention_markdown_v2()}\!\n"
+        f"Please select one of the options",
+        reply_markup=ReplyKeyboardMarkup(menu_keyboard, one_time_keyboard=True, resize_keyboard=True),
     )
+    return CHOOSE_TASK
 
 
-def choose_task(update: Update, context: CallbackContext) -> None:
+def choose_task(update: Update, context: CallbackContext) -> int:
     if update.message.text == menu_keyboard[0][0]:
         message = 'Great, give me an IMDB id, a title or an IMDB link.'
         update.message.reply_text(message)
         return IDENTIFY_MOVIE
 
-    if update.message.text == menu_keyboard[1][0]:
+    elif update.message.text == menu_keyboard[1][0]:
         message = 'Not implemented yet'
         update.message.reply_text(message)
 
-    message = "Please select one of the options."
-    update.effective_message.reply_text(
-        message, reply_markup=ReplyKeyboardMarkup(menu_keyboard, one_time_keyboard=True, resize_keyboard=True)
-    )
+    # If the user doesnt click any options, do nothing?
+    elif update.message.text == 'suka':
+        return bail(update, context)
+
+    else:
+        if 'dont_greet' in context.user_data:
+            update.message.reply_text(
+                f"Please select one of the options",
+                reply_markup=ReplyKeyboardMarkup(menu_keyboard, one_time_keyboard=True, resize_keyboard=True),
+            )
+            return CHOOSE_TASK
+        else:
+            return start(update, context)
 
 
 def parse_imdb_id(update: Update, context: CallbackContext) -> int:
-    logger.info(f"In parse_imdb_id with package {update.message.text}")
+    update.message.reply_text("Just a sec until we get data about this title...")
     user_data = context.user_data
     # We need number so filter out the number from the user input:
     imdb_id = ''.join([x for x in update.message.text if x.isdigit()]).lstrip('0')
@@ -73,56 +90,148 @@ def parse_imdb_id(update: Update, context: CallbackContext) -> int:
 
 
 def parse_imdb_link(update: Update, context: CallbackContext) -> int:
-    """Ask the user for info about the selected predefined choice."""
-    text = update.message.text
-    print(text)
-    update.message.reply_text(f'Your {text.lower()}? imdb_link')
+    update.message.reply_text("Just a sec until we get data about this title...")
+    user_data = context.user_data
+    try:
+        imdb_id = re.search("([tT]{2})?\d+", update.message.text).group(0)
+    except AttributeError:
+        update.effective_message.reply_text("Couldn't find the specified ID in the link, are you"
+                                            "sure it's an IMDB link? Try pasting only the ID, as in"
+                                            "`tt0903624`.")
+        return IDENTIFY_MOVIE
+
+    # We need number so filter out the number from the user input:
+    imdb_id = ''.join([x for x in imdb_id if x.isdigit()]).lstrip('0')
+
+    # Get IMDB data
+    pkg = get_movie_from_all_databases(imdb_id)
+    user_data['pkg'] = pkg
+
+    message = f"<a href='{pkg['poster']}'>Is this your movie?\n{pkg['title']}</a>"
+    update.effective_message.reply_html(message, reply_markup=ReplyKeyboardMarkup(bool_keyboard,
+                                                                                  one_time_keyboard=True,
+                                                                                  resize_keyboard=True,
+                                                                                  ))
     return CHOOSE_MOVIE
 
 
 def parse_imdb_title(update: Update, context: CallbackContext) -> int:
-    if update.message.text == 'suka':
-        update.message.reply_text("exit")
-    """Ask the user for info about the selected predefined choice."""
-    text = update.message.text
-    print('parse_imdb_title')
-    # update.message.reply_text(f'Your {text.lower()}? title')
-    return CHOOSE_MOVIE
+    # update.message.reply_text("Just a sec until we get data about this title...")
+    # https://www.w3resource.com/mysql/string-functions/mysql-soundex-function.php
+    # https://stackoverflow.com/questions/2602252/mysql-query-string-contains
+    update.message.reply_text("This feature is not yet implemented, come back with an IMDB link or an ID please.")
+    # return CHOOSE_MOVIE
+    return bail(update, context)
 
 
 def accept_reject_title(update: Update, context: CallbackContext) -> int:
     movie = context.user_data['pkg']
     if update.message.text == 'Yes':
-        pprint(context.user_data)
+        continue_process = True
         # Check if you've already seen it and send info
         if movie['already_in_my_movies']:
-            message = f"Movie already in DB."
+            message = f"Movie already in your DB."
             if movie['my_score']:
                 message += f"\nYour score: {movie['my_score']}"
             if movie['seen_date']:
                 message += f"\nAnd you've seen it on {movie['seen_date']}"
             update.message.reply_text(message)
-            # TODO ask if he still wants to download it
-        # Warn the user if movie is already in DB and if's already downloaded - need to search for the torrent also.
-        update.message.reply_text("Searching for available torrents...")
-        # check if torrent is already downloaded
+            if movie['torr_result']:
+                message = f"Looks like the movie is also downloaded in {movie['resolution']}p\n" \
+                          f"Torrent status: {movie['torr_status']}\n" \
+                          f"Would you still like to proceed to download?"
+            else:
+                message = f"\nWould you still like to proceed to download?"
 
-        # search for torrents on FL
+            update.effective_message.reply_html(message, reply_markup=ReplyKeyboardMarkup(bool_keyboard,
+                                                                                          one_time_keyboard=True,
+                                                                                          resize_keyboard=True,
+                                                                                          ))
+            return CONFIRM_REDOWNLOAD_ACTION
+        else:
+            return search_for_torrents(update, context)
 
     else:
-        update.message.reply_text("Please re-enter your search query or type 'suka' to exit")
-        return IDENTIFY_MOVIE
-    return confirm_action(update, context)
+        return bail(update, context)
 
 
-def confirm_action(update: Update, context: CallbackContext) -> int:
-    update.message.reply_text('Download request in progress...')
+def confirm_redownload_action(update: Update, context: CallbackContext) -> int:
+    if update.message.text == 'Yes':
+        return search_for_torrents(update, context)
+    else:
+        return bail(update, context)
+
+
+def search_for_torrents(update: Update, context: CallbackContext) -> int:
+    update.message.reply_text('Searching for available torrents...')
+    torrents = get_torrents_for_imdb_id(context.user_data['pkg']['imdb'])
+
+    if torrents:
+        keyboard = [[]]
+        for pos, item in enumerate(torrents):
+            pos += 1  # exclude 0
+            btn_text = f"Quality: {str(item['resolution'])}||" \
+                       f"Size: {str(round(item['size'] / 1000000000, 2))}\n" \
+                       f"S/P: {str(item['seeders'])}/{str(item['leechers'])}"
+            btn = InlineKeyboardButton(btn_text, callback_data=item['id'])
+            keyboard.append([btn])
+        # Add button for None
+        keyboard.append([InlineKeyboardButton('None, thanks', callback_data=0)])
+        update.message.reply_text(
+            f"Please select one of the torrents",
+            reply_markup=InlineKeyboardMarkup(keyboard, one_time_keyboard=True),
+        )
+        return DOWNLOAD_TORRENT
+    else:
+        update.message.reply_text(
+            "We couldn't find any torrents for this title.\n"
+            "What would you like to do next?",
+            reply_markup=ReplyKeyboardMarkup(menu_keyboard, one_time_keyboard=True, resize_keyboard=True),
+        )
+        return CHOOSE_TASK
+
+
+def download_torrent(update: Update, context: CallbackContext) -> int:
+    query = update.callback_query
+    if query.data != '0':
+        query.edit_message_text(text=f"Thanks, sending download request...")
+        # Send download request
+        try:
+            send_torrent(compose_link(query.data))
+            message = f"Download started, have a great day!"
+        except TransmissionError as e:
+            raise (e)
+            message = f"Download failed, please check logs and try again."
+        query.answer()
+        query.edit_message_text(text=message)
+        return ConversationHandler.END
+    else:
+        query.answer()
+        query.edit_message_text(text="Ok, have a great day!")
+        return ConversationHandler.END
 
 
 def echo(update: Update, context: CallbackContext) -> None:
     """Echo the user message."""
     print(update.message.text)
     update.message.reply_text(update.message.text)
+
+
+def bail(update: Update, context: CallbackContext) -> int:
+    if update.message.text == 'suka':
+        context.user_data.clear()
+        update.message.reply_text("Ok, have a great day!")
+        return ConversationHandler.END
+    update.message.reply_text("Please re-enter your search query or type 'suka' to exit")
+    context.user_data.clear()
+    return IDENTIFY_MOVIE
+
+
+def go_back(update, context, message):
+    update.message.reply_text(message)
+    context.user_data.clear()
+    context.user_data['dont_greet'] = True
+    return choose_task(update, context)
 
 
 def main() -> None:
@@ -133,17 +242,14 @@ def main() -> None:
     # Get the dispatcher to register handlers
     dispatcher = updater.dispatcher
 
-    # on different commands - answer in Telegram
-    # dispatcher.add_handler(CommandHandler("start", choose_task))
-    # dispatcher.add_handler(CommandHandler("help", help_command))
-
-    # on non command i.e message - echo the message on Telegram
-    # dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, choose_task))
-
-    # Add conversation handler with the states IDENTIFY_MOVIE, TYPING_CHOICE and TYPING_REPLY
     conv_handler = ConversationHandler(
-        entry_points=[MessageHandler(Filters.text & ~Filters.command, choose_task)],
+        entry_points=[MessageHandler(Filters.text & ~Filters.command, start)],
         states={
+            CHOOSE_TASK: [
+                MessageHandler(
+                    Filters.text, choose_task
+                )
+            ],
             IDENTIFY_MOVIE: [
                 MessageHandler(
                     Filters.regex('^([tT]{2})?\d+$'), parse_imdb_id
@@ -153,7 +259,7 @@ def main() -> None:
                     parse_imdb_link
                 ),
                 MessageHandler(
-                    Filters.text(Filters.text), parse_imdb_title
+                    Filters.text, parse_imdb_title
                 ),
             ],
             CHOOSE_MOVIE: [
@@ -161,21 +267,29 @@ def main() -> None:
                     Filters.text, accept_reject_title
                 )
             ],
-            CONFIRM_ACTION: [
+            CONFIRM_REDOWNLOAD_ACTION: [
                 MessageHandler(
-                    Filters.text, confirm_action
+                    Filters.text, confirm_redownload_action
+                )
+            ],
+            SEARCH_FOR_TORRENTS: [
+                MessageHandler(
+                    Filters.text, search_for_torrents
+                )
+            ],
+            DOWNLOAD_TORRENT: [
+                CallbackQueryHandler(
+                    download_torrent
                 )
             ],
         },
         fallbacks=[MessageHandler(Filters.regex('^Done$'), echo)],
     )
     dispatcher.add_handler(conv_handler)
+
     # Start the Bot
     updater.start_polling()
 
-    # Run the bot until you press Ctrl-C or the process receives SIGINT,
-    # SIGTERM or SIGABRT. This should be used most of the time, since
-    # start_polling() is non-blocking and will stop the bot gracefully.
     updater.idle()
 
 

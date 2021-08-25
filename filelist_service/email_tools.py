@@ -9,7 +9,7 @@ from settings import xml_trnt_path, template_path, movie_template_path, trnt_tem
     EMAIL_PASS, EMAIL_HOSTNAME, EMAIL_TO, setup_logger
 from tmdb_omdb_tools import OMDB
 from tmdb_omdb_tools import TMDB
-from torr_service.torr_tools import get_torr_quality, generate_torr_links
+from torr_tools import get_torr_quality, generate_torr_links
 
 
 logger = setup_logger('EmailSender')

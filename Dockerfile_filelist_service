@@ -11,7 +11,7 @@ COPY db_tools.py ./
 COPY filelist_service/email_tools.py ./
 COPY utils.py ./
 COPY settings.py ./
-COPY torr_service/torr_tools.py ./
+COPY torr_tools.py ./
 COPY tmdb_omdb_tools.py ./
 
 
