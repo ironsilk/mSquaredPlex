@@ -1,5 +1,6 @@
 import logging
 import re
+from pprint import pprint
 
 from telegram import (
     ReplyKeyboardMarkup,
@@ -129,39 +130,62 @@ def parse_imdb_text(update: Update, context: CallbackContext) -> int:
                     return IDENTIFY_MOVIE
                 # No error, we have matches
                 else:
+                    movies = [get_movie_from_all_databases(x['id']) for x in movies]
+                    movies = [x for x in movies if x]
                     update.effective_message.reply_text(f"We found {len(movies)} potential matches:")
-                    from pprint import pprint
-                    context.user_data['potential_titles'] = movies
-                    
-                    # TODO change from iteration to
-                    for enum, imdb_id in enumerate(movies.keys()):
-                        imdb_id = ''.join([x for x in imdb_id if x.isdigit()]).lstrip('0')
-                        print('stripped: ', imdb_id)
-                        # Check again if we can find it
-                        pkg = get_movie_from_all_databases(imdb_id)
-                        if pkg:
-                            response = return_parsed_id(update, context, pkg, '/'.join([str(enum+1), str(len(movies))]))
-                            print(response == 2)
-                            if response != 2:
-                                return check_movie_status(update, context)
-                            else:
-                                update.effective_message.reply_text(f"Couldn't find {imdb_id}")
-                        else:
-                            continue
+                    pprint(movies)
+                    if movies:
+                        keyboard = [[]]
+                        for pos, item in enumerate(movies):
+                            # pprint(pos, item)
+                            pos += 1  # exclude 0
+                            btn_text = f"Name: {str(item['primaryTitle'])}\n" \
+                                       f"Year: {str(item['startYear'])}\n" \
+                                       f"IMDB/ROTT/TMDB: {str(item['averageRating'])}/{str(item['rott_score'])}" \
+                                       f"/{str(item['tmdb_score'])}\n" \
+                                       f"Cast: {item['cast']}\n" \
+                                       f"Trailer: {item['trailer_link']}"
+                            btn = InlineKeyboardButton(btn_text, callback_data=item['imdb'])
+                            keyboard.append([btn])
+                        # Add button for None
+                        keyboard.append([InlineKeyboardButton('None, thanks', callback_data=0)])
+                        update.message.reply_text(
+                            f"Is your movie here?",
+                            reply_markup=InlineKeyboardMarkup(keyboard, one_time_keyboard=True),
+                        )
+                        return DOWNLOAD_TORRENT
 
-
-            else:
-                update.effective_message.reply_text("Couldn't find the specified movie,"
-                                                    "Try pasting the IMDB id or a link"
-                                                    "`tt0903624`.")
-                return IDENTIFY_MOVIE
+            update.effective_message.reply_text("Couldn't find the specified movie,"
+                                                "Try pasting the IMDB id or a link"
+                                                "`tt0903624`.")
+            return IDENTIFY_MOVIE
 
 
 def choose_multiple(update: Update, context: CallbackContext) -> int:
+    print('in choose multiple')
     movies = context.user_data['potential_titles']
     if movies:
-        movie = movies.pop[0]
+        print(movies)
+        movie = movies.pop(0)
+        # Check again if we can find it
+        pkg = get_movie_from_all_databases(movie['id'])
+        # context.user_data['pkg'] = pkg
+        if pkg:
+            context.user_data['pkg'] = pkg
 
+            message = f"<a href='{pkg['poster']}'>Is this your movie?\n{pkg['title']}</a>"
+            update.effective_message.reply_html(message, reply_markup=ReplyKeyboardMarkup(bool_keyboard,
+                                                                                          one_time_keyboard=True,
+                                                                                          resize_keyboard=True,
+                                                                                          ))
+            return accept_reject_title(update, context)
+        else:
+            return choose_multiple(update, context)
+    else:
+        update.effective_message.reply_text("Couldn't find the specified movie,"
+                                            "Try pasting the IMDB id or a link"
+                                            "`tt0903624`.")
+        return IDENTIFY_MOVIE
 
 
 def return_parsed_id(update: Update, context: CallbackContext, movie) -> int:
@@ -179,11 +203,11 @@ def accept_reject_title(update: Update, context: CallbackContext) -> int:
     print('accept', update.message.text)
     movie = context.user_data['pkg']
     if update.message.text == 'Yes':
-        check_movie_status(update, context, movie)
+        check_movie_status(update, context)
     else:
-        if context.user_data['more_options']:
-            print('here')
-            return 0
+        if context.user_data['potential_titles']:
+            update.effective_message.reply_text("Ok, trying next hit...")
+            return CHOOSE_MULTIPLE
         else:
             return bail(update, context)
 

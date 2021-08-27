@@ -213,6 +213,6 @@ def get_movie_from_all_databases(imdb_id):
 
 if __name__ == '__main__':
     from pprint import pprint
-    pprint(get_movie_IMDB(1096702))
+    # pprint(get_movie_IMDB(1096702))
     # check_db()
-    # print(get_movie_from_all_databases(3910814))
+    pprint(get_movie_from_all_databases(3910814))

@@ -203,8 +203,15 @@ def search_imdb_title(item, ia=None):
             logger.error(e)
             return 'IMDB library error'
     try:
-        movies = ia.search_movie(item)
-        return {x.movieID: x.data for x in movies}
+        movies = ia.search_movie(item, _episodes=False)
+        # return {x.movieID: x.data for x in movies}
+        res = []
+        for x in movies:
+            if x.data['kind'] == 'movie':
+                x.data['id'] = x.movieID
+                res.append(x.data)
+        return res
+        # return {x.data for x in movies}
     except Exception as e:
         logger.error(e)
         return 'IMDB library error'
@@ -223,4 +230,5 @@ def timing(f):
 
 
 if __name__ == '__main__':
-    search_imdb_title()
+    from pprint import pprint
+    pprint(search_imdb_title('desolation'))
