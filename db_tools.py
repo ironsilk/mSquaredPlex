@@ -134,6 +134,8 @@ def retrieve_one_from_dbs(item, cursor=None):
     # Search in local_db
     imdb_keys = get_movie_IMDB(imdb_id_number, cursor)
     # Search online if TMDB, OMDB not found in local DB
+    if not imdb_keys:
+        return None
     if imdb_keys['hit_tmdb'] != 1:
         tmdb = get_tmdb(imdb_id_number)
         if tmdb['hit_tmdb'] == 1:
@@ -171,6 +173,8 @@ def get_movie_IMDB(imdb_id, cursor=None):
 
     cursor.execute(q)
     item = cursor.fetchone()
+    if not item:
+        return None
     # Add crew
     cursor.execute((q_crew))
     item .update(cursor.fetchone())
@@ -197,6 +201,8 @@ def get_movie_from_all_databases(imdb_id):
             my_item['torr_result'] = False
     # Get rest of the data
     pkg = retrieve_one_from_dbs({'imdb': imdb_id}, cursor)
+    if not pkg:
+        return None
     if my_item:
         pkg['already_in_my_movies'] = True
         return {**pkg, **my_item}
@@ -207,6 +213,6 @@ def get_movie_from_all_databases(imdb_id):
 
 if __name__ == '__main__':
     from pprint import pprint
-    # pprint(get_movie_IMDB(89853))
-    check_db()
-    # print(get_movie_from_all_databases(3910814))
+    # pprint(get_movie_IMDB(1096702))
+    # check_db()
+    pprint(get_movie_from_all_databases(3910814))

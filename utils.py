@@ -3,6 +3,7 @@ from time import time
 import logging
 import mysql.connector as cnt
 from settings import custom_settings
+import imdb
 
 logger = logging.getLogger('PlexService')
 
@@ -194,6 +195,28 @@ def update_many(data_list=None, mysql_table=None):
     conn.close()
 
 
+def search_imdb_title(item, ia=None):
+    if not ia:
+        try:
+            ia = imdb.IMDb()
+        except Exception as e:
+            logger.error(e)
+            return 'IMDB library error'
+    try:
+        movies = ia.search_movie(item, _episodes=False)
+        # return {x.movieID: x.data for x in movies}
+        res = []
+        for x in movies:
+            if x.data['kind'] == 'movie':
+                x.data['id'] = x.movieID
+                res.append(x.data)
+        return res
+        # return {x.data for x in movies}
+    except Exception as e:
+        logger.error(e)
+        return 'IMDB library error'
+
+
 def timing(f):
     @wraps(f)
     def wrap(*args, **kw):
@@ -204,3 +227,8 @@ def timing(f):
         return result
 
     return wrap
+
+
+if __name__ == '__main__':
+    from pprint import pprint
+    pprint(search_imdb_title('desolation'))
