@@ -10,7 +10,7 @@ Wonder 2017
 	http://www.imdb.com/title/tt2543472/
 	https://www.rottentomatoes.com/m/wonder/
 	http://www.metacritic.com/movie/wonder
-'''                                                                            
+
 
 import os
 import sys
@@ -255,3 +255,5 @@ if email_body:
 	mtls.send_email('TeleCinemateca', sys_email.username, cfg.email_list_debug, mail_subject, email_body, '', sys_email.hostname, sys_email.username, sys_email.password)
 else:
 	print 'nimic de trimis pe mail'
+
+'''

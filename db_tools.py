@@ -38,7 +38,7 @@ def check_one_in_my_movies(idd, cursor=None):
     return cursor.fetchone()
 
 
-def check_in_my_movies(new_movies):
+def check_in_my_movies(new_movies, email):
     """
     checks if passed new movies are already in database.
     :param new_movies: dict, returned from FL API
@@ -59,8 +59,8 @@ def check_in_my_movies(new_movies):
                 'already_in_db': False,
                 'better_quality': False,
             }
-            if new_m['imdb'] in [x['imdb_id'] for x in old]:
-                old_quality = [x['resolution'] for x in old if x['imdb_id'] == new_m['imdb']][0]
+            if new_m['imdb_id'] in [x['imdb_id'] for x in old]:
+                old_quality = [x['resolution'] for x in old if x['imdb_id'] == new_m['imdb_id']][0]
                 new_quality = int(PTN.parse(new_m['name'])['resolution'][:-1])
                 d['already_in_db'] = True
                 if int(new_quality) > int(old_quality):
@@ -68,10 +68,9 @@ def check_in_my_movies(new_movies):
             lst.append({**new_m, **d})
         return lst
     conn, cursor = connect_mysql()
-    q = "SELECT * FROM {table} WHERE imdb_id IN ('{values}')".format(
-        table='my_movies',
-        values="','".join([x['imdb'] for x in new_movies])
-    )
+    values = "','".join([str(x['imdb_id']) for x in new_movies])
+    q = f"SELECT * FROM my_movies WHERE imdb_id IN ('{values}') AND " \
+        f"user = '{email}'"
     cursor.execute(q)
     already_in_db = cursor.fetchall()
     new = get_intersections(new_movies, already_in_db)
@@ -108,15 +107,20 @@ def check_in_my_torrents(new_movies, cursor=None):
     already_in_db = [x['torr_id'] for x in cursor.fetchall()]
     for movie in new_movies:
         if movie['id'] in already_in_db:
-            movie['torr_already_seen'] = True
+            movie['torr_already_processed'] = True
         else:
-            movie['torr_already_seen'] = False
+            movie['torr_already_processed'] = False
     return new_movies
 
 
 def update_my_torrents_db(items):
-    ids = [{'torr_id': x['id']} for x in items if not x['torr_already_seen']]
-    update_many(ids, 'my_torrents')
+    items = [{'torr_id': x['id'],
+              'imdb_id': x['imdb_id'],
+              'status': 'users notified',
+              'resolution': int(PTN.parse(x['name'])['resolution'][:-1]),
+              }
+             for x in items]
+    update_many(items, 'my_torrents')
 
 
 def retrieve_bulk_from_dbs(items):
@@ -211,8 +215,25 @@ def get_movie_from_all_databases(imdb_id):
         return pkg
 
 
+def get_my_imdb_users(cursor=None):
+    if not cursor:
+        conn, cursor = connect_mysql()
+    q = """SELECT * from users"""
+    cursor.execute(q)
+    return cursor.fetchall()
+
+
+def get_my_movies(email, cursor=None):
+    if not cursor:
+        conn, cursor = connect_mysql()
+    q = f"SELECT `imdb_id` FROM my_movies where user = '{email}'"
+    cursor.execute(q)
+    return [x['imdb_id'] for x in cursor.fetchall()]
+
+
 if __name__ == '__main__':
     from pprint import pprint
     # pprint(get_movie_IMDB(1096702))
-    # check_db()
-    pprint(get_movie_from_all_databases(3910814))
+    check_db()
+    # pprint(get_movie_from_all_databases(3910814))
+    pprint(get_my_movies('vreinuvrei@gmail.com'))

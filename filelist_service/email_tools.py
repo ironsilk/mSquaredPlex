@@ -6,11 +6,12 @@ from xml.dom import minidom
 from xml.etree.ElementTree import SubElement
 
 from settings import xml_trnt_path, template_path, movie_template_path, trnt_template_path, EMAIL_USER, \
-    EMAIL_PASS, EMAIL_HOSTNAME, EMAIL_TO, setup_logger
+    EMAIL_PASS, EMAIL_HOSTNAME, PLEX_SERVER_NAME, setup_logger
 from tmdb_omdb_tools import OMDB
 from tmdb_omdb_tools import TMDB
 from torr_tools import get_torr_quality, generate_torr_links
-
+from plex_utils import get_plex_emails
+from db_tools import check_in_my_movies
 
 logger = setup_logger('EmailSender')
 
@@ -505,38 +506,43 @@ class Mtls:
 def send_email(items, cypher):
     if items:
         logger.info("Starting emailing routine")
-        mtls = Mtls()
-        mtls.empty_xml(xml_trnt_path)
+        emails = get_plex_emails()
+        for email in emails:
+            # Filter for each user, with what they've seen
+            user_items = check_in_my_movies(items, email)
+            if user_items:
+                mtls = Mtls()
+                mtls.empty_xml(xml_trnt_path)
 
-        for item in items:
-            mtls = prepare_item_for_email(item, mtls, cypher)
+                for item in user_items:
+                    mtls = prepare_item_for_email(item, email, mtls, cypher)
 
-        mtls.update_filelist_xml(xml_trnt_path)
-        mtls.count_xml(xml_trnt_path)
+                mtls.update_filelist_xml(xml_trnt_path)
+                mtls.count_xml(xml_trnt_path)
 
-        list_new, list_trnt, list_seen = mtls.read_filelist_xml(xml_trnt_path, movie_template_path,
-                                                                trnt_template_path)
-        email_body = mtls.generate_email_html(template_path, list_new, list_trnt, list_seen, datetime.datetime.now())
+                list_new, list_trnt, list_seen = mtls.read_filelist_xml(xml_trnt_path, movie_template_path,
+                                                                        trnt_template_path)
+                email_body = mtls.generate_email_html(template_path, list_new, list_trnt, list_seen, datetime.datetime.now())
 
-        if mtls.new_movies == 1:
-            mail_subject = 'Film nou pe FileList'
-        elif mtls.new_movies > 1:
-            mail_subject = '{0} filme noi pe FileList'.format(mtls.new_movies)
-        else:
-            mail_subject = 'Nou pe FileList'
+                if mtls.new_movies == 1:
+                    mail_subject = 'Film nou pe FileList'
+                elif mtls.new_movies > 1:
+                    mail_subject = '{0} filme noi pe FileList'.format(mtls.new_movies)
+                else:
+                    mail_subject = 'Nou pe FileList'
 
-        with open('../test.html', 'w') as f:
-            f.write(email_body)
+                with open('../test.html', 'w') as f:
+                    f.write(email_body)
 
-        if email_body:
-            logger.info('Sending email')
-            mtls.send_email('TeleCinemateca', EMAIL_USER, EMAIL_TO, mail_subject, email_body, '',
-                            EMAIL_HOSTNAME, EMAIL_USER, EMAIL_PASS)
-            return
+                if email_body:
+                    logger.info('Sending email')
+                    mtls.send_email(PLEX_SERVER_NAME, EMAIL_USER, [email], mail_subject, email_body, '',
+                                    EMAIL_HOSTNAME, EMAIL_USER, EMAIL_PASS)
+        return
     logger.info('Nothing left to send')
 
 
-def prepare_item_for_email(item, mtls, cypher):
+def prepare_item_for_email(item, email, mtls, cypher):
     # Add seen type keys
     if item['hit_tmdb'] == 0:
         item['seen_type'] = 0
@@ -560,7 +566,7 @@ def prepare_item_for_email(item, mtls, cypher):
     item['freeleech'] = True if item['freeleech'] == 1 else False
 
     # Add keys for torrent API and generate AES hash for each torrent
-    item['torr_link_seed'], item['torr_link_download'] = generate_torr_links(item, cypher)
+    item['torr_link_seed'], item['torr_link_download'] = generate_torr_links(item, email, cypher)
 
     # Build HTML and return
     mtls.find_trnt_elem_xml(xml_trnt_path, 'movie', 'id_imdb', item['imdb'])
@@ -628,7 +634,7 @@ if __name__ == '__main__':
         'times_completed': 28,
         'title': 'Sul più bello',
         'titleType': 'movie',
-        'torr_already_seen': False,  # Daca torrentul a fost procesat pana acum si trimis prin email
+        'torr_already_processed': False,  # Daca torrentul a fost procesat pana acum si trimis prin email
         'trailer_link': 'https://www.youtube.com/watch?v=PQM54p9IKZs',
         'upload_date': '2021-08-18 11:30:23'
     }

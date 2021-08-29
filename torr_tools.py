@@ -63,22 +63,16 @@ class TORRAPI:
             resp.status = falcon.HTTP_500
             return
 
-        # Update in DB
+        # Update in torrents DB
         update_many([{
             'torr_id': pkg['id'],
             'torr_client_id': torr_response.id,
             'imdb_id': pkg['imdb_id'],
             'resolution': pkg['resolution'],
             'status': 'requested download',
+            'requested_by': pkg['requested_by']
         }],
             'my_torrents')
-
-        # Update in DB - we will always have ONLY the last version of the movie
-        update_many([{
-            'imdb_id': pkg['imdb_id'],
-            'resolution': pkg['resolution'],
-        }],
-            'my_movies')
 
         # Give response
         resp.media = 'Torrent successfully queued for download.'
@@ -175,7 +169,7 @@ def refresher_routine():
     return
 
 
-def generate_torr_links(item, cypher):
+def generate_torr_links(item, email, cypher):
     def compose_link(pkg):
         pkg = cypher.encrypt(json.dumps(pkg))
         return f"http://{TORR_API_HOST}:{TORR_API_PORT}{TORR_API_PATH}?{pkg}"
@@ -184,13 +178,15 @@ def generate_torr_links(item, cypher):
         'id': item['id'],
         'imdb_id': item['imdb_id'],
         'resolution': get_torr_quality(item['name']),
-        'folder': TORR_SEED_FOLDER
+        'folder': TORR_SEED_FOLDER,
+        'requested_by': email,
     }
     download = {
         'id': item['id'],
         'imdb_id': item['imdb_id'],
         'resolution': get_torr_quality(item['name']),
-        'folder': TORR_DOWNLOAD_FOLDER
+        'folder': TORR_DOWNLOAD_FOLDER,
+        'requested_by': email,
     }
     return compose_link(seed), compose_link(download)
 

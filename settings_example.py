@@ -12,7 +12,6 @@ custom_settings = {
 # Routine settings
 FLIST_ROUTINE_SLEEP_TIME = 12  # hrs
 
-
 # TORR settings
 API_URL = 'https://filelist.io/api.php'
 USER = ''
@@ -29,10 +28,26 @@ TORR_DOWNLOAD_FOLDER = '/movies'
 TORR_SEED_FOLDER = '/movies'
 TORR_KEEP_TIME = 5  # days, to be used in TORR_REFRESHER, check_seeding_status
 TORR_CLEAN_ROUTINE_INTERVAL = 15  # minutes between torrent client status checks
+NO_POSTER_PATH = 'no-poster.png'
+TELEGRAM_AUTH_TEST_PATH = 'auth_test.png'
+TELEGRAM_AUTH_APPROVE = 'approve.jpg'
+TELEGRAM_IMDB_RATINGS = 'ratings.jpg'
 MOVIE_HDRO = 19
 MOVIE_4K = 26
 SOAP_HD = 21
 SOAP_4K = 27
+
+# PLEX server settings
+# How to get the plex token:
+# https://digiex.net/threads/plex-guide-step-by-step-getting-plex-token.15402/
+PLEX_HOST = 'http://192.168.1.99:32400'
+PLEX_TOKEN = ''
+PLEX_SERVER_NAME = ''  # Will also appear in emails sent
+PLEX_ADMIN_EMAILS = []  # If you have multiple admins or other users which are not friends,
+# you've got to mention their emails here unfortunately. Their name must be their email. Not tested tho, don't have
+# plex pass.
+# The account the TOKEN belongs to should always be first, AKA your account
+
 
 # TMDB & OMDB
 TMDB_API_KEY = ''
@@ -90,13 +105,17 @@ table_columns = {
     'my_movies': {
         'imdb_id': 'INT(11)',
         'type': 'CHAR(32)',
-        'resolution': 'int(11)',
-        'torr_id': 'int(11)',
+        'my_score': 'float',
+        'seen_date': 'DATETIME',
+        'user': 'VARCHAR(256)',
     },
     'my_torrents': {
         'torr_id': 'INT(11)',
         'torr_client_id': 'INT(11)',
+        'imdb_id': 'INT(11)',
+        'resolution': 'int(11)',
         'status': 'CHAR(32)',
+        'requested_by': 'VARCHAR(256)',
     },
     'tmdb_data': {
         'imdb_id': 'INT(11)',
@@ -121,8 +140,15 @@ table_columns = {
         'last_update_omdb': 'DATETIME',
         'hit_omdb': 'BOOL',
     },
+    'users': {
+        'telegram_chat_id': 'INT(11)',
+        'telegram_name': 'VARCHAR(256)',
+        'email': 'VARCHAR(256)',
+        'imdb_id': 'int(11)',
+        'scan_watchlist': 'BOOL',
+        'email_newsletters': 'BOOL',
+    },
 }
-
 
 # EMAIL settings
 xml_trnt_path = r'C:\Users\mihai\Desktop\git\mSquaredPlex\views\new_trnt.xml'
@@ -132,7 +158,6 @@ trnt_template_path = r'C:\Users\mihai\Desktop\git\mSquaredPlex\views\_torrent.ht
 EMAIL_USER = ''
 EMAIL_PASS = ''
 EMAIL_HOSTNAME = 'smtp.gmail.com'
-EMAIL_TO = []  # TODO PLEX de luat din users
 
 
 # Logger settings

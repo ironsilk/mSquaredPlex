@@ -38,12 +38,10 @@ def get_latest_torrents(n=100, category=MOVIE_HDRO):
 
 def filter_results(new_movies):
     logger.info("Filtering results...")
-    # Check against my_movies database
-    filtered = check_in_my_movies(new_movies)
     # Check against my_torrents_database
-    filtered = check_in_my_torrents(filtered)
+    filtered = check_in_my_torrents(new_movies)
     # Remove already seen torrents - can be removed for testing purposes
-    filtered = [x for x in filtered if not x['torr_already_seen']]
+    filtered = [x for x in filtered if not x['torr_already_processed']]
 
     return filtered
 
@@ -52,11 +50,10 @@ def filter_results(new_movies):
 def feed_routine(cypher):
     # fetch latest movies
     new_movies = get_latest_torrents(n=7)
+
     # filter out those already in database with same or better quality and mark
     # the rest if they are already in db
-
     new_movies = filter_results(new_movies)
-    # get if these torrents have been seen before
 
     # get IMDB, TMDB and OMDB data for these new movies.
     new_movies = retrieve_bulk_from_dbs(new_movies)

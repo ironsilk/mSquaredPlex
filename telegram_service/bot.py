@@ -1,6 +1,6 @@
 import logging
 import re
-from pprint import pprint
+from functools import wraps
 
 from telegram import (
     ReplyKeyboardMarkup,
@@ -8,12 +8,20 @@ from telegram import (
     InlineKeyboardButton,
     Update,
 )
-from telegram.ext import Updater, MessageHandler, Filters, CallbackContext, ConversationHandler, CallbackQueryHandler
+from telegram.ext import Updater, MessageHandler, Filters, CallbackContext, ConversationHandler, CallbackQueryHandler, \
+    CommandHandler
 from transmission_rpc.error import TransmissionError
 
+from bot_utils import make_movie_reply, get_telegram_users
 from db_tools import get_movie_from_all_databases
 from torr_tools import get_torrents_for_imdb_id, send_torrent, compose_link
-from utils import search_imdb_title
+from utils import search_imdb_title, update_many
+from settings import TELEGRAM_AUTH_TEST_PATH, TELEGRAM_AUTH_APPROVE, TELEGRAM_IMDB_RATINGS
+from plex_utils import invite_friend
+
+# Other info:
+# https://github.com/Ambro17/AmbroBot
+# https://github.com/notPlasticCat/Library-Genesis-Bot/blob/main/LibGenBot/__main__.py
 
 # Enable logging
 logging.basicConfig(
@@ -24,30 +32,141 @@ logger = logging.getLogger('MovieTimeBot')
 
 # Stages
 CHOOSE_TASK, IDENTIFY_MOVIE, CHOOSE_MULTIPLE, CHOOSE_ONE, CONFIRM_REDOWNLOAD_ACTION, SEARCH_FOR_TORRENTS, \
-DOWNLOAD_TORRENT = range(7)
+DOWNLOAD_TORRENT, CHECK_RIDDLE_RESPONSE, CHECK_EMAIL, GIVE_IMDB, CHECK_IMDB = range(11)
 
 # Keyboards
 menu_keyboard = [
-    ["💵 Download a movie"],
+    ["📥 Download a movie"],
     ["📈 Check progress"],
 ]
 bool_keyboard = [
     ['Yes'],
     ['No']
 ]
+movie_selection_keyboard = [
+    ['Yes'],
+    ['No'],
+    ['Exit'],
+]
+
+# Get users from db
+USERS = get_telegram_users()
 
 
+def auth_wrap(f):
+    @wraps(f)
+    def wrap(update: Update, context: CallbackContext):
+        user = update.message.chat_id
+        if user in USERS.keys():
+            # Ok boss
+            result = f(update, context)
+            return result
+        else:
+            # Check this mofo
+            update.effective_message.reply_photo(
+                photo=open(TELEGRAM_AUTH_TEST_PATH, 'rb'),
+                caption="Looks like you're new here. Answer correctly and you may enter.",
+            )
+            return CHECK_RIDDLE_RESPONSE
+
+    return wrap
+
+
+def check_riddle(update: Update, context: CallbackContext):
+    if update.message.text.lower() == 'mellon':
+        update.effective_message.reply_photo(
+            photo=open(TELEGRAM_AUTH_APPROVE, 'rb'),
+            caption="Welcome! Just a few more steps to configure your preferences. "
+                    "First, please type in your email so that we can add you "
+                    "to our PLEX users.",
+        )
+        return CHECK_EMAIL
+    else:
+        update.effective_message.reply_text("Sorry boi, ur welcome to try again.")
+        return CHECK_RIDDLE_RESPONSE
+
+
+def check_email(update: Update, context: CallbackContext):
+    # Invite to PLEX server
+    email_invite = invite_friend(update.message.text)
+    if email_invite:
+        message = "Great! An invitation for PLEX has been sent to your email.\n"
+    else:
+        message = "Looks like this email is already in our PLEX users database. " \
+                  "If this is not the case, please contact the admin.\n\n"
+
+    # Continue to IMDB stuff
+    context.user_data['new_user'] = {
+        'telegram_chat_id': update.message.chat_id,
+        'telegram_name': update.effective_user.first_name,
+        'email': update.message.text,
+        'email_newsletters': True,
+    }
+    message += "Would you like to connect you IMDB account? " \
+               "In this way we'll be able to pull your movie " \
+               "ratings and warn you when you'll search for a movie " \
+               "you've already seen.\n" \
+               "We'll also scan your watchlist periodically and notify you " \
+               "when we'll be able to download any of the titles there.\n" \
+               "In the future we're planning to be able to " \
+               "give ratings here and transfer them to IMDB."
+    update.effective_message.reply_text(message, reply_markup=ReplyKeyboardMarkup(bool_keyboard,
+                                                                                  one_time_keyboard=True,
+                                                                                  resize_keyboard=True,
+                                                                                  ))
+    return GIVE_IMDB
+
+
+def give_imdb(update: Update, context: CallbackContext):
+    if update.message.text == 'Yes':
+        context.user_data['new_user']['scan_watchlist'] = True
+        update.effective_message.reply_photo(
+            photo=open(TELEGRAM_IMDB_RATINGS, 'rb'),
+            caption="I'll need you to go to your IMDB account and copy here your user ID, like the one in the photo, "
+                    "ur77571297. Also make sure that your Ratings are PUBLIC and so is your Watchlist (10 pages max).\n"
+                    "If this is too much, just type 'fuck it' and skip this step.",
+        )
+        return CHECK_IMDB
+    else:
+        update.effective_message.reply_text("Ok, that's it. I'll take care of the rest, from now on "
+                                            "anytime you type something i'll be here to help you out. Enjoy!")
+
+
+def check_imdb(update: Update, context: CallbackContext):
+    if update.message.text != 'fuck it':
+        context.user_data['new_user']['imdb_id'] = ''.join([x for x in update.message.text if x.isdigit()])
+    return register_user(update, context)
+
+
+def register_user(update: Update, context: CallbackContext):
+    global USERS
+    # Update user to database
+    update_many([context.user_data['new_user']], 'users')
+    USERS = get_telegram_users()
+    update.effective_message.reply_text("Ok, that's it. I'll take care of the rest, from now on "
+                                        "anytime you type something i'll be here to help you out. Enjoy!")
+    return start(update, context)
+
+
+def wrong_input(update: Update, context: CallbackContext):
+    update.effective_message.reply_text("Wrong input, please try again.")
+    return CHECK_EMAIL
+
+
+@auth_wrap
 def start(update: Update, context: CallbackContext) -> int:
+    # TODO add user checking, a wrapper would be great
     """Send a message when the command /start is issued."""
     user = update.effective_user
     update.message.reply_markdown_v2(
         f"Hi {user.mention_markdown_v2()}\!\n"
-        f"Please select one of the options",
+        f"Please select one of the options or type /help for more options\.",
         reply_markup=ReplyKeyboardMarkup(menu_keyboard, one_time_keyboard=True, resize_keyboard=True),
     )
     return CHOOSE_TASK
 
 
+@auth_wrap
 def choose_task(update: Update, context: CallbackContext) -> int:
     if update.message.text == menu_keyboard[0][0]:
         message = 'Great, give me an IMDB id, a title or an IMDB link.'
@@ -58,21 +177,10 @@ def choose_task(update: Update, context: CallbackContext) -> int:
         message = 'Not implemented yet'
         update.message.reply_text(message)
 
-    # If the user doesnt click any options, do nothing?
-    elif update.message.text == 'suka':
-        return bail(update, context)
-
-    else:
-        if 'dont_greet' in context.user_data:
-            update.message.reply_text(
-                f"Please select one of the options",
-                reply_markup=ReplyKeyboardMarkup(menu_keyboard, one_time_keyboard=True, resize_keyboard=True),
-            )
-            return CHOOSE_TASK
-        else:
-            return start(update, context)
+    return start(update, context)
 
 
+@auth_wrap
 def parse_imdb_id(update: Update, context: CallbackContext) -> int:
     update.message.reply_text("Just a sec until we get data about this title...")
     # We need number so filter out the number from the user input:
@@ -83,7 +191,7 @@ def parse_imdb_id(update: Update, context: CallbackContext) -> int:
     context.user_data['pkg'] = pkg
     context.user_data['more_options'] = False
 
-    message = f"<a href='{pkg['poster']}'>Is this your movie?\n{pkg['title']}</a>"
+    message = make_movie_reply(pkg)
     update.effective_message.reply_html(message, reply_markup=ReplyKeyboardMarkup(bool_keyboard,
                                                                                   one_time_keyboard=True,
                                                                                   resize_keyboard=True,
@@ -91,6 +199,7 @@ def parse_imdb_id(update: Update, context: CallbackContext) -> int:
     return CHOOSE_ONE
 
 
+@auth_wrap
 def parse_imdb_text(update: Update, context: CallbackContext) -> int:
     # https://www.w3resource.com/mysql/string-functions/mysql-soundex-function.php
     # https://stackoverflow.com/questions/2602252/mysql-query-string-contains
@@ -106,8 +215,8 @@ def parse_imdb_text(update: Update, context: CallbackContext) -> int:
         pkg = get_movie_from_all_databases(imdb_id)
         context.user_data['pkg'] = pkg
 
-        message = f"<a href='{pkg['poster']}'>Is this your movie?\n{pkg['title']}</a>"
-        update.effective_message.reply_html(message, reply_markup=ReplyKeyboardMarkup(bool_keyboard,
+        message = make_movie_reply(pkg)
+        update.effective_message.reply_html(message, reply_markup=ReplyKeyboardMarkup(movie_selection_keyboard,
                                                                                       one_time_keyboard=True,
                                                                                       resize_keyboard=True,
                                                                                       ))
@@ -122,50 +231,20 @@ def parse_imdb_text(update: Update, context: CallbackContext) -> int:
         else:
             # Test for title
             movies = search_imdb_title(update.message.text)
-            if movies:
-                # Test for IMDB API ERROR
-                if type(movies) == str:
-                    update.effective_message.reply_text("We're having trouble with our IMDB API, please"
-                                                        "insert an IMDB ID or paste a link.")
-                    return IDENTIFY_MOVIE
-                # No error, we have matches
-                else:
-                    movies = [get_movie_from_all_databases(x['id']) for x in movies]
-                    movies = [x for x in movies if x]
-                    update.effective_message.reply_text(f"We found {len(movies)} potential matches:")
-                    pprint(movies)
-                    if movies:
-                        keyboard = [[]]
-                        for pos, item in enumerate(movies):
-                            # pprint(pos, item)
-                            pos += 1  # exclude 0
-                            btn_text = f"Name: {str(item['primaryTitle'])}\n" \
-                                       f"Year: {str(item['startYear'])}\n" \
-                                       f"IMDB/ROTT/TMDB: {str(item['averageRating'])}/{str(item['rott_score'])}" \
-                                       f"/{str(item['tmdb_score'])}\n" \
-                                       f"Cast: {item['cast']}\n" \
-                                       f"Trailer: {item['trailer_link']}"
-                            btn = InlineKeyboardButton(btn_text, callback_data=item['imdb'])
-                            keyboard.append([btn])
-                        # Add button for None
-                        keyboard.append([InlineKeyboardButton('None, thanks', callback_data=0)])
-                        update.message.reply_text(
-                            f"Is your movie here?",
-                            reply_markup=InlineKeyboardMarkup(keyboard, one_time_keyboard=True),
-                        )
-                        return DOWNLOAD_TORRENT
+            #  movies = []
+            context.user_data['potential_titles'] = movies
 
-            update.effective_message.reply_text("Couldn't find the specified movie,"
-                                                "Try pasting the IMDB id or a link"
-                                                "`tt0903624`.")
-            return IDENTIFY_MOVIE
+            return choose_multiple(update, context)
 
 
+@auth_wrap
 def choose_multiple(update: Update, context: CallbackContext) -> int:
-    print('in choose multiple')
     movies = context.user_data['potential_titles']
     if movies:
-        print(movies)
+        if type(movies) == str:
+            update.effective_message.reply_text("We're having trouble with our IMDB API, please"
+                                                "insert an IMDB ID or paste a link.")
+            return IDENTIFY_MOVIE
         movie = movies.pop(0)
         # Check again if we can find it
         pkg = get_movie_from_all_databases(movie['id'])
@@ -173,12 +252,16 @@ def choose_multiple(update: Update, context: CallbackContext) -> int:
         if pkg:
             context.user_data['pkg'] = pkg
 
-            message = f"<a href='{pkg['poster']}'>Is this your movie?\n{pkg['title']}</a>"
-            update.effective_message.reply_html(message, reply_markup=ReplyKeyboardMarkup(bool_keyboard,
-                                                                                          one_time_keyboard=True,
-                                                                                          resize_keyboard=True,
-                                                                                          ))
-            return accept_reject_title(update, context)
+            message, image = make_movie_reply(pkg)
+            update.effective_message.reply_photo(
+                photo=image,
+                caption=message,
+                reply_markup=ReplyKeyboardMarkup(movie_selection_keyboard,
+                                                 one_time_keyboard=True,
+                                                 resize_keyboard=True,
+                                                 ),
+            )
+            return CHOOSE_ONE
         else:
             return choose_multiple(update, context)
     else:
@@ -188,31 +271,24 @@ def choose_multiple(update: Update, context: CallbackContext) -> int:
         return IDENTIFY_MOVIE
 
 
-def return_parsed_id(update: Update, context: CallbackContext, movie) -> int:
-    context.user_data['pkg'] = movie
-
-    message = f"<a href='{movie['poster']}'>Is this your movie?\n{movie['title']}</a>"
-    update.effective_message.reply_html(message, reply_markup=ReplyKeyboardMarkup(bool_keyboard,
-                                                                                  one_time_keyboard=True,
-                                                                                  resize_keyboard=True,
-                                                                                  ))
-    return CHOOSE_ONE
-
-
+@auth_wrap
 def accept_reject_title(update: Update, context: CallbackContext) -> int:
-    print('accept', update.message.text)
-    movie = context.user_data['pkg']
     if update.message.text == 'Yes':
-        check_movie_status(update, context)
-    else:
+        return check_movie_status(update, context)
+    elif update.message.text == 'No':
         if context.user_data['potential_titles']:
             update.effective_message.reply_text("Ok, trying next hit...")
-            return CHOOSE_MULTIPLE
+            return choose_multiple(update, context)
         else:
+            update.effective_message.reply_text("These were all the hits.")
             return bail(update, context)
+    elif update.message.text == 'Exit':
+        return bail(update, context)
 
 
+@auth_wrap
 def check_movie_status(update: Update, context: CallbackContext) -> int:
+    # TODO prettify here
     movie = context.user_data['pkg']
     # Check if you've already seen it and send info
     if movie['already_in_my_movies']:
@@ -238,6 +314,7 @@ def check_movie_status(update: Update, context: CallbackContext) -> int:
         return search_for_torrents(update, context)
 
 
+@auth_wrap
 def confirm_redownload_action(update: Update, context: CallbackContext) -> int:
     if update.message.text == 'Yes':
         return search_for_torrents(update, context)
@@ -245,17 +322,22 @@ def confirm_redownload_action(update: Update, context: CallbackContext) -> int:
         return bail(update, context)
 
 
+@auth_wrap
 def search_for_torrents(update: Update, context: CallbackContext) -> int:
     update.message.reply_text('Searching for available torrents...')
     torrents = get_torrents_for_imdb_id(context.user_data['pkg']['imdb'])
 
     if torrents:
         keyboard = [[]]
+        torrents = sorted(torrents, key=lambda k: k['size'])
         for pos, item in enumerate(torrents):
             pos += 1  # exclude 0
-            btn_text = f"Quality: {str(item['resolution'])}||" \
-                       f"Size: {str(round(item['size'] / 1000000000, 2))}\n" \
-                       f"S/P: {str(item['seeders'])}/{str(item['leechers'])}"
+            btn_text = (
+                f"🖥 Q: {str(item['resolution'])}"
+                f"🗳 S: {str(round(item['size'] / 1000000000, 2))} GB"
+                f"🌱 S/P: {str(item['seeders'])}/{str(item['leechers'])}"
+                # f"📤 [DOWNLOAD]\n"
+            )
             btn = InlineKeyboardButton(btn_text, callback_data=item['id'])
             keyboard.append([btn])
         # Add button for None
@@ -274,6 +356,7 @@ def search_for_torrents(update: Update, context: CallbackContext) -> int:
         return CHOOSE_TASK
 
 
+@auth_wrap
 def download_torrent(update: Update, context: CallbackContext) -> int:
     query = update.callback_query
     if query.data != '0':
@@ -293,14 +376,9 @@ def download_torrent(update: Update, context: CallbackContext) -> int:
         return ConversationHandler.END
 
 
-def echo(update: Update, context: CallbackContext) -> None:
-    """Echo the user message."""
-    print(update.message.text)
-    update.message.reply_text(update.message.text)
-
-
+@auth_wrap
 def bail(update: Update, context: CallbackContext) -> int:
-    if update.message.text == 'suka':
+    if update.message.text.lower() == 'suka' or 'exit':
         context.user_data.clear()
         update.message.reply_text("Ok, have a great day!")
         return ConversationHandler.END
@@ -309,11 +387,53 @@ def bail(update: Update, context: CallbackContext) -> int:
     return IDENTIFY_MOVIE
 
 
+@auth_wrap
 def go_back(update, context, message):
     update.message.reply_text(message)
     context.user_data.clear()
     context.user_data['dont_greet'] = True
     return choose_task(update, context)
+
+
+@auth_wrap
+def help_command(update: Update, context: CallbackContext) -> None:
+    watchlist_status = 'MONITORING' if USERS[update.effective_user.id]['scan_watchlist'] == 1 else 'NOT MONITORING'
+    email_status = 'RECEIVING' if USERS[update.effective_user.id]['email_newsletters'] else 'NOT RECEIVING'
+    """Displays info on how to use the bot."""
+    update.message.reply_text("Type anything for the bot to start.\n\n"
+                              f"Right now we are {watchlist_status} your watchlist (10pg max). "
+                              f"Type /change_watchlist "
+                              "to reverse the status.\n\n"
+                              f"Right now you are {email_status} the email newsletters. Type /change_newsletter "
+                              "to reverse the status.\n\n"
+                              "If you want to change your email address or your imdb ID type /update_user "
+                              "and we'll ask you to retake the login process. Once started, you must complete "
+                              "the entire process.")
+
+
+def change_watchlist_command(update: Update, context: CallbackContext) -> None:
+    pkg = USERS[update.effective_user.id]
+    if pkg['scan_watchlist'] == 0:
+        pkg['scan_watchlist'] = 1
+    else:
+        pkg['scan_watchlist'] = 0
+    update_many([pkg], 'users')
+    update.message.reply_text("Updated your watchlist preferences.")
+
+
+def change_newsletter_command(update: Update, context: CallbackContext) -> None:
+    pkg = USERS[update.effective_user.id]
+    if pkg['email_newsletters'] == 0:
+        pkg['email_newsletters'] = 1
+    else:
+        pkg['email_newsletters'] = 0
+    update_many([pkg], 'users')
+    update.message.reply_text("Updated your newsletter preferences.")
+
+
+def update_user(update: Update, context: CallbackContext) -> None:
+    update.message.reply_text('Type anything to get started.')
+    del USERS[update.effective_user.id]
 
 
 def main() -> None:
@@ -325,7 +445,7 @@ def main() -> None:
     dispatcher = updater.dispatcher
 
     conv_handler = ConversationHandler(
-        entry_points=[MessageHandler(Filters.text & ~Filters.command, start)],
+        entry_points=[MessageHandler(Filters.text, start)],
         states={
             CHOOSE_TASK: [
                 MessageHandler(
@@ -365,9 +485,43 @@ def main() -> None:
                     download_torrent
                 )
             ],
+            CHECK_RIDDLE_RESPONSE: [
+                MessageHandler(
+                    Filters.text, check_riddle
+                )
+            ],
+            CHECK_EMAIL: [
+                MessageHandler(
+                    Filters.regex('[^@]+@[^@]+\.[^@]+'), check_email
+                ),
+                MessageHandler(
+                    Filters.text, wrong_input,
+                ),
+            ],
+            GIVE_IMDB: [
+                MessageHandler(
+                    Filters.text, give_imdb,
+                ),
+            ],
+            CHECK_IMDB: [
+                MessageHandler(
+                    Filters.regex('^[u]?[r]?\d+$'), check_imdb
+                ),
+                MessageHandler(
+                    Filters.regex('fuck it'), check_imdb
+                ),
+                MessageHandler(
+                    Filters.text, wrong_input
+                ),
+            ],
         },
-        fallbacks=[MessageHandler(Filters.regex('^Done$'), echo)],
+        fallbacks=[MessageHandler(Filters.text, start)],
+        per_message=False
     )
+    dispatcher.add_handler(CommandHandler('help', help_command))
+    dispatcher.add_handler(CommandHandler('change_watchlist', change_watchlist_command))
+    dispatcher.add_handler(CommandHandler('change_newsletter', change_newsletter_command))
+    dispatcher.add_handler(CommandHandler('update_user', update_user))
     dispatcher.add_handler(conv_handler)
 
     # Start the Bot
