@@ -194,15 +194,17 @@ def get_movie_from_all_databases(imdb_id):
     conn, cursor = connect_mysql()
     # Check if it's in my_movies:
     my_item = check_one_in_my_movies(imdb_id, cursor)
+    if not my_item:
+        my_item = dict()
     # Check if it's in my_torrents
-    if my_item:
-        torr_results = check_one_in_my_torrents_by_imdb(imdb_id, cursor)
-        if torr_results:
-            max_res_item = max(torr_results, key=lambda x: x['resolution'])
-            my_item['torr_result'] = True
-            my_item['torr_status'] = max_res_item['status']
-        else:
-            my_item['torr_result'] = False
+    torr_results = check_one_in_my_torrents_by_imdb(imdb_id, cursor)
+    if torr_results:
+        max_res_item = max(torr_results, key=lambda x: x['resolution'])
+        my_item['torr_result'] = True
+        my_item['torr_status'] = max_res_item['status']
+        my_item['resolution'] = max_res_item['resolution']
+    else:
+        my_item['torr_result'] = False
     # Get rest of the data
     pkg = retrieve_one_from_dbs({'imdb': imdb_id}, cursor)
     if not pkg:
@@ -231,9 +233,27 @@ def get_my_movies(email, cursor=None):
     return [x['imdb_id'] for x in cursor.fetchall()]
 
 
+def get_email_by_tgram_id(user, cursor=None):
+    if not cursor:
+        conn, cursor = connect_mysql()
+    q = f"SELECT `email` FROM users where telegram_chat_id = '{user}'"
+    cursor.execute(q)
+    return cursor.fetchone()['email']
+
+
+def get_watchlist_intersections(user_imdb_id, watchlist, cursor=None):
+    if not cursor:
+        conn, cursor = connect_mysql()
+    values = "','".join([str(x) for x in watchlist])
+    q = f"SELECT movie_id FROM watchlists WHERE movie_id IN ('{values}' AND imdb_id = {user_imdb_id})"
+    cursor.execute(q)
+    return [x['movie_id'] for x in cursor.fetchall()]
+
+
 if __name__ == '__main__':
     from pprint import pprint
     # pprint(get_movie_IMDB(1096702))
     check_db()
-    # pprint(get_movie_from_all_databases(3910814))
-    pprint(get_my_movies('vreinuvrei@gmail.com'))
+    # pprint(get_movie_from_all_databases(1571222))
+    # pprint([x['email'] for x in get_my_imdb_users() if x['email_newsletters'] == 1])
+    pprint(get_my_imdb_users())

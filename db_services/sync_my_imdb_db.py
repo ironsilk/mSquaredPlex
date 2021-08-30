@@ -1,19 +1,21 @@
 import datetime
 import time
-
+from plexapi.exceptions import Unauthorized
 import requests
 from utils import logger, deconvert_imdb_id, update_many
 from bs4 import BeautifulSoup
-from db_tools import get_my_imdb_users, get_my_movies
+from db_tools import get_my_imdb_users, get_my_movies, get_watchlist_intersections
 from plex_utils import get_user_watched_movies
 import re
+import pandas as pd
+from settings import MY_IMDB_REFRESH_INTERVAL
 
 
 def sync_my_imdb():
     logger.info("Getting users")
     users = get_my_imdb_users()
     for user in users:
-        pass
+        logger.info(f"Syncing data for {user['email']}")
         # Get movies already in DB
         already_in_my_movies = get_my_movies(user['email'])
         # Sync IMDB data
@@ -25,11 +27,32 @@ def sync_my_imdb():
 
         already_in_my_movies = get_my_movies(user['email'])
         # Sync PLEX data
-        plex_data = get_user_watched_movies(user['email'])
-        plex_data = [x for x in plex_data if x['imdb_id'] not in already_in_my_movies]
-        for item in plex_data:
-            item['user'] = user['email']
-        # update_many(plex_data, 'my_movies')
+        try:
+            plex_data = get_user_watched_movies(user['email'])
+        except Unauthorized:
+            logger.error(f"Error retrieving PLEX data for user {user['email']}, unauthorised")
+            plex_data = None
+        if plex_data:
+            plex_data = [x for x in plex_data if x['imdb_id'] not in already_in_my_movies]
+            for item in plex_data:
+                item['user'] = user['email']
+            update_many(plex_data, 'my_movies')
+        # Sync IMDB Watchlist
+        if user['scan_watchlist'] == 1:
+            sync_watchlist(user['imdb_id'])
+        logger.info("Done.")
+
+
+def run_imdb_sync():
+    """
+    Imports all scores and seen dates from MY_IMDB to our DB
+    Adds watchlisted movies to DB in order to be picked up and searched for.
+    :return:
+    """
+    while True:
+        sync_my_imdb()
+        logger.info(f"Sleeping {MY_IMDB_REFRESH_INTERVAL} minutes...")
+        time.sleep(MY_IMDB_REFRESH_INTERVAL * 60)
 
 
 def get_my_imdb(profile_id):
@@ -74,44 +97,37 @@ def get_my_imdb(profile_id):
 
 
 def get_my_watchlist(profile_id):
-    # TODO, fking regex + js injection
     try:
-        url = 'https://www.imdb.com/user/ur{0}/watchlist'.format(profile_id)
-        print(url)
+        url = f'https://www.imdb.com/user/ur{profile_id}/watchlist'
         soup_imdb = BeautifulSoup(requests.get(url).text, 'html.parser')
-        html_content = soup_imdb.prettify()
-        Html_file = open("example.html", "w")
-        Html_file.write(html_content)
-        Html_file.close()
-        pages = 10
-
-        results = []
-        for page in range(pages + 1):
-            html_content = soup_imdb.prettify()
-            print(re.findall("[IMDbReactInitialState.push(].*[);]", html_content))
-            ids = soup_imdb.findAll('div', {'class': 'lister-item-image'})
-            print(ids)
-            try:
-                last_page = False
-                next_url = soup_imdb.find('a', {'class': 'flat-button lister-page-next next-page'})['href']
-            except:
-                last_page = True
-            for x in ids:
-                imdb_id = x['data-tconst']
-                results.append(imdb_id)
-            if not last_page:
-                next_url = 'https://www.imdb.com{0}'.format(next_url)
-                soup_imdb = BeautifulSoup(requests.get(next_url).text, 'html.parser')
-
-        return results
-
+        listId = soup_imdb.find("meta", property="pageId")['content']
+        url = f"https://www.imdb.com/list/{listId}/export"
+        df = pd.read_csv(url)
+        # Return only movies
+        return df.loc[df['Title Type'] == 'movie']['Const'].tolist()
     except Exception as e:
-        raise(e)
-        logger.error(f"Could not fetch MyIMDB for user {profile_id}, error: {e}")
+        logger.error(f"Can't fetch IMDB Watchlist for user {profile_id}, error: {e}")
         return None
 
 
+def sync_watchlist(profile_id):
+    logger.info(f"Syncing watchlist for user {profile_id}")
+    try:
+        watchlist = get_my_watchlist(profile_id)
+        watchlist = [int(deconvert_imdb_id(x)) for x in watchlist]
+        already_processed = get_watchlist_intersections(profile_id, watchlist)
+        watchlist = [{
+            'movie_id': x,
+            'imdb_id': profile_id,
+            'status': 'new',
+        } for x in watchlist if x not in already_processed]
+        update_many(watchlist, 'watchlists')
+    except Exception as e:
+        logger.error(f"Watchlist sync for user {profile_id} failed. Error: {e}")
+    logger.info("Done.")
+
+
 if __name__ == '__main__':
-    from pprint import pprint
-    # x = get_my_imdb(30152272)
-    sync_my_imdb()
+    # x = get_my_watchlist(77571297)
+    # sync_watchlist(77571297)
+    run_imdb_sync()

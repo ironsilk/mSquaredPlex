@@ -10,8 +10,7 @@ from settings import xml_trnt_path, template_path, movie_template_path, trnt_tem
 from tmdb_omdb_tools import OMDB
 from tmdb_omdb_tools import TMDB
 from torr_tools import get_torr_quality, generate_torr_links
-from plex_utils import get_plex_emails
-from db_tools import check_in_my_movies
+from db_tools import check_in_my_movies, get_my_imdb_users
 
 logger = setup_logger('EmailSender')
 
@@ -506,7 +505,7 @@ class Mtls:
 def send_email(items, cypher):
     if items:
         logger.info("Starting emailing routine")
-        emails = get_plex_emails()
+        emails = [x['email'] for x in get_my_imdb_users() if x['email_newsletters'] == 1]
         for email in emails:
             # Filter for each user, with what they've seen
             user_items = check_in_my_movies(items, email)
@@ -585,7 +584,7 @@ def prepare_item_for_email(item, email, mtls, cypher):
 if __name__ == '__main__':
     from crypto_tools import torr_cypher
     # test package
-    x = {
+    xx = {
         'already_in_db': False,
         # Daca e sau nu in baza de date my_movies - adica alea vazute (prin intermediul serviciului astuia)
         'averageRating': 5.4,
@@ -638,4 +637,4 @@ if __name__ == '__main__':
         'trailer_link': 'https://www.youtube.com/watch?v=PQM54p9IKZs',
         'upload_date': '2021-08-18 11:30:23'
     }
-    send_email([x], torr_cypher)
+    send_email([xx], torr_cypher)

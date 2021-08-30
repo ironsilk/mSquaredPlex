@@ -64,13 +64,20 @@ def check_table(cursor, table, columns, column_types):
     else:
         logger.info("Table '{table}' does not exist, creating...".format(table=table))
         primary_key = columns.pop(0)
+        if column_types[primary_key] == 'AUTO-INCREMENT':
+            auto_increment = True
+        else:
+            auto_increment = False
+
         del column_types[primary_key]
         q = f'''
         CREATE TABLE `{table}` (
         `{primary_key}` int(11) NOT NULL,
         PRIMARY KEY (`{primary_key}`) KEY_BLOCK_SIZE=1024
-        ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=8;
+        ) ENGINE=MyISAM AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=8;
         '''
+        if auto_increment:
+            q = q.replace('int(11) NOT NULL', 'int(11) NOT NULL AUTO_INCREMENT')
         cursor.execute(q)
         for col in columns:
             try:

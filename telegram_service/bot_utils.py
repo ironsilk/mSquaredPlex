@@ -1,7 +1,8 @@
 import requests
 
 from settings import NO_POSTER_PATH
-from utils import connect_mysql, close_mysql
+from utils import connect_mysql, close_mysql, update_many
+from db_tools import deconvert_imdb_id, get_email_by_tgram_id
 
 
 def make_movie_reply(pkg):
@@ -117,6 +118,18 @@ def get_telegram_users():
             'email_newsletters': x['email_newsletters'],
         }
         for x in users}
+
+
+def update_torr_db(pkg, torr_response, tgram_id):
+    update_many([{
+        'torr_id': pkg['id'],
+        'torr_client_id': torr_response.id,
+        'imdb_id': deconvert_imdb_id(pkg['imdb']),
+        'resolution': pkg['resolution'],
+        'status': 'requested download',
+        'requested_by': get_email_by_tgram_id(tgram_id)
+    }],
+        'my_torrents')
 
 
 if __name__ == '__main__':

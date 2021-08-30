@@ -12,7 +12,7 @@ from telegram.ext import Updater, MessageHandler, Filters, CallbackContext, Conv
     CommandHandler
 from transmission_rpc.error import TransmissionError
 
-from bot_utils import make_movie_reply, get_telegram_users
+from bot_utils import make_movie_reply, get_telegram_users, update_torr_db
 from db_tools import get_movie_from_all_databases
 from torr_tools import get_torrents_for_imdb_id, send_torrent, compose_link
 from utils import search_imdb_title, update_many
@@ -56,7 +56,7 @@ USERS = get_telegram_users()
 def auth_wrap(f):
     @wraps(f)
     def wrap(update: Update, context: CallbackContext):
-        user = update.message.chat_id
+        user = update.effective_user['id']
         if user in USERS.keys():
             # Ok boss
             result = f(update, context)
@@ -101,6 +101,8 @@ def check_email(update: Update, context: CallbackContext):
         'telegram_name': update.effective_user.first_name,
         'email': update.message.text,
         'email_newsletters': True,
+        'scan_watchlist': False,
+
     }
     message += "Would you like to connect you IMDB account? " \
                "In this way we'll be able to pull your movie " \
@@ -119,7 +121,6 @@ def check_email(update: Update, context: CallbackContext):
 
 def give_imdb(update: Update, context: CallbackContext):
     if update.message.text == 'Yes':
-        context.user_data['new_user']['scan_watchlist'] = True
         update.effective_message.reply_photo(
             photo=open(TELEGRAM_IMDB_RATINGS, 'rb'),
             caption="I'll need you to go to your IMDB account and copy here your user ID, like the one in the photo, "
@@ -128,12 +129,12 @@ def give_imdb(update: Update, context: CallbackContext):
         )
         return CHECK_IMDB
     else:
-        update.effective_message.reply_text("Ok, that's it. I'll take care of the rest, from now on "
-                                            "anytime you type something i'll be here to help you out. Enjoy!")
+        return register_user(update, context)
 
 
 def check_imdb(update: Update, context: CallbackContext):
-    if update.message.text != 'fuck it':
+    if update.message.text.lower() != 'fuck it':
+        context.user_data['new_user']['scan_watchlist'] = True
         context.user_data['new_user']['imdb_id'] = ''.join([x for x in update.message.text if x.isdigit()])
     return register_user(update, context)
 
@@ -155,7 +156,6 @@ def wrong_input(update: Update, context: CallbackContext):
 
 @auth_wrap
 def start(update: Update, context: CallbackContext) -> int:
-    # TODO add user checking, a wrapper would be great
     """Send a message when the command /start is issued."""
     user = update.effective_user
     update.message.reply_markdown_v2(
@@ -191,11 +191,15 @@ def parse_imdb_id(update: Update, context: CallbackContext) -> int:
     context.user_data['pkg'] = pkg
     context.user_data['more_options'] = False
 
-    message = make_movie_reply(pkg)
-    update.effective_message.reply_html(message, reply_markup=ReplyKeyboardMarkup(bool_keyboard,
-                                                                                  one_time_keyboard=True,
-                                                                                  resize_keyboard=True,
-                                                                                  ))
+    message, image = make_movie_reply(pkg)
+    update.effective_message.reply_photo(
+        photo=image,
+        caption=message,
+        reply_markup=ReplyKeyboardMarkup(movie_selection_keyboard,
+                                         one_time_keyboard=True,
+                                         resize_keyboard=True,
+                                         ),
+    )
     return CHOOSE_ONE
 
 
@@ -206,7 +210,8 @@ def parse_imdb_text(update: Update, context: CallbackContext) -> int:
     update.message.reply_text("Just a sec until we get data about this title...")
     # Is it a link?
     try:
-        imdb_id = re.search("([tT]{2})?\d+", update.message.text).group(0)
+        imdb_id = re.search(r"[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)",
+                            update.message.text).group(0)
 
         # We need number so filter out the number from the user input:
         imdb_id = ''.join([x for x in imdb_id if x.isdigit()]).lstrip('0')
@@ -215,11 +220,15 @@ def parse_imdb_text(update: Update, context: CallbackContext) -> int:
         pkg = get_movie_from_all_databases(imdb_id)
         context.user_data['pkg'] = pkg
 
-        message = make_movie_reply(pkg)
-        update.effective_message.reply_html(message, reply_markup=ReplyKeyboardMarkup(movie_selection_keyboard,
-                                                                                      one_time_keyboard=True,
-                                                                                      resize_keyboard=True,
-                                                                                      ))
+        message, image = make_movie_reply(pkg)
+        update.effective_message.reply_photo(
+            photo=image,
+            caption=message,
+            reply_markup=ReplyKeyboardMarkup(movie_selection_keyboard,
+                                             one_time_keyboard=True,
+                                             resize_keyboard=True,
+                                             ),
+        )
         return CHOOSE_ONE
     except AttributeError:
         # Yes but wrong link or no match
@@ -293,9 +302,9 @@ def check_movie_status(update: Update, context: CallbackContext) -> int:
     # Check if you've already seen it and send info
     if movie['already_in_my_movies']:
         message = f"Movie already in your DB."
-        if movie['my_score']:
+        if 'my_score' in movie.keys():
             message += f"\nYour score: {movie['my_score']}"
-        if movie['seen_date']:
+        if 'seen_date' in movie.keys():
             message += f"\nAnd you've seen it on {movie['seen_date']}"
         update.message.reply_text(message)
         if movie['torr_result']:
@@ -326,6 +335,7 @@ def confirm_redownload_action(update: Update, context: CallbackContext) -> int:
 def search_for_torrents(update: Update, context: CallbackContext) -> int:
     update.message.reply_text('Searching for available torrents...')
     torrents = get_torrents_for_imdb_id(context.user_data['pkg']['imdb'])
+    context.user_data['pkg'] = sorted(torrents, key=lambda k: k['size'])
 
     if torrents:
         keyboard = [[]]
@@ -363,7 +373,11 @@ def download_torrent(update: Update, context: CallbackContext) -> int:
         query.edit_message_text(text=f"Thanks, sending download request...")
         # Send download request
         try:
-            send_torrent(compose_link(query.data))
+            torr = [x for x in context.user_data['pkg'] if query.data == str(x['id'])][0]
+            # Send torrent to daemon
+            torr_client_resp = send_torrent(compose_link(query.data))
+            # Update torrent DB
+            update_torr_db(torr, torr_client_resp, update.effective_user['id'])
             message = f"Download started, have a great day!"
         except TransmissionError as e:
             message = f"Download failed, please check logs and try again."
@@ -509,6 +523,9 @@ def main() -> None:
                 ),
                 MessageHandler(
                     Filters.regex('fuck it'), check_imdb
+                ),
+                MessageHandler(
+                    Filters.regex('Fuck it'), check_imdb
                 ),
                 MessageHandler(
                     Filters.text, wrong_input
