@@ -32,6 +32,8 @@ NO_POSTER_PATH = 'no-poster.png'
 TELEGRAM_AUTH_TEST_PATH = 'images/auth_test.png'
 TELEGRAM_AUTH_APPROVE = 'images/approve.jpg'
 TELEGRAM_IMDB_RATINGS = 'images/ratings.jpg'
+TELEGRAM_WATCHLIST_ROUTINE_INTERVAL = 60  # minutes
+MY_IMDB_REFRESH_INTERVAL = 15  # minutes
 MOVIE_HDRO = 19
 MOVIE_4K = 26
 SOAP_HD = 21
@@ -148,6 +150,13 @@ table_columns = {
         'scan_watchlist': 'BOOL',
         'email_newsletters': 'BOOL',
     },
+    'watchlists': {
+        'id': 'AUTO-INCREMENT',
+        'movie_id': 'int(11)',
+        'imdb_id': 'int(11)',
+        'status': 'VARCHAR(128)',
+        'excluded_torrents': 'TEXT',
+    }
 }
 
 # EMAIL settings
