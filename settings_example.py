@@ -29,9 +29,9 @@ TORR_SEED_FOLDER = '/movies'
 TORR_KEEP_TIME = 5  # days, to be used in TORR_REFRESHER, check_seeding_status
 TORR_CLEAN_ROUTINE_INTERVAL = 15  # minutes between torrent client status checks
 NO_POSTER_PATH = 'no-poster.png'
-TELEGRAM_AUTH_TEST_PATH = 'auth_test.png'
-TELEGRAM_AUTH_APPROVE = 'approve.jpg'
-TELEGRAM_IMDB_RATINGS = 'ratings.jpg'
+TELEGRAM_AUTH_TEST_PATH = 'images/auth_test.png'
+TELEGRAM_AUTH_APPROVE = 'images/approve.jpg'
+TELEGRAM_IMDB_RATINGS = 'images/ratings.jpg'
 MOVIE_HDRO = 19
 MOVIE_4K = 26
 SOAP_HD = 21
@@ -43,7 +43,7 @@ SOAP_4K = 27
 PLEX_HOST = 'http://192.168.1.99:32400'
 PLEX_TOKEN = ''
 PLEX_SERVER_NAME = ''  # Will also appear in emails sent
-PLEX_ADMIN_EMAILS = []  # If you have multiple admins or other users which are not friends,
+PLEX_ADMIN_EMAILS = ['mihai.vlad6@gmail.com']  # If you have multiple admins or other users which are not friends,
 # you've got to mention their emails here unfortunately. Their name must be their email. Not tested tho, don't have
 # plex pass.
 # The account the TOKEN belongs to should always be first, AKA your account

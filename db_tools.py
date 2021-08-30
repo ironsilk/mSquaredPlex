@@ -250,10 +250,19 @@ def get_watchlist_intersections(user_imdb_id, watchlist, cursor=None):
     return [x['movie_id'] for x in cursor.fetchall()]
 
 
+def get_watchlist_new(cursor=None):
+    if not cursor:
+        conn, cursor = connect_mysql()
+    q = f"SELECT * FROM watchlists WHERE status = 'new'"
+    cursor.execute(q)
+    return cursor.fetchall()
+
+
 if __name__ == '__main__':
     from pprint import pprint
     # pprint(get_movie_IMDB(1096702))
     check_db()
     # pprint(get_movie_from_all_databases(1571222))
     # pprint([x['email'] for x in get_my_imdb_users() if x['email_newsletters'] == 1])
-    pprint(get_my_imdb_users())
+    # pprint(get_watchlist_new())
+    # pprint(get_my_imdb_users())

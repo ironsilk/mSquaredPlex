@@ -111,6 +111,7 @@ def get_my_watchlist(profile_id):
 
 
 def sync_watchlist(profile_id):
+    # TODO check if movie already in torrent database and mark it if it is, also exclude quality
     logger.info(f"Syncing watchlist for user {profile_id}")
     try:
         watchlist = get_my_watchlist(profile_id)

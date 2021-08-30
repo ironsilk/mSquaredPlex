@@ -12,16 +12,22 @@ from telegram.ext import Updater, MessageHandler, Filters, CallbackContext, Conv
     CommandHandler
 from transmission_rpc.error import TransmissionError
 
-from bot_utils import make_movie_reply, get_telegram_users, update_torr_db
+from bot_utils import make_movie_reply, get_telegram_users, update_torr_db, bot_watchlist_routine, \
+    remove_movie_from_bot_watchlist, exclude_torrents_from_watchlist, get_excluded_resolutions
 from db_tools import get_movie_from_all_databases
 from torr_tools import get_torrents_for_imdb_id, send_torrent, compose_link
-from utils import search_imdb_title, update_many
-from settings import TELEGRAM_AUTH_TEST_PATH, TELEGRAM_AUTH_APPROVE, TELEGRAM_IMDB_RATINGS
+from utils import search_imdb_title, update_many, deconvert_imdb_id
+from settings import TELEGRAM_AUTH_TEST_PATH, TELEGRAM_AUTH_APPROVE, TELEGRAM_IMDB_RATINGS, \
+    TELEGRAM_WATCHLIST_ROUTINE_INTERVAL
 from plex_utils import invite_friend
 
 # Other info:
 # https://github.com/Ambro17/AmbroBot
 # https://github.com/notPlasticCat/Library-Genesis-Bot/blob/main/LibGenBot/__main__.py
+
+# Job Queue
+# https://github.com/python-telegram-bot/python-telegram-bot/wiki/Extensions-%E2%80%93-JobQueue
+# https://github.com/python-telegram-bot/python-telegram-bot/blob/master/examples/timerbot.py
 
 # Enable logging
 logging.basicConfig(
@@ -160,7 +166,7 @@ def start(update: Update, context: CallbackContext) -> int:
     user = update.effective_user
     update.message.reply_markdown_v2(
         f"Hi {user.mention_markdown_v2()}\!\n"
-        f"Please select one of the options or type /help for more options\.",
+        fr"Please select one of the options or type /help for more options\.",
         reply_markup=ReplyKeyboardMarkup(menu_keyboard, one_time_keyboard=True, resize_keyboard=True),
     )
     return CHOOSE_TASK
@@ -177,7 +183,7 @@ def choose_task(update: Update, context: CallbackContext) -> int:
         message = 'Not implemented yet'
         update.message.reply_text(message)
 
-    return start(update, context)
+    return ConversationHandler.END
 
 
 @auth_wrap
@@ -336,10 +342,14 @@ def search_for_torrents(update: Update, context: CallbackContext) -> int:
     update.message.reply_text('Searching for available torrents...')
     torrents = get_torrents_for_imdb_id(context.user_data['pkg']['imdb'])
     context.user_data['pkg'] = sorted(torrents, key=lambda k: k['size'])
-
     if torrents:
         keyboard = [[]]
         torrents = sorted(torrents, key=lambda k: k['size'])
+        # Check if we need to filter excluded resolutions
+        if 'from_watchlist' in context.user_data.keys():
+            movie_id = deconvert_imdb_id(torrents[0]['imdb'])
+            excluded_resolutions = get_excluded_resolutions(movie_id, update.effective_user['id'])
+            torrents = [x for x in torrents if x['id'] not in excluded_resolutions]
         for pos, item in enumerate(torrents):
             pos += 1  # exclude 0
             btn_text = (
@@ -369,6 +379,7 @@ def search_for_torrents(update: Update, context: CallbackContext) -> int:
 @auth_wrap
 def download_torrent(update: Update, context: CallbackContext) -> int:
     query = update.callback_query
+    query.answer()
     if query.data != '0':
         query.edit_message_text(text=f"Thanks, sending download request...")
         # Send download request
@@ -381,13 +392,16 @@ def download_torrent(update: Update, context: CallbackContext) -> int:
             message = f"Download started, have a great day!"
         except TransmissionError as e:
             message = f"Download failed, please check logs and try again."
-        query.answer()
         query.edit_message_text(text=message)
         return ConversationHandler.END
     else:
-        query.answer()
-        query.edit_message_text(text="Ok, have a great day!")
-        return ConversationHandler.END
+        if 'from_watchlist' in context.user_data.keys():
+            query.edit_message_text(text="Ok, i'll remove these torrent options from future watchlist alerts "
+                                         "regarding this movie.")
+            return exclude_res_from_watchlist(update, context)
+        else:
+            query.edit_message_text(text="Ok, have a great day!")
+            return ConversationHandler.END
 
 
 @auth_wrap
@@ -425,6 +439,7 @@ def help_command(update: Update, context: CallbackContext) -> None:
                               "the entire process.")
 
 
+@auth_wrap
 def change_watchlist_command(update: Update, context: CallbackContext) -> None:
     pkg = USERS[update.effective_user.id]
     if pkg['scan_watchlist'] == 0:
@@ -435,6 +450,7 @@ def change_watchlist_command(update: Update, context: CallbackContext) -> None:
     update.message.reply_text("Updated your watchlist preferences.")
 
 
+@auth_wrap
 def change_newsletter_command(update: Update, context: CallbackContext) -> None:
     pkg = USERS[update.effective_user.id]
     if pkg['email_newsletters'] == 0:
@@ -445,9 +461,43 @@ def change_newsletter_command(update: Update, context: CallbackContext) -> None:
     update.message.reply_text("Updated your newsletter preferences.")
 
 
+@auth_wrap
 def update_user(update: Update, context: CallbackContext) -> None:
     update.message.reply_text('Type anything to get started.')
     del USERS[update.effective_user.id]
+
+
+@auth_wrap
+def watchlist_entry(update: Update, context: CallbackContext) -> int:
+    context.user_data['pkg'] = {
+        'imdb': int(update.message.text.replace('/WatchMatch', '')),
+    }
+    context.user_data['from_watchlist'] = True
+    update.message.reply_text('Watchlist entry')
+    return search_for_torrents(update, context)
+
+
+@auth_wrap
+def remove_watchlist_entry(update: Update, context: CallbackContext) -> int:
+    movie_id = int(update.message.text.replace('/UnWatchMatch', ''))
+    remove_movie_from_bot_watchlist(movie_id, update.effective_user['id'])
+    update.message.reply_text("Done, no more watchlist updates for this movie.")
+    return ConversationHandler.END
+
+
+@auth_wrap
+def exclude_res_from_watchlist(update: Update, context: CallbackContext) -> int:
+    torrents = context.user_data['pkg']
+    movie_id = deconvert_imdb_id(torrents[0]['imdb'])
+    exclude_torrents_from_watchlist(movie_id, update.effective_user['id'], [x['id'] for x in torrents])
+    update.callback_query.edit_message_text(text="Removed these torrent quality for future recommendations "
+                                                 "on this title.")
+    return ConversationHandler.END
+
+
+@auth_wrap
+def end(update, context, message):
+    return ConversationHandler.END
 
 
 def main() -> None:
@@ -459,7 +509,11 @@ def main() -> None:
     dispatcher = updater.dispatcher
 
     conv_handler = ConversationHandler(
-        entry_points=[MessageHandler(Filters.text, start)],
+        entry_points=[
+            MessageHandler(Filters.regex(r'^/WatchMatch\d+$'), watchlist_entry),
+            MessageHandler(Filters.regex(r'^/UnWatchMatch\d+$'), remove_watchlist_entry),
+            MessageHandler(Filters.text, start),
+        ],
         states={
             CHOOSE_TASK: [
                 MessageHandler(
@@ -532,7 +586,7 @@ def main() -> None:
                 ),
             ],
         },
-        fallbacks=[MessageHandler(Filters.text, start)],
+        fallbacks=[MessageHandler(Filters.text, end)],
         per_message=False
     )
     dispatcher.add_handler(CommandHandler('help', help_command))
@@ -543,6 +597,8 @@ def main() -> None:
 
     # Start the Bot
     updater.start_polling()
+    job_queue = updater.job_queue
+    job_queue.run_repeating(bot_watchlist_routine, interval=TELEGRAM_WATCHLIST_ROUTINE_INTERVAL * 60, first=5)
 
     updater.idle()
 

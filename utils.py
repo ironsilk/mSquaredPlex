@@ -153,7 +153,7 @@ def update_one(update_columns, update_values, condition_col, condition_value, ta
         logger.error('Got {e}'.format(e=e))
 
 
-def update_many(data_list=None, mysql_table=None):
+def update_many(data_list=None, mysql_table=None, connection=None, cursor=None):
     """
     Updates a mysql table with the data provided. If the key is not unique, the
     data will be inserted into the table.
@@ -169,7 +169,8 @@ def update_many(data_list=None, mysql_table=None):
     """
 
     # Connection and Cursor
-    conn, cur = connect_mysql()
+    if not cursor or not connection:
+        connection, cursor = connect_mysql()
 
     query = ""
     values = []
@@ -185,21 +186,20 @@ def update_many(data_list=None, mysql_table=None):
 
         v = list(data_dict.values())
         values.append(v)
-
     try:
-        cur.executemany(query, values)
+        cursor.executemany(query, values)
     except Exception as e:
         try:
             print("MySQL Error [%d]: %s" % (e.args[0], e.args[1]))
         except IndexError:
             print("MySQL Error: %s" % str(e))
 
-        conn.rollback()
+        connection.rollback()
         return False
 
-    conn.commit()
-    cur.close()
-    conn.close()
+    connection.commit()
+    cursor.close()
+    connection.close()
 
 
 def search_imdb_title(item, ia=None):

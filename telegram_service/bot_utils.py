@@ -1,8 +1,11 @@
 import requests
-
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+import PTN
 from settings import NO_POSTER_PATH
 from utils import connect_mysql, close_mysql, update_many
-from db_tools import deconvert_imdb_id, get_email_by_tgram_id
+from db_tools import deconvert_imdb_id, get_email_by_tgram_id, get_watchlist_new, get_my_imdb_users
+from torr_tools import get_torrents_for_imdb_id
+from telegram.ext import CallbackContext
 
 
 def make_movie_reply(pkg):
@@ -110,13 +113,13 @@ def get_telegram_users():
     users = cursor.fetchall()
     return {
         x['telegram_chat_id']:
-        {
-            'email': x['email'],
-            'imdb_id': x['imdb_id'],
-            'telegram_name': x['telegram_name'],
-            'scan_watchlist': x['scan_watchlist'],
-            'email_newsletters': x['email_newsletters'],
-        }
+            {
+                'email': x['email'],
+                'imdb_id': x['imdb_id'],
+                'telegram_name': x['telegram_name'],
+                'scan_watchlist': x['scan_watchlist'],
+                'email_newsletters': x['email_newsletters'],
+            }
         for x in users}
 
 
@@ -132,9 +135,78 @@ def update_torr_db(pkg, torr_response, tgram_id):
         'my_torrents')
 
 
+def bot_watchlist_routine(context: CallbackContext) -> None:
+    """
+    Gets newest watchlist items form database and if it finds the torrents
+    for those movies it notifies the user.
+    :param context:
+    :return:
+    """
+    # Get watchlist items
+    watchlist_items = get_watchlist_new()
+    if watchlist_items:
+        users = get_my_imdb_users()
+        for item in watchlist_items:
+            torrents = get_torrents_for_imdb_id(item['movie_id'])
+            torrents = sorted(torrents, key=lambda k: k['size'])
+            if item['excluded_torrents']:
+                torrents = [x for x in torrents if str(x['id']) not in item['excluded_torrents']]
+
+            if torrents:
+                chat_id = [x['telegram_chat_id'] for x in users if x['imdb_id'] == item['imdb_id']][0]
+                context.bot.send_message(chat_id=chat_id, text=f"Hi there! WATCHLIST ALERT!\n"
+                                                               f"🎞️ {PTN.parse(torrents[0]['name'])['title']}\n"
+                                                               f"has {len(torrents)} download candidates\n"
+                                                               f"📥 /WatchMatch{item['movie_id']} (download)\n\n"
+                                                               f"❌ /UnWatchMatch{item['movie_id']} (forget this movie)"
+                                         )
+
+
+def get_watchlist_item(movie_id, tg_id):
+    conn, cursor = connect_mysql()
+    q = f"SELECT * FROM watchlists WHERE movie_id = {movie_id} " \
+        f"AND imdb_id = (SELECT imdb_id FROM users where telegram_chat_id = {tg_id})"
+    cursor.execute(q)
+    return cursor.fetchone()
+
+
+def remove_movie_from_bot_watchlist(movie_id, tg_id):
+    watchlist_item = get_watchlist_item(movie_id, tg_id)
+    update_many([{
+        'id': watchlist_item['id'],
+        'movie_id': movie_id,
+        'imdb_id': watchlist_item['imdb_id'],
+        'status': 'closed',
+    }],
+        'watchlists')
+
+
+def exclude_torrents_from_watchlist(movie_id, tg_id, torr_ids):
+    new = ', '.join([str(x) for x in torr_ids])
+    watchlist_item = get_watchlist_item(movie_id, tg_id)
+    if watchlist_item['excluded_torrents']:
+        old = watchlist_item['excluded_torrents'].split(', ')
+        new = ', '.join([str(x) for x in torr_ids if x not in old])
+    update_many([{
+        'id': watchlist_item['id'],
+        'movie_id': movie_id,
+        'imdb_id': watchlist_item['imdb_id'],
+        'excluded_torrents': new,
+    }],
+        'watchlists')
+
+
+def get_excluded_resolutions(movie_id, tg_id):
+    excluded = get_watchlist_item(movie_id, tg_id)['excluded_torrents']
+    if excluded:
+        return [int(x) for x in excluded.split(', ')]
+    else:
+        return []
+
+
 if __name__ == '__main__':
     from pprint import pprint
 
-    link = 'https://www.youtube.com/watch?v=Sl90LWbuyVM'
     # print(make_trailer(link))
-    pprint(get_telegram_users())
+    # pprint(get_telegram_users())
+    pprint(get_excluded_resolutions(1571222, 1700079840))
