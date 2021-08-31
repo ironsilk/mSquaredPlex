@@ -1,0 +1,42 @@
+APScheduler
+beautifulsoup4
+bs4
+cachetools==4.2.2
+certifi==2021.5.30
+charset-normalizer==2.0.4
+colorama==0.4.4
+greenlet==1.1.1
+idna==3.2
+lxml
+mysqlclient==2.0.3
+numpy==1.21.2
+pandas
+parse-torrent-title==2.3
+PlexAPI
+protobuf==3.17.3
+pycryptodome==3.10.1
+PyMySQL==1.0.2
+python-dateutil
+python-telegram-bot==13.7
+pytz
+python-dotenv
+six
+soupsieve==2.2.1
+SQLAlchemy
+tornado==6.1
+tqdm
+typing-extensions==3.10.0.0
+tzlocal==2.1
+wincertstore==0.2
+# tmdb_omdb_tools
+omdb
+tmdbsimple
+# torr tools
+urllib3==1.26.6
+falcon
+requests
+transmission-rpc==3.2.7
+# db tools
+mysql-connector-python
+# utils
+IMDbPY==2021.4.18

@@ -4,7 +4,7 @@ import time
 import requests
 
 from crypto_tools import torr_cypher
-from db_tools import check_in_my_torrents, retrieve_bulk_from_dbs, update_my_torrents_db
+from db_tools import check_in_my_torrents, retrieve_bulk_from_dbs, update_my_torrents_db, check_db
 from email_tools import send_email
 from utils import logger
 from utils import timing
@@ -21,11 +21,11 @@ FLIST_ROUTINE_SLEEP_TIME = int(os.getenv('FLIST_ROUTINE_SLEEP_TIME'))
 
 
 def get_latest_torrents(n=100, category=MOVIE_HDRO):
-    '''
+    """
     returns last n movies from filelist API.
     n default 100
     movie category default HD RO
-    '''
+    """
     logger.info('Getting RSS feeds')
     r = requests.get(
         url=API_URL,
@@ -87,4 +87,5 @@ def run_forever(cypher=torr_cypher, sleep_time=60*60*FLIST_ROUTINE_SLEEP_TIME):
 
 
 if __name__ == '__main__':
+    check_db()
     run_forever()

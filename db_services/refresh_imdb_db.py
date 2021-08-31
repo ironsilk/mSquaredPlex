@@ -2,16 +2,17 @@ import os
 import time
 from datetime import datetime
 
-import lxml
 import requests
-import tqdm
+from tqdm import tqdm
 from dateutil import parser as d_util
+from dotenv import load_dotenv
+from lxml import html
 
 from imdb_dump_import import run_import
 from settings import setup_logger
 
-import time
-# time.sleep(12413132)
+load_dotenv()
+
 IMDB_DB_REFRESH_INTERVAL = int(os.getenv('IMDB_DB_REFRESH_INTERVAL'))
 DUMPS_URL = os.getenv('DUMPS_URL')
 DUMPS_PATH = os.getenv('DUMPS_PATH')
@@ -22,13 +23,12 @@ DB_URI = "mysql://{u}:{p}@{hp}/{dbname}?charset=utf8".format(
     dbname=os.getenv('MYSQL_DB_NAME'),
 )
 
-
 logger = setup_logger("IMDB_db_updater")
 
 
 def fetch_database_dumps():
     logger.info('Downloading dumps...')
-    dom = lxml.html.fromstring(requests.get(DUMPS_URL).content)
+    dom = html.fromstring(requests.get(DUMPS_URL).content)
     db_links = [x for x in dom.xpath('//a/@href') if '//' in x and 'interfaces' not in x]
     for url in db_links:
         name = url.split('/')[-1]
