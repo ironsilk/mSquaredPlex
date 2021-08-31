@@ -1,6 +1,6 @@
 import os
 import time
-from datetime import datetime, timedelta
+from datetime import datetime
 
 import lxml
 import requests
@@ -8,7 +8,17 @@ import tqdm
 from dateutil import parser as d_util
 
 from imdb_dump_import import run_import
-from settings import IMDB_DB_REFRESH_INTERVAL, DUMPS_URL, DUMPS_PATH, DB_URI, setup_logger
+from settings import setup_logger
+
+IMDB_DB_REFRESH_INTERVAL = int(os.getenv('MYSQL_DB_NAME'))
+DUMPS_URL = os.getenv('DUMPS_URL')
+DUMPS_PATH = os.getenv('DUMPS_PATH')
+DB_URI = "mysql://{u}:{p}@{hp}/{dbname}?charset=utf8".format(
+    u=os.getenv('MYSQL_USER'),
+    p=os.getenv('MYSQL_PASS'),
+    hp=':'.join([os.getenv('MYSQL_HOST'), os.getenv('MYSQL_PORT')]),
+    dbname=os.getenv('MYSQL_DB_NAME'),
+)
 
 
 logger = setup_logger("IMDB_db_updater")

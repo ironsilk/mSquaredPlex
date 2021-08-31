@@ -5,12 +5,21 @@ import xml.etree.ElementTree as ET
 from xml.dom import minidom
 from xml.etree.ElementTree import SubElement
 
-from settings import xml_trnt_path, template_path, movie_template_path, trnt_template_path, EMAIL_USER, \
-    EMAIL_PASS, EMAIL_HOSTNAME, PLEX_SERVER_NAME, setup_logger
+from db_tools import check_in_my_movies, get_my_imdb_users
+from settings import setup_logger
 from tmdb_omdb_tools import OMDB
 from tmdb_omdb_tools import TMDB
 from torr_tools import get_torr_quality, generate_torr_links
-from db_tools import check_in_my_movies, get_my_imdb_users
+
+XML_TRNT_PATH = os.getenv('XML_TRNT_PATH')
+TEMPLATE_PATH = os.getenv('TEMPLATE_PATH')
+MOVIE_TEMPLATE_PATH = os.getenv('MOVIE_TEMPLATE_PATH')
+TRNT_TEMPLATE_PATH = os.getenv('TRNT_TEMPLATE_PATH')
+EMAIL_USER = os.getenv('EMAIL_USER')
+EMAIL_PASS = os.getenv('EMAIL_PASS')
+EMAIL_HOSTNAME = os.getenv('EMAIL_HOSTNAME')
+PLEX_SERVER_NAME = os.getenv('PLEX_SERVER_NAME')
+
 
 logger = setup_logger('EmailSender')
 
@@ -511,17 +520,17 @@ def send_email(items, cypher):
             user_items = check_in_my_movies(items, email)
             if user_items:
                 mtls = Mtls()
-                mtls.empty_xml(xml_trnt_path)
+                mtls.empty_xml(XML_TRNT_PATH)
 
                 for item in user_items:
                     mtls = prepare_item_for_email(item, email, mtls, cypher)
 
-                mtls.update_filelist_xml(xml_trnt_path)
-                mtls.count_xml(xml_trnt_path)
+                mtls.update_filelist_xml(XML_TRNT_PATH)
+                mtls.count_xml(XML_TRNT_PATH)
 
-                list_new, list_trnt, list_seen = mtls.read_filelist_xml(xml_trnt_path, movie_template_path,
-                                                                        trnt_template_path)
-                email_body = mtls.generate_email_html(template_path, list_new, list_trnt, list_seen, datetime.datetime.now())
+                list_new, list_trnt, list_seen = mtls.read_filelist_xml(XML_TRNT_PATH, MOVIE_TEMPLATE_PATH,
+                                                                        TRNT_TEMPLATE_PATH)
+                email_body = mtls.generate_email_html(TEMPLATE_PATH, list_new, list_trnt, list_seen, datetime.datetime.now())
 
                 if mtls.new_movies == 1:
                     mail_subject = 'Film nou pe FileList'
@@ -568,16 +577,16 @@ def prepare_item_for_email(item, email, mtls, cypher):
     item['torr_link_seed'], item['torr_link_download'] = generate_torr_links(item, email, cypher)
 
     # Build HTML and return
-    mtls.find_trnt_elem_xml(xml_trnt_path, 'movie', 'id_imdb', item['imdb'])
+    mtls.find_trnt_elem_xml(XML_TRNT_PATH, 'movie', 'id_imdb', item['imdb'])
     if mtls.find is False:
-        mtls.add_movie_to_xml(xml_trnt_path, item['imdb'], item['id'], movie_data=item,
+        mtls.add_movie_to_xml(XML_TRNT_PATH, item['imdb'], item['id'], movie_data=item,
                               trnt_data=item)
     elif mtls.find is True:
-        mtls.find_trnt_elem_xml(xml_trnt_path, 'trnt', 'id', item['id'])
+        mtls.find_trnt_elem_xml(XML_TRNT_PATH, 'trnt', 'id', item['id'])
         if mtls.find is False:
-            mtls.new_trnt_link_xml(xml_trnt_path, item['imdb'], item['id'],
+            mtls.new_trnt_link_xml(XML_TRNT_PATH, item['imdb'], item['id'],
                                    trnt_data=item)
-    mtls.xml_pritify(xml_trnt_path)
+    mtls.xml_pritify(XML_TRNT_PATH)
     return mtls
 
 

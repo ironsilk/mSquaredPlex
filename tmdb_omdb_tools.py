@@ -1,11 +1,15 @@
+import datetime
+import os
 import re
 import xml.etree.ElementTree as ET
-from utils import logger, convert_imdb_id
-import tmdbsimple as tmdb_api
+
 import omdb.api as omdb_api
-from settings import TMDB_API_KEY
-from settings import OMDB_API_KEY
-import datetime
+import tmdbsimple as tmdb_api
+
+from utils import logger, convert_imdb_id
+
+TMDB_API_KEY = os.getenv('TMDB_API_KEY')
+OMDB_API_KEY = os.getenv('OMDB_API_KEY')
 
 
 class Movie:

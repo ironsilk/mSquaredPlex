@@ -1,4 +1,5 @@
 import logging
+import os
 import re
 from functools import wraps
 
@@ -17,10 +18,13 @@ from bot_utils import make_movie_reply, get_telegram_users, update_torr_db, bot_
     update_watchlist_item_status
 from db_tools import get_movie_from_all_databases
 from plex_utils import invite_friend
-from settings import TELEGRAM_AUTH_TEST_PATH, TELEGRAM_AUTH_APPROVE, TELEGRAM_IMDB_RATINGS, \
-    TELEGRAM_WATCHLIST_ROUTINE_INTERVAL
 from torr_tools import get_torrents_for_imdb_id, send_torrent, compose_link
 from utils import search_imdb_title, update_many, deconvert_imdb_id
+
+TELEGRAM_AUTH_TEST_PATH = os.getenv('TELEGRAM_AUTH_TEST_PATH')
+TELEGRAM_AUTH_APPROVE = os.getenv('TELEGRAM_AUTH_APPROVE')
+TELEGRAM_IMDB_RATINGS = os.getenv('TELEGRAM_IMDB_RATINGS')
+TELEGRAM_WATCHLIST_ROUTINE_INTERVAL = int(os.getenv('TELEGRAM_WATCHLIST_ROUTINE_INTERVAL'))
 
 # Other info:
 # https://github.com/Ambro17/AmbroBot

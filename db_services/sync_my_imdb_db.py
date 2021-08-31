@@ -1,15 +1,19 @@
 import datetime
+import os
+import re
 import time
-from plexapi.exceptions import Unauthorized
+
+import pandas as pd
 import requests
-from utils import logger, deconvert_imdb_id, update_many
 from bs4 import BeautifulSoup
+from plexapi.exceptions import Unauthorized
+
 from db_tools import get_my_imdb_users, get_my_movies, get_watchlist_intersections, remove_from_watchlist, \
     get_watchlist_for_user, check_one_in_my_torrents_by_imdb
 from plex_utils import get_user_watched_movies
-import re
-import pandas as pd
-from settings import MY_IMDB_REFRESH_INTERVAL
+from utils import logger, deconvert_imdb_id, update_many
+
+MY_IMDB_REFRESH_INTERVAL = int(os.getenv('MY_IMDB_REFRESH_INTERVAL'))
 
 
 def sync_my_imdb():
@@ -145,8 +149,6 @@ def sync_watchlist(profile_id):
 
 
 if __name__ == '__main__':
-    from pprint import pprint
-
     # watchlistt = get_my_watchlist(77571297)
     # watchlistt = [int(deconvert_imdb_id(x)) for x in watchlistt]
     # remove_from_watchlist(watchlistt, 77571297)

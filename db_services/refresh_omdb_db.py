@@ -1,10 +1,13 @@
 import datetime
+import os
 import time
 
-from settings import REVIEW_INTERVAL_REFRESH, OMDB_API_LIMIT, INSERT_RATE
-from tmdb_omdb_tools import OMDB
-from utils import logger, connect_mysql, close_mysql, update_many, convert_imdb_id
 from tmdb_omdb_tools import get_omdb
+from utils import logger, connect_mysql, close_mysql, update_many
+
+REVIEW_INTERVAL_REFRESH = int(os.getenv('REVIEW_INTERVAL_REFRESH'))
+OMDB_API_LIMIT = int(os.getenv('OMDB_API_LIMIT'))
+INSERT_RATE = int(os.getenv('INSERT_RATE'))
 
 
 def get_omdb_data(session_not_found=[]):

@@ -1,12 +1,17 @@
 import atexit
+import os
 from wsgiref.simple_server import make_server
 
 import falcon
 from apscheduler.schedulers.background import BackgroundScheduler
 
 from crypto_tools import torr_cypher
-from settings import TORR_API_PORT, TORR_API_PATH, TORR_CLEAN_ROUTINE_INTERVAL, setup_logger
+from settings import setup_logger
 from torr_tools import transmission_client, TORRAPI, refresher_routine
+
+TORR_API_PORT = int(os.getenv('TORR_API_PORT'))
+TORR_API_PATH = os.getenv('TORR_API_PATH')
+TORR_CLEAN_ROUTINE_INTERVAL = int(os.getenv('TORR_CLEAN_ROUTINE_INTERVAL'))
 
 logger = setup_logger('TORR_API_SERVICE')
 

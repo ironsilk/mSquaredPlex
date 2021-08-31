@@ -1,0 +1,80 @@
+# PLEX docker variables
+PLEX_FILES_LOCATION = /mnt/Media/Movies&TV/plex
+PLEX_TV_LIBRARY_FOLDER = /mnt/Media/Movies&TV/TV
+PLEX_MOVIES_LIBRARY_FOLDER = /mnt/Media/Movies&TV/Movies
+
+# TRANSMISSION docker variables
+TRANSMISSION_USER =
+TRANSMISSION_PASS =
+TRANSMISSION_FILES_LOCATION = /mnt/Media/Movies&TV/transmission
+
+
+# Routine settings
+FLIST_ROUTINE_SLEEP_TIME = 12  # hrs
+
+# MYSQL settings
+MYSQL_DB_NAME = plex_buddy
+MYSQL_HOST = broodmother.go.ro
+MYSQL_PORT = 5433
+MYSQL_USER = root
+MYSQL_PASS =
+
+# TORR settings
+API_URL = https://filelist.io/api.php
+USER =
+PASSKEY =
+TORR_API_HOST = localhost  # Listening path for torrent API service.
+TORR_API_PATH = /torr_api  # Listening path for torrent API service.
+TORR_API_PORT = 9092  # Listening path for torrent API service.
+TORR_HOST =   # Listening path for torrent RPC service.
+TORR_PORT = 9091  # Listening path for torrent RPC service.
+TORR_USER =
+TORR_PASS =
+TORR_HASH_KEY = "this my hash key"  # Used to secure incoming calls to API
+TORR_DOWNLOAD_FOLDER = /movies
+TORR_SEED_FOLDER = /movies
+TORR_KEEP_TIME = 60  # days, to be used in TORR_REFRESHER, check_seeding_status
+TORR_CLEAN_ROUTINE_INTERVAL = 15  # minutes between torrent client status checks
+NO_POSTER_PATH = images/no-poster.png
+TELEGRAM_AUTH_TEST_PATH = images/auth_test.png
+TELEGRAM_AUTH_APPROVE = images/approve.jpg
+TELEGRAM_IMDB_RATINGS = images/ratings.jpg
+TELEGRAM_WATCHLIST_ROUTINE_INTERVAL = 60  # minutes
+MOVIE_HDRO = 19
+MOVIE_4K = 26
+SOAP_HD = 21
+SOAP_4K = 27
+
+# PLEX server settings
+# How to get the plex token:
+# https://digiex.net/threads/plex-guide-step-by-step-getting-plex-token.15402/
+PLEX_HOST = http://192.168.1.99:32400
+PLEX_TOKEN =
+PLEX_SERVER_NAME =   # Will also appear in emails sent
+PLEX_ADMIN_EMAILS = [mihai.vlad6@gmail.com]  # If you have multiple admins or other users which are not friends,
+# youve got to mention their emails here unfortunately. Their name must be their email. Not tested tho, dont have
+# plex pass.
+# The account the TOKEN belongs to should always be first, AKA your account
+
+
+# TMDB & OMDB
+TMDB_API_KEY =
+OMDB_API_KEY =
+INSERT_RATE = 100
+OMDB_API_LIMIT = 800
+
+# For imdb DB dumps
+MY_IMDB_REFRESH_INTERVAL = 15 # minutes
+IMDB_DB_REFRESH_INTERVAL = 30  # days
+REVIEW_INTERVAL_REFRESH = 180  # days
+DUMPS_URL = https://datasets.imdbws.com/
+DUMPS_PATH = /dumps
+
+# EMAIL settings
+XML_TRNT_PATH = views/new_trnt.xml
+TEMPLATE_PATH = views/email_filelist.html
+MOVIE_TEMPLATE_PATH = views/_movie.html
+TRNT_TEMPLATE_PATH = views/_torrent.html
+EMAIL_USER =
+EMAIL_PASS =
+EMAIL_HOSTNAME = smtp.gmail.com

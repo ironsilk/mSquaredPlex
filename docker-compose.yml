@@ -1,0 +1,79 @@
+version: "2.1"
+services:
+  plex:
+    image: ghcr.io/linuxserver/plex
+    container_name: plex
+    network_mode: host
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - VERSION=docker
+    volumes:
+      - ${PLEX_FILES_LOCATION}:/config
+      - ${PLEX_TV_LIBRARY_FOLDER}:/tv
+      - ${PLEX_MOVIES_LIBRARY_FOLDER}:/movies
+    restart: unless-stopped
+
+  transmission:
+    image: ghcr.io/linuxserver/transmission
+    container_name: transmission
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Bucharest
+      - TRANSMISSION_WEB_HOME=/combustion-release/ #optional
+      - USER=${TRANSMISSION_USER} #optional
+      - PASS=${TRANSMISSION_PASS} #optional
+    volumes:
+      - ${TRANSMISSION_FILES_LOCATION}:/config
+      - ${TRANSMISSION_FILES_LOCATION}/downloads:/downloads
+      - ${TRANSMISSION_FILES_LOCATION}/watch:/watch
+      - ${PLEX_TV_LIBRARY_FOLDER}:/tv
+      - ${PLEX_MOVIES_LIBRARY_FOLDER}:/movies
+      - /mnt/Media/books/downloads:/books
+    ports:
+      - 9091:9091
+      - 51413:51413
+      - 51413:51413/udp
+    restart: unless-stopped
+# TODO add volume here for mysql persistance
+  mysql:
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    container_name: mysql
+    network_mode: host
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASS}
+      MYSQL_TCP_PORT: 5433
+
+  imdb_update_service:
+    build:
+      dockerfile: Dockerfile_imdb_db_update_service
+
+  omdb_update_service:
+    build:
+      dockerfile: Dockerfile_omdb_db_update_service
+
+  tmdb_update_service:
+    build:
+      dockerfile: Dockerfile_tmdb_db_update_service
+
+  imdb_sync_service:
+    build:
+      dockerfile:
+
+  filelist_service:
+    build:
+      dockerfile: Dockerfile_filelist_service
+
+  torrent_service:
+    build:
+      dockerfile: Dockerfile_torrent_service
+
+  telegram_service:
+    build:
+      dockerfile:
+
+
+

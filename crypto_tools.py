@@ -1,10 +1,11 @@
 import base64
 import hashlib
 import json
+import os
 
 from Crypto.Cipher import ChaCha20
 
-from settings import TORR_HASH_KEY
+TORR_HASH_KEY = os.getenv('TORR_HASH_KEY')
 
 
 class AESCipher(object):

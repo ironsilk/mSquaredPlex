@@ -1,18 +1,34 @@
 import datetime
 import json
-from urllib.parse import unquote
+import os
 from itertools import groupby
+from urllib.parse import unquote
+
 import PTN
 import falcon
-from transmission_rpc import Client
 import requests
+from transmission_rpc import Client
+
 from db_tools import connect_mysql, close_mysql
-from settings import PASSKEY, TORR_KEEP_TIME, setup_logger
-from settings import TORR_HOST, TORR_PORT, TORR_USER, TORR_PASS, TORR_API_HOST, TORR_API_PORT, TORR_API_PATH, \
-    TORR_SEED_FOLDER, TORR_DOWNLOAD_FOLDER, API_URL, USER, MOVIE_HDRO, MOVIE_4K
+from settings import setup_logger
 from utils import timing
 from utils import update_many, convert_imdb_id
-from pprint import pprint
+
+PASSKEY = os.getenv('PASSKEY')
+TORR_KEEP_TIME = int(os.getenv('TORR_KEEP_TIME'))
+TORR_HOST = os.getenv('TORR_HOST')
+TORR_PORT = int(os.getenv('TORR_PORT'))
+TORR_USER = os.getenv('TORR_USER')
+TORR_PASS = os.getenv('TORR_PASS')
+TORR_API_HOST = os.getenv('TORR_API_HOST')
+TORR_API_PORT = os.getenv('TORR_API_PORT')
+TORR_API_PATH = os.getenv('TORR_API_PATH')
+TORR_SEED_FOLDER = os.getenv('TORR_SEED_FOLDER')
+TORR_DOWNLOAD_FOLDER = os.getenv('TORR_DOWNLOAD_FOLDER')
+API_URL = os.getenv('API_URL')
+USER = os.getenv('USER')
+MOVIE_HDRO = os.getenv('MOVIE_HDRO')
+MOVIE_4K = os.getenv('MOVIE_4K')
 
 transmission_client = Client(host=TORR_HOST, port=TORR_PORT, username=TORR_USER, password=TORR_PASS)
 
@@ -231,7 +247,6 @@ def get_torrents_for_imdb_id(idd):
 
 
 if __name__ == '__main__':
-    from pprint import pprint
     # pprint(get_torrents_for_imdb_id(1763303))  # 281433
     # pprint(send_torrent(1763303))
     t = TORR_REFRESHER(logger=setup_logger('test'))

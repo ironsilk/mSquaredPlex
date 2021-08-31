@@ -1,11 +1,18 @@
+import logging
+import os
 from functools import wraps
 from time import time
-import logging
-import mysql.connector as cnt
-from settings import custom_settings
+
 import imdb
+import mysql.connector as cnt
 
 logger = logging.getLogger('PlexService')
+
+MYSQL_DB_NAME = os.getenv('MYSQL_DB_NAME')
+MYSQL_HOST = os.getenv('MYSQL_HOST')
+MYSQL_PORT = os.getenv('MYSQL_PORT')
+MYSQL_USER = os.getenv('MYSQL_USER')
+MYSQL_PASS = os.getenv('MYSQL_PASS')
 
 
 def convert_imdb_id(id):
@@ -33,9 +40,9 @@ def deconvert_imdb_id(imdb_id):
 
 def connect_mysql():
     # Connects to mysql and returns cursor
-    sql_conn = cnt.connect(host=custom_settings['mysql_host'], port=custom_settings['mysql_port'],
-                           database=custom_settings['mysql_db_name'],
-                           user=custom_settings['mysql_user'], password=custom_settings['mysql_pass'])
+    sql_conn = cnt.connect(host=MYSQL_HOST, port=MYSQL_PORT,
+                           database=MYSQL_DB_NAME,
+                           user=MYSQL_USER, password=MYSQL_PASS)
     return sql_conn, sql_conn.cursor(dictionary=True)
 
 
@@ -46,14 +53,14 @@ def close_mysql(conn, cursor):
 
 def create_db(name):
     sql_conn = cnt.connect(
-        host=custom_settings['mysql_host'], port=custom_settings['mysql_port'],
-        user=custom_settings['mysql_user'], password=custom_settings['mysql_pass'])
+        host=MYSQL_HOST, port=MYSQL_PORT,
+        user=MYSQL_USER, password=MYSQL_PASS)
     sql_conn.cursor().execute("CREATE DATABASE {x}".format(x=name))
     sql_conn.close()
 
 
 def check_table(cursor, table, columns, column_types):
-    db = custom_settings['mysql_db_name']
+    db = MYSQL_DB_NAME
     q = '''
     SELECT table_name FROM information_schema.tables WHERE table_name = '{table}' AND table_schema = '{db_name}'
     '''.format(db_name=db, table=table)

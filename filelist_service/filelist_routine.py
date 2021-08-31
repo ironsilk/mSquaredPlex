@@ -1,13 +1,20 @@
+import os
 import time
 
 import requests
 
-from db_tools import check_in_my_movies, check_in_my_torrents, retrieve_bulk_from_dbs, update_my_torrents_db
-from email_tools import send_email
 from crypto_tools import torr_cypher
-from settings import API_URL, USER, PASSKEY, MOVIE_HDRO, MOVIE_4K, FLIST_ROUTINE_SLEEP_TIME
+from db_tools import check_in_my_torrents, retrieve_bulk_from_dbs, update_my_torrents_db
+from email_tools import send_email
 from utils import logger
 from utils import timing
+
+API_URL = os.getenv('API_URL')
+USER = os.getenv('USER')
+PASSKEY = os.getenv('PASSKEY')
+MOVIE_HDRO = os.getenv('MOVIE_HDRO')
+MOVIE_4K = os.getenv('MOVIE_4K')
+FLIST_ROUTINE_SLEEP_TIME = int(os.getenv('FLIST_ROUTINE_SLEEP_TIME'))
 
 
 # https://filelist.io/forums.php?action=viewtopic&topicid=120435

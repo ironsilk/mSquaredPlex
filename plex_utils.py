@@ -1,12 +1,16 @@
+import os
+
 from plexapi.server import PlexServer
-from settings import PLEX_HOST, PLEX_TOKEN, PLEX_SERVER_NAME, PLEX_ADMIN_EMAILS
+
 from settings import setup_logger
+
+PLEX_HOST = os.getenv('PLEX_HOST')
+PLEX_TOKEN = os.getenv('PLEX_TOKEN')
+PLEX_SERVER_NAME = os.getenv('PLEX_SERVER_NAME')
+PLEX_ADMIN_EMAILS = os.getenv('PLEX_ADMIN_EMAILS')
 
 # How to get the plex token:
 # https://digiex.net/threads/plex-guide-step-by-step-getting-plex-token.15402/
-baseurl = 'http://192.168.1.99:32400'
-token = '4VzQJvzMYEviPx3iWGkT'
-
 logger = setup_logger("PlexServices")
 
 

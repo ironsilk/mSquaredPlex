@@ -1,11 +1,14 @@
-import requests
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+import os
+
 import PTN
-from settings import NO_POSTER_PATH
-from utils import connect_mysql, close_mysql, update_many
+import requests
+from telegram.ext import CallbackContext
+
 from db_tools import deconvert_imdb_id, get_email_by_tgram_id, get_watchlist_new, get_my_imdb_users
 from torr_tools import get_torrents_for_imdb_id
-from telegram.ext import CallbackContext
+from utils import connect_mysql, update_many
+
+NO_POSTER_PATH = os.getenv('NO_POSTER_PATH')
 
 
 def make_movie_reply(pkg):
