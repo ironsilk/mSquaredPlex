@@ -1,4 +1,4 @@
-APScheduler @ file:///C:/ci/apscheduler_1613147068179/work
+APScheduler
 beautifulsoup4==4.9.3
 bs4==0.0.1
 cachetools==4.2.2
@@ -22,9 +22,9 @@ pycryptodome==3.10.1
 PyMySQL==1.0.2
 python-dateutil==2.8.2
 python-telegram-bot==13.7
-pytz @ file:///tmp/build/80754af9/pytz_1612215392582/work
+pytz
 requests==2.26.0
-six @ file:///tmp/build/80754af9/six_1623709665295/work
+six
 soupsieve==2.2.1
 SQLAlchemy==1.4.22
 tmdbsimple==2.8.0
