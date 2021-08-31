@@ -129,6 +129,10 @@ def sync_watchlist(profile_id):
 
 
 if __name__ == '__main__':
-    # x = get_my_watchlist(77571297)
+    from pprint import pprint
+
+    watchlist = get_my_watchlist(77571297)
+    watchlist = [int(deconvert_imdb_id(x)) for x in watchlist]
+    pprint(watchlist)
     # sync_watchlist(77571297)
-    run_imdb_sync()
+    # run_imdb_sync()

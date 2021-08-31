@@ -12,6 +12,7 @@ from settings import TORR_HOST, TORR_PORT, TORR_USER, TORR_PASS, TORR_API_HOST, 
     TORR_SEED_FOLDER, TORR_DOWNLOAD_FOLDER, API_URL, USER, MOVIE_HDRO, MOVIE_4K
 from utils import timing
 from utils import update_many, convert_imdb_id
+from pprint import pprint
 
 transmission_client = Client(host=TORR_HOST, port=TORR_PORT, username=TORR_USER, password=TORR_PASS)
 
@@ -94,6 +95,7 @@ class TORR_REFRESHER:
         q = "SELECT * FROM my_torrents WHERE status != 'removed'"
         self.cursor.execute(q)
         results = self.cursor.fetchall()
+        results = [x for x in results if x['torr_client_id']]
         return results
 
     def update_statuses(self):
@@ -103,14 +105,14 @@ class TORR_REFRESHER:
         # Remove any duplicatd torrents by IMDB ID, keep only higher resolution
         self.logger.info("Checking for duplicate lower res movies...")
         torrents = self.remove_low_res(torrents)
-
         for torr in torrents:
             torr_response = self.torr_client.get_torrent(torr['torr_client_id'])
             if torr_response.status == 'seeding':
                 # Decide whether to remove it or keep it
                 if self.check_seeding_status(torr_response):
-                    # keep it
-                    pass
+                    if torr['status'] == 'requested download':
+                        torr['status'] = 'seeding'
+                        update_many([torr], 'my_torrents')
                 else:
                     # remove torrent and data
                     self.remove_torrent_and_files(torr['torr_client_id'])
@@ -121,7 +123,7 @@ class TORR_REFRESHER:
                 torr['status'] = 'downloading'
                 update_many([torr], 'my_torrents')
 
-    def remove_low_resp(self, torrents):
+    def remove_low_res(self, torrents):
         to_remove = []
         # Sort
         torrents = sorted(torrents, key=lambda x: x['imdb_id'])
@@ -231,4 +233,6 @@ def get_torrents_for_imdb_id(idd):
 if __name__ == '__main__':
     from pprint import pprint
     # pprint(get_torrents_for_imdb_id(1763303))  # 281433
-    pprint(send_torrent(1763303))
+    # pprint(send_torrent(1763303))
+    t = TORR_REFRESHER(logger=setup_logger('test'))
+    t.update_statuses()
