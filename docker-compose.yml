@@ -25,9 +25,9 @@ services:
       - USER=${TRANSMISSION_USER} #optional
       - PASS=${TRANSMISSION_PASS} #optional
     volumes:
-      - ${TRANSMISSION_FILES_LOCATION}:./config
-      - ${TRANSMISSION_FILES_LOCATION}/downloads:./downloads
-      - ${TRANSMISSION_FILES_LOCATION}/watch:./watch
+      - ${TRANSMISSION_FILES_LOCATION}:/config
+      - ${TRANSMISSION_FILES_LOCATION}/downloads:/downloads
+      - ${TRANSMISSION_FILES_LOCATION}/watch:/watch
       - ${PLEX_TV_LIBRARY_FOLDER}:/tv
       - ${PLEX_MOVIES_LIBRARY_FOLDER}:/movies
       - /mnt/Media/books/downloads:/books
