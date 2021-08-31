@@ -1,0 +1,23 @@
+# docker build -t torrent_service . -f Dockerfile_torrent_service
+FROM python:3.9.1
+
+LABEL Author="Mikael"
+
+RUN mkdir /app
+WORKDIR /app
+
+COPY telegram_service/bot.py ./
+COPY telegram_service/bot_utils.py ./
+COPY settings.py ./
+COPY torr_tools.py ./
+COPY utils.py ./
+COPY db_tools.py ./
+COPY tmdb_omdb_tools.py ./
+COPY plex_utils.py ./
+
+COPY requirements.txt ./
+RUN pip install -r requirements.txt
+
+EXPOSE 9092
+
+ENTRYPOINT ["python", "bot.py"]

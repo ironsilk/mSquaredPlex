@@ -149,8 +149,4 @@ def sync_watchlist(profile_id):
 
 
 if __name__ == '__main__':
-    # watchlistt = get_my_watchlist(77571297)
-    # watchlistt = [int(deconvert_imdb_id(x)) for x in watchlistt]
-    # remove_from_watchlist(watchlistt, 77571297)
-    sync_watchlist(77571297)
-    # run_imdb_sync()
+    run_imdb_sync()

@@ -10,7 +10,7 @@ from dateutil import parser as d_util
 from imdb_dump_import import run_import
 from settings import setup_logger
 
-IMDB_DB_REFRESH_INTERVAL = int(os.getenv('MYSQL_DB_NAME'))
+IMDB_DB_REFRESH_INTERVAL = int(os.getenv('IMDB_DB_REFRESH_INTERVAL'))
 DUMPS_URL = os.getenv('DUMPS_URL')
 DUMPS_PATH = os.getenv('DUMPS_PATH')
 DB_URI = "mysql://{u}:{p}@{hp}/{dbname}?charset=utf8".format(

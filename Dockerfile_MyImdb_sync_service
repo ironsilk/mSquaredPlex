@@ -1,0 +1,21 @@
+# docker build -t imdb_refresh_service . -f Dockerfile_imdb_db_update_service
+FROM python:3.9.1
+
+LABEL Author="Mikael"
+
+RUN mkdir /app
+WORKDIR /app
+
+COPY db_services/sync_my_imdb_db.py ./
+COPY db_tools.py ./
+COPY utils.py ./
+COPY plex_utils.py ./
+COPY settings.py ./
+COPY tmdb_omdb_tools.py ./
+
+
+COPY requirements.txt ./
+RUN pip install -r requirements.txt
+
+
+ENTRYPOINT ["python", "sync_my_imdb_db.py"]
