@@ -36,7 +36,7 @@ services:
       - 51413:51413
       - 51413:51413/udp
     restart: unless-stopped
-# TODO add volume here for mysql persistance
+
   mysql:
     image: mysql
     command: --default-authentication-plugin=mysql_native_password
