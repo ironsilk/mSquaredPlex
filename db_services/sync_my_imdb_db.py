@@ -4,7 +4,8 @@ from plexapi.exceptions import Unauthorized
 import requests
 from utils import logger, deconvert_imdb_id, update_many
 from bs4 import BeautifulSoup
-from db_tools import get_my_imdb_users, get_my_movies, get_watchlist_intersections
+from db_tools import get_my_imdb_users, get_my_movies, get_watchlist_intersections, remove_from_watchlist, \
+    get_watchlist_for_user, check_one_in_my_torrents_by_imdb
 from plex_utils import get_user_watched_movies
 import re
 import pandas as pd
@@ -114,15 +115,30 @@ def sync_watchlist(profile_id):
     # TODO check if movie already in torrent database and mark it if it is, also exclude quality
     logger.info(f"Syncing watchlist for user {profile_id}")
     try:
-        watchlist = get_my_watchlist(profile_id)
-        watchlist = [int(deconvert_imdb_id(x)) for x in watchlist]
-        already_processed = get_watchlist_intersections(profile_id, watchlist)
-        watchlist = [{
+        # IMDB watchlist
+        imdb_watchlist = get_my_watchlist(profile_id)
+        imdb_watchlist = [int(deconvert_imdb_id(x)) for x in imdb_watchlist]
+        # My DB watchlist which are also in IMDB
+        already_processed = get_watchlist_intersections(profile_id, imdb_watchlist)
+        # Add new items added to IMDB watchlist
+        to_upload = [{
             'movie_id': x,
             'imdb_id': profile_id,
             'status': 'new',
-        } for x in watchlist if x not in already_processed]
-        update_many(watchlist, 'watchlists')
+        } for x in imdb_watchlist if x not in already_processed]
+        if to_upload:
+            update_many(to_upload, 'watchlists')
+
+        # Remove from DB watchlist those movies which are no longer in IMDB watchlist
+        remove_from_watchlist(imdb_watchlist, profile_id)
+
+        # Update watchlist item status if we find a torrent already downloaded
+        watchlist = get_watchlist_for_user(profile_id)
+        for item in watchlist:
+            is_in_my_torrents = check_one_in_my_torrents_by_imdb(item['movie_id'])
+            if is_in_my_torrents:
+                item['is_downloaded'] = is_in_my_torrents[0]['resolution']
+                update_many([item], 'watchlists')
     except Exception as e:
         logger.error(f"Watchlist sync for user {profile_id} failed. Error: {e}")
     logger.info("Done.")
@@ -131,8 +147,8 @@ def sync_watchlist(profile_id):
 if __name__ == '__main__':
     from pprint import pprint
 
-    watchlist = get_my_watchlist(77571297)
-    watchlist = [int(deconvert_imdb_id(x)) for x in watchlist]
-    pprint(watchlist)
-    # sync_watchlist(77571297)
+    # watchlistt = get_my_watchlist(77571297)
+    # watchlistt = [int(deconvert_imdb_id(x)) for x in watchlistt]
+    # remove_from_watchlist(watchlistt, 77571297)
+    sync_watchlist(77571297)
     # run_imdb_sync()

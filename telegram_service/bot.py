@@ -13,13 +13,14 @@ from telegram.ext import Updater, MessageHandler, Filters, CallbackContext, Conv
 from transmission_rpc.error import TransmissionError
 
 from bot_utils import make_movie_reply, get_telegram_users, update_torr_db, bot_watchlist_routine, \
-    remove_movie_from_bot_watchlist, exclude_torrents_from_watchlist, get_excluded_resolutions
+    exclude_torrents_from_watchlist, get_excluded_resolutions, \
+    update_watchlist_item_status
 from db_tools import get_movie_from_all_databases
-from torr_tools import get_torrents_for_imdb_id, send_torrent, compose_link
-from utils import search_imdb_title, update_many, deconvert_imdb_id
+from plex_utils import invite_friend
 from settings import TELEGRAM_AUTH_TEST_PATH, TELEGRAM_AUTH_APPROVE, TELEGRAM_IMDB_RATINGS, \
     TELEGRAM_WATCHLIST_ROUTINE_INTERVAL
-from plex_utils import invite_friend
+from torr_tools import get_torrents_for_imdb_id, send_torrent, compose_link
+from utils import search_imdb_title, update_many, deconvert_imdb_id
 
 # Other info:
 # https://github.com/Ambro17/AmbroBot
@@ -480,7 +481,7 @@ def watchlist_entry(update: Update, context: CallbackContext) -> int:
 @auth_wrap
 def remove_watchlist_entry(update: Update, context: CallbackContext) -> int:
     movie_id = int(update.message.text.replace('/UnWatchMatch', ''))
-    remove_movie_from_bot_watchlist(movie_id, update.effective_user['id'])
+    update_watchlist_item_status(movie_id, update.effective_user['id'], 'closed')
     update.message.reply_text("Done, no more watchlist updates for this movie.")
     return ConversationHandler.END
 

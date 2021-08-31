@@ -151,15 +151,21 @@ def bot_watchlist_routine(context: CallbackContext) -> None:
             torrents = sorted(torrents, key=lambda k: k['size'])
             if item['excluded_torrents']:
                 torrents = [x for x in torrents if str(x['id']) not in item['excluded_torrents']]
+            if item['is_downloaded']:
+                torrents = [x for x in torrents if str(x['resolution']) != item['is_downloaded']]
 
             if torrents:
                 chat_id = [x['telegram_chat_id'] for x in users if x['imdb_id'] == item['imdb_id']][0]
-                context.bot.send_message(chat_id=chat_id, text=f"Hi there! WATCHLIST ALERT!\n"
-                                                               f"🎞️ {PTN.parse(torrents[0]['name'])['title']}\n"
-                                                               f"has {len(torrents)} download candidates\n"
-                                                               f"📥 /WatchMatch{item['movie_id']} (download)\n\n"
-                                                               f"❌ /UnWatchMatch{item['movie_id']} (forget this movie)"
-                                         )
+                message = f"Hi there! WATCHLIST ALERT!\n"\
+                          f"🎞️ {PTN.parse(torrents[0]['name'])['title']}\n"\
+                          f"has {len(torrents)} download candidates\n"\
+                          f"📥 /WatchMatch{item['movie_id']} (download)\n\n"\
+                          f"❌ /UnWatchMatch{item['movie_id']} (forget movie)"
+                if item['is_downloaded']:
+                    message += f"\n🚨 Movie aleady exists in PLEX, quality: {item['is_downloaded']}"
+                context.bot.send_message(chat_id=chat_id, text=message)
+                # exclude_torrents_from_watchlist(item['movie_id'], chat_id, [x['id'] for x in torrents])
+                update_watchlist_item_status(item['movie_id'], chat_id, 'notification sent')
 
 
 def get_watchlist_item(movie_id, tg_id):
@@ -170,13 +176,13 @@ def get_watchlist_item(movie_id, tg_id):
     return cursor.fetchone()
 
 
-def remove_movie_from_bot_watchlist(movie_id, tg_id):
+def update_watchlist_item_status(movie_id, tg_id, new_status):
     watchlist_item = get_watchlist_item(movie_id, tg_id)
     update_many([{
         'id': watchlist_item['id'],
         'movie_id': movie_id,
         'imdb_id': watchlist_item['imdb_id'],
-        'status': 'closed',
+        'status': new_status,
     }],
         'watchlists')
 
@@ -192,6 +198,7 @@ def exclude_torrents_from_watchlist(movie_id, tg_id, torr_ids):
         'movie_id': movie_id,
         'imdb_id': watchlist_item['imdb_id'],
         'excluded_torrents': new,
+        'status': 'new',
     }],
         'watchlists')
 

@@ -26,9 +26,9 @@ TORR_PASS = ''
 TORR_HASH_KEY = 'this my hash key'  # Used to secure incoming calls to API
 TORR_DOWNLOAD_FOLDER = '/movies'
 TORR_SEED_FOLDER = '/movies'
-TORR_KEEP_TIME = 5  # days, to be used in TORR_REFRESHER, check_seeding_status
+TORR_KEEP_TIME = 60  # days, to be used in TORR_REFRESHER, check_seeding_status
 TORR_CLEAN_ROUTINE_INTERVAL = 15  # minutes between torrent client status checks
-NO_POSTER_PATH = 'no-poster.png'
+NO_POSTER_PATH = 'images/no-poster.png'
 TELEGRAM_AUTH_TEST_PATH = 'images/auth_test.png'
 TELEGRAM_AUTH_APPROVE = 'images/approve.jpg'
 TELEGRAM_IMDB_RATINGS = 'images/ratings.jpg'
@@ -58,6 +58,7 @@ INSERT_RATE = 100
 OMDB_API_LIMIT = 800
 
 # For imdb DB dumps
+MY_IMDB_REFRESH_INTERVAL = 15 # minutes
 IMDB_DB_REFRESH_INTERVAL = 30  # days
 REVIEW_INTERVAL_REFRESH = 180  # days
 DUMPS_URL = 'https://datasets.imdbws.com/'

@@ -245,7 +245,7 @@ def get_watchlist_intersections(user_imdb_id, watchlist, cursor=None):
     if not cursor:
         conn, cursor = connect_mysql()
     values = "','".join([str(x) for x in watchlist])
-    q = f"SELECT movie_id FROM watchlists WHERE movie_id IN ('{values}' AND imdb_id = {user_imdb_id})"
+    q = f"SELECT movie_id FROM watchlists WHERE movie_id IN ('{values}') AND imdb_id = {user_imdb_id}"
     cursor.execute(q)
     return [x['movie_id'] for x in cursor.fetchall()]
 
@@ -256,6 +256,28 @@ def get_watchlist_new(cursor=None):
     q = f"SELECT * FROM watchlists WHERE status = 'new'"
     cursor.execute(q)
     return cursor.fetchall()
+
+
+def get_watchlist_for_user(user_imdb_id, cursor=None):
+    if not cursor:
+        conn, cursor = connect_mysql()
+    q = f"SELECT * FROM watchlists WHERE imdb_id = {user_imdb_id} and status = 'new'"
+    cursor.execute(q)
+    return cursor.fetchall()
+
+
+def remove_from_watchlist(except_these_movie_ids, user_imdb_id, cursor=None):
+    if not cursor:
+        conn, cursor = connect_mysql()
+    values = "', '".join([str(x) for x in except_these_movie_ids])
+    q = f"SELECT id FROM watchlists WHERE movie_id NOT IN ('{values}') AND imdb_id = {user_imdb_id}"
+    cursor.execute(q)
+    to_delete = [x['id'] for x in cursor.fetchall()]
+    if to_delete:
+        values = "', '".join([str(x) for x in to_delete])
+        q = f"DELETE FROM watchlists where id IN ('{values}')"
+        cursor.execute(q)
+    return
 
 
 if __name__ == '__main__':
