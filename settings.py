@@ -1,5 +1,6 @@
 import logging
-
+# TODO filelist la 6am si 6PM, omdb, tmdb de vazut iar IMDB update la 1 noaptea o data la N zile. myimdb sync
+#  ala il facem sa fie in timpul zilei doar. De implementat si alerta ca serviciul va fi indisponibil intre orele.
 '''
 ID-uri categorii filelist
 | id | name             |
