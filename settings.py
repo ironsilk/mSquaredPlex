@@ -1,74 +1,8 @@
 import logging
+import os
+# from dotenv import load_dotenv
 
-custom_settings = {
-    # Mysql
-    'mysql_db_name': 'plex_buddy',
-    'mysql_host': 'broodmother.go.ro',
-    'mysql_port': 5433,
-    'mysql_user': 'root',
-    'mysql_pass': 'pass',
-}
-
-# Routine settings
-FLIST_ROUTINE_SLEEP_TIME = 12  # hrs
-
-# TORR settings
-API_URL = 'https://filelist.io/api.php'
-USER = ''
-PASSKEY = ''
-TORR_API_HOST = 'localhost'  # Listening path for torrent API service.
-TORR_API_PATH = '/torr_api'  # Listening path for torrent API service.
-TORR_API_PORT = 9092  # Listening path for torrent API service.
-TORR_HOST = 'localhost'  # Listening path for torrent RPC service.
-TORR_PORT = 9091  # Listening path for torrent RPC service.
-TORR_USER = ''
-TORR_PASS = ''
-TORR_HASH_KEY = 'this my hash key'  # Used to secure incoming calls to API
-TORR_DOWNLOAD_FOLDER = '/movies'
-TORR_SEED_FOLDER = '/movies'
-TORR_KEEP_TIME = 60  # days, to be used in TORR_REFRESHER, check_seeding_status
-TORR_CLEAN_ROUTINE_INTERVAL = 15  # minutes between torrent client status checks
-NO_POSTER_PATH = 'images/no-poster.png'
-TELEGRAM_AUTH_TEST_PATH = 'images/auth_test.png'
-TELEGRAM_AUTH_APPROVE = 'images/approve.jpg'
-TELEGRAM_IMDB_RATINGS = 'images/ratings.jpg'
-TELEGRAM_WATCHLIST_ROUTINE_INTERVAL = 60  # minutes
-MY_IMDB_REFRESH_INTERVAL = 15  # minutes
-MOVIE_HDRO = 19
-MOVIE_4K = 26
-SOAP_HD = 21
-SOAP_4K = 27
-
-# PLEX server settings
-# How to get the plex token:
-# https://digiex.net/threads/plex-guide-step-by-step-getting-plex-token.15402/
-PLEX_HOST = 'http://192.168.1.99:32400'
-PLEX_TOKEN = ''
-PLEX_SERVER_NAME = ''  # Will also appear in emails sent
-PLEX_ADMIN_EMAILS = ['mihai.vlad6@gmail.com']  # If you have multiple admins or other users which are not friends,
-# you've got to mention their emails here unfortunately. Their name must be their email. Not tested tho, don't have
-# plex pass.
-# The account the TOKEN belongs to should always be first, AKA your account
-
-
-# TMDB & OMDB
-TMDB_API_KEY = ''
-OMDB_API_KEY = ''
-INSERT_RATE = 100
-OMDB_API_LIMIT = 800
-
-# For imdb DB dumps
-MY_IMDB_REFRESH_INTERVAL = 15 # minutes
-IMDB_DB_REFRESH_INTERVAL = 30  # days
-REVIEW_INTERVAL_REFRESH = 180  # days
-DUMPS_URL = 'https://datasets.imdbws.com/'
-DUMPS_PATH = r'C:\Users\mihai\Downloads'
-DB_URI = "mysql://{u}:{p}@{hp}/{dbname}?charset=utf8".format(
-    u=custom_settings['mysql_user'],
-    p=custom_settings['mysql_pass'],
-    hp=':'.join([custom_settings['mysql_host'], str(custom_settings['mysql_port'])]),
-    dbname=custom_settings['mysql_db_name'],
-)
+# load_dotenv()
 
 '''
 ID-uri categorii filelist
@@ -157,17 +91,9 @@ table_columns = {
         'imdb_id': 'int(11)',
         'status': 'VARCHAR(128)',
         'excluded_torrents': 'TEXT',
+        'is_downloaded': 'VARCHAR(128)',
     }
 }
-
-# EMAIL settings
-xml_trnt_path = r'C:\Users\mihai\Desktop\git\mSquaredPlex\views\new_trnt.xml'
-template_path = r'C:\Users\mihai\Desktop\git\mSquaredPlex\views\email_filelist.html'
-movie_template_path = r'C:\Users\mihai\Desktop\git\mSquaredPlex\views\_movie.html'
-trnt_template_path = r'C:\Users\mihai\Desktop\git\mSquaredPlex\views\_torrent.html'
-EMAIL_USER = ''
-EMAIL_PASS = ''
-EMAIL_HOSTNAME = 'smtp.gmail.com'
 
 
 # Logger settings
