@@ -9,6 +9,9 @@ from dateutil import parser as d_util
 
 from imdb_dump_import import run_import
 from settings import setup_logger
+from dotenv import load_dotenv
+
+load_dotenv()
 
 IMDB_DB_REFRESH_INTERVAL = int(os.getenv('IMDB_DB_REFRESH_INTERVAL'))
 DUMPS_URL = os.getenv('DUMPS_URL')
