@@ -15,6 +15,7 @@ COPY torr_tools.py ./
 COPY tmdb_omdb_tools.py ./
 COPY plex_utils.py ./
 COPY views ./views
+COPY crypto_tools.py ./
 
 COPY requirements.txt ./
 RUN pip install -r requirements.txt

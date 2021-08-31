@@ -1,4 +1,4 @@
-version: "2.1"
+version: "3"
 services:
   plex:
     image: ghcr.io/linuxserver/plex
@@ -25,9 +25,9 @@ services:
       - USER=${TRANSMISSION_USER} #optional
       - PASS=${TRANSMISSION_PASS} #optional
     volumes:
-      - ${TRANSMISSION_FILES_LOCATION}:./config
-      - ${TRANSMISSION_FILES_LOCATION}/downloads:./downloads
-      - ${TRANSMISSION_FILES_LOCATION}/watch:./watch
+      - ${TRANSMISSION_FILES_LOCATION}:/config
+      - ${TRANSMISSION_FILES_LOCATION}/downloads:/downloads
+      - ${TRANSMISSION_FILES_LOCATION}/watch:/watch
       - ${PLEX_TV_LIBRARY_FOLDER}:/tv
       - ${PLEX_MOVIES_LIBRARY_FOLDER}:/movies
       - /mnt/Media/books/downloads:/books
@@ -51,55 +51,30 @@ services:
 
   imdb_update_service:
     image: mikael6/mad_repo:imdb_update_service
-    build:
-      context: ./
-      dockerfile: Dockerfile_imdb_db_update_service
-    env_file:
-      - .env
     restart: unless-stopped
     depends_on:
       - mysql
 
   omdb_update_service:
     image: mikael6/mad_repo:omdb_update_service
-    build:
-      context: ./
-      dockerfile: Dockerfile_omdb_db_update_service
-    env_file:
-      - .env
     restart: unless-stopped
     depends_on:
       - mysql
 
   tmdb_update_service:
     image: mikael6/mad_repo:tmdb_update_service
-    build:
-      context: ./
-      dockerfile: Dockerfile_tmdb_db_update_service
-    env_file:
-      - .env
     restart: unless-stopped
     depends_on:
       - mysql
 
   imdb_sync_service:
     image: mikael6/mad_repo:imdb_sync_service
-    build:
-      context: ./
-      dockerfile: Dockerfile_MyImdb_sync_service
-    env_file:
-      - .env
     restart: unless-stopped
     depends_on:
       - mysql
 
   filelist_service:
     image: mikael6/mad_repo:filelist_service
-    build:
-      context: ./
-      dockerfile: Dockerfile_filelist_service
-    env_file:
-      - .env
     restart: unless-stopped
     depends_on:
       - mysql
@@ -107,11 +82,6 @@ services:
 
   torrent_service:
     image: mikael6/mad_repo:torrent_service
-    build:
-      context: ./
-      dockerfile: Dockerfile_torrent_service
-    env_file:
-      - .env
     restart: unless-stopped
     depends_on:
       - mysql
@@ -119,12 +89,6 @@ services:
 
   telegram_service:
     image: mikael6/mad_repo:telegram_service
-    build:
-      context: ./
-      dockerfile: Dockerfile_telegram_service
-    env_file:
-      - .env
-    restart: unless-stopped
     depends_on:
       - mysql
       - transmission
