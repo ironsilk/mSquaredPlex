@@ -57,9 +57,6 @@ services:
     image: mikael6/mad_repo:imdb_sync_service
     container_name: PLEXSTACK_IMDB_sync
     network_mode: host
-    build:
-      context: ./
-      dockerfile: Dockerfile_MAINSTACK_myimdb
     restart: unless-stopped
     depends_on:
       plexbuddy_mysql:
@@ -69,9 +66,6 @@ services:
     image: mikael6/mad_repo:filelist_service
     container_name: PLEXSTACK_Filelist
     network_mode: host
-    build:
-      context: ./
-      dockerfile: Dockerfile_MAINSTACK_newsletter
     restart: unless-stopped
     depends_on:
       plexbuddy_mysql:
@@ -81,9 +75,6 @@ services:
     image: mikael6/mad_repo:torrent_service
     container_name: PLEXSTACK_TorrentAPI
     network_mode: host
-    build:
-      context: ./
-      dockerfile: Dockerfile_MAINSTACK_torrapi
     restart: unless-stopped
     depends_on:
       plexbuddy_mysql:
@@ -93,9 +84,6 @@ services:
     image: mikael6/mad_repo:telegram_service
     container_name: PLEXSTACK_Telegram
     network_mode: host
-    build:
-      context: ./
-      dockerfile: Dockerfile_MAINSTACK_telegram
     restart: unless-stopped
     depends_on:
       plexbuddy_mysql:
