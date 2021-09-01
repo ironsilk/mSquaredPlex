@@ -1,4 +1,4 @@
-version: "3"
+version: "2.1"
 services:
   plex:
     image: ghcr.io/linuxserver/plex
@@ -63,7 +63,8 @@ services:
       - .env
     restart: unless-stopped
     depends_on:
-      - plexbuddy_mysql
+      plexbuddy_mysql:
+        condition: service_healthy
 
   filelist_service:
     image: mikael6/mad_repo:filelist_service
@@ -75,8 +76,8 @@ services:
       - .env
     restart: unless-stopped
     depends_on:
-      - plexbuddy_mysql
-      - torrent_service
+      plexbuddy_mysql:
+        condition: service_healthy
 
   torrent_service:
     image: mikael6/mad_repo:torrent_service
@@ -88,8 +89,8 @@ services:
       - .env
     restart: unless-stopped
     depends_on:
-      - plexbuddy_mysql
-      - transmission
+      plexbuddy_mysql:
+        condition: service_healthy
 
   telegram_service:
     image: mikael6/mad_repo:telegram_service
@@ -101,5 +102,5 @@ services:
       - .env
     restart: unless-stopped
     depends_on:
-      - plexbuddy_mysql
-      - transmission
+      plexbuddy_mysql:
+        condition: service_healthy
