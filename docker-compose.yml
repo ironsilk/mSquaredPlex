@@ -65,8 +65,6 @@ services:
     restart: unless-stopped
     depends_on:
       - plexbuddy_mysql
-    links:
-      - plexbuddy_mysql
 
   filelist_service:
     image: mikael6/mad_repo:filelist_service
@@ -80,8 +78,6 @@ services:
     depends_on:
       - plexbuddy_mysql
       - torrent_service
-    links:
-      - plexbuddy_mysql
 
   torrent_service:
     image: mikael6/mad_repo:torrent_service
@@ -108,5 +104,3 @@ services:
     depends_on:
       - plexbuddy_mysql
       - transmission
-    links:
-      - plexbuddy_mysql
