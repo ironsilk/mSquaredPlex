@@ -15,7 +15,7 @@ from Crypto.Cipher import ChaCha20
 import hashlib
 import base64
 import json
-import time
+from time import time
 from functools import wraps
 from transmission_rpc import Client
 

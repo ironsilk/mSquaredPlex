@@ -41,7 +41,7 @@ services:
     network_mode: host
     build:
       context: ./
-      dockerfile: Dockerfile_tmdb_db_update_service
+      dockerfile: Dockerfile_MOVIELIB_tmdb
     env_file:
       - .env
     restart: unless-stopped
