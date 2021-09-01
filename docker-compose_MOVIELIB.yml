@@ -14,7 +14,7 @@ services:
     healthcheck:
       test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
       timeout: 20s
-      retries: 10
+      retries: 50
 
   imdb_update_service:
     network_mode: host
