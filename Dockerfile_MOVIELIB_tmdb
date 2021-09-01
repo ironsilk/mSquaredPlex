@@ -7,11 +7,8 @@ RUN mkdir /app
 WORKDIR /app
 
 COPY db_services/refresh_tmdb_db.py ./
-COPY tmdb_omdb_tools.py ./
-COPY settings.py ./
-COPY utils3.py ./
-COPY db_services/last_update.txt ./
-COPY tmdb_omdb_tools.py ./
+COPY db_services/db_services_utils.py ./
+COPY utils.py ./
 
 COPY requirements.txt ./
 RUN pip install -r requirements.txt
