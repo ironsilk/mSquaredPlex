@@ -8,6 +8,7 @@ WORKDIR /app
 
 COPY telegram_service/bot.py ./
 COPY telegram_service/bot_utils.py ./
+COPY telegram_service/images ./images
 COPY utils.py ./
 
 

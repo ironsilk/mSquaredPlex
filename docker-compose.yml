@@ -49,10 +49,9 @@ services:
     volumes:
     - ${MYSQL_DB_LOCATION}:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:${MYSQL_PORT}"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
 
   imdb_sync_service:
     image: mikael6/mad_repo:imdb_sync_service
