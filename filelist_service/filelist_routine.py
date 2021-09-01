@@ -94,7 +94,7 @@ def filter_results(new_movies):
 @timing
 def feed_routine(cypher):
     # fetch latest movies
-    new_movies = get_latest_torrents(n=7)
+    new_movies = get_latest_torrents()
 
     # filter out those already in database with same or better quality and mark
     # the rest if they are already in db

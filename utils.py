@@ -493,7 +493,7 @@ def get_movie_IMDB(imdb_id, cursor=None):
         try:
             movie = ia.get_movie(imdb_id)
             item = {
-                'cast': ', '.join([x['name'] for x in movie.data['cast']]),
+                'cast': ', '.join([x['name'] for x in movie.data['cast'][:5]]),
                 'director': movie.data['director'][0].data['name'],
                 'genres': ', '.join(movie.data['genres']),
                 'imdbID': movie.data['imdbID'],

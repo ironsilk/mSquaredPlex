@@ -2,7 +2,7 @@ version: "2.1"
 services:
   plex:
     image: ghcr.io/linuxserver/plex
-    container_name: plex
+    container_name: PLEXSTACK_Plex
     network_mode: host
     environment:
       - PUID=1000
@@ -16,7 +16,7 @@ services:
 
   transmission:
     image: ghcr.io/linuxserver/transmission
-    container_name: transmission
+    container_name: PLEXSTACK_Transmission
     environment:
       - PUID=1000
       - PGID=1000
@@ -40,7 +40,7 @@ services:
   plexbuddy_mysql:
     image: mysql
     command: --default-authentication-plugin=mysql_native_password --max_allowed_packet=32505856 --net_read_timeout=700
-    container_name: plexbuddy_mysql
+    container_name: PLEXSTACK_Mysql
     network_mode: host
     restart: always
     environment:
@@ -55,6 +55,7 @@ services:
 
   imdb_sync_service:
     image: mikael6/mad_repo:imdb_sync_service
+    container_name: PLEXSTACK_IMDB_sync
     network_mode: host
     build:
       context: ./
@@ -68,6 +69,7 @@ services:
 
   filelist_service:
     image: mikael6/mad_repo:filelist_service
+    container_name: PLEXSTACK_Filelist
     network_mode: host
     build:
       context: ./
@@ -81,6 +83,7 @@ services:
 
   torrent_service:
     image: mikael6/mad_repo:torrent_service
+    container_name: PLEXSTACK_TorrentAPI
     network_mode: host
     build:
       context: ./
@@ -94,6 +97,7 @@ services:
 
   telegram_service:
     image: mikael6/mad_repo:telegram_service
+    container_name: PLEXSTACK_Telegram
     network_mode: host
     build:
       context: ./
