@@ -2,6 +2,8 @@ import datetime
 import os
 import time
 
+import mysql.connector.errors
+
 from utils import get_tmdb
 from utils import logger, connect_mysql, close_mysql, update_many, check_db_myimdb
 
@@ -21,7 +23,10 @@ def get_tmdb_data(session_not_found=[]):
     # New titles
     logger.info("Downloading data for new TMDB titles")
     tmdb_inserted = 0
-    conn, new_for_tmdb_cursor = get_new_imdb_titles('tmdb_data')
+    try:
+        conn, new_for_tmdb_cursor = get_new_imdb_titles('tmdb_data')
+    except mysql.connector.errors.ProgrammingError:
+        conn, new_for_tmdb_cursor = None, None
     if new_for_tmdb_cursor:
         while new_for_tmdb_cursor.with_rows:
             batch = new_for_tmdb_cursor.fetchmany(INSERT_RATE)
@@ -34,6 +39,9 @@ def get_tmdb_data(session_not_found=[]):
         logger.info('Sleeping for 1 hour.')
         time.sleep(360)
         get_tmdb_data(session_not_found)
+    else:
+        logger.info('IMDB refresh going on... Sleeping for 1 hour.')
+        time.sleep(360)
 
 
 def get_new_imdb_titles(target_table):

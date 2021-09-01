@@ -2,6 +2,8 @@ import datetime
 import os
 import time
 
+import mysql.connector.errors
+
 from utils import setup_logger, connect_mysql, close_mysql, update_many, check_db_myimdb
 from utils import get_omdb
 
@@ -25,7 +27,10 @@ def get_omdb_data(session_not_found=[]):
     logger.info("Downloading data for new OMDB titles")
     # Get how many API calls we have left
     api_calls = get_omdb_api_limit()
-    conn, new_for_omdb_cursor = get_new_imdb_titles('omdb_data', session_not_found)
+    try:
+        conn, new_for_omdb_cursor = get_new_imdb_titles('omdb_data', session_not_found)
+    except mysql.connector.errors.ProgrammingError:
+        conn, new_for_omdb_cursor = None, None
     if new_for_omdb_cursor:
         while new_for_omdb_cursor.with_rows:
             if api_calls > INSERT_RATE:
@@ -48,6 +53,9 @@ def get_omdb_data(session_not_found=[]):
                 time.sleep(360)
                 get_omdb_data(session_not_found)
                 break
+    else:
+        logger.info('IMDB refresh going on... Sleeping for 1 hour.')
+        time.sleep(360)
 
 
 def get_new_imdb_titles(target_table, session_not_found):
