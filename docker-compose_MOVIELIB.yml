@@ -10,7 +10,7 @@ services:
       MYSQL_ROOT_PASSWORD: ${MYSQL_PASS}
       MYSQL_TCP_PORT: ${MYSQL_MYIMDB_PORT}
     volumes:
-    - ${MYSQL_MYIMDBL_DB_LOCATION}:/var/lib/mysql
+    - ${MYSQL_MYIMDB_DB_LOCATION}:/var/lib/mysql
     healthcheck:
       test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
       timeout: 20s
