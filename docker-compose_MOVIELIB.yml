@@ -7,7 +7,7 @@ services:
     network_mode: host
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_PASS}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_MYIMDB_PASS}
       MYSQL_TCP_PORT: ${MYSQL_MYIMDB_PORT}
     volumes:
     - ${MYSQL_MYIMDB_DB_LOCATION}:/var/lib/mysql
