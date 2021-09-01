@@ -2,7 +2,7 @@ version: "2.1"
 services:
   myimdb_mysql:
     image: mysql
-    command: --default-authentication-plugin=mysql_native_password --max_allowed_packet=32505856 --net_read_timeout=700 --default-storage-engine=MyIsam
+    command: --default-authentication-plugin=mysql_native_password --max_allowed_packet=32505856 --net_read_timeout=700 --default-table-type=myisam
     container_name: MOVIELIB_Mysql
     network_mode: host
     restart: always
