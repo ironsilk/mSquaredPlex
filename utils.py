@@ -191,7 +191,7 @@ def check_db_plexbuddy():
 def check_db_myimdb():
     logger.info("Checking DB at service startup")
     try:
-        conn, cursor = connect_mysql()
+        conn, cursor = connect_mysql(myimdb=True)
     except mysql.connector.errors.ProgrammingError:  # if db doesn't exist, create it
         create_db(MYSQL_MYIMDB_DB_NAME)
         conn, cursor = connect_mysql()
