@@ -4,7 +4,7 @@ import requests
 from lxml import html
 
 from imdb_dump_import import run_import
-from utils import setup_logger
+from utils import setup_logger, check_db_myimdb
 
 IMDB_DB_REFRESH_INTERVAL = int(os.getenv('IMDB_DB_REFRESH_INTERVAL'))
 DUMPS_URL = os.getenv('DUMPS_URL')
@@ -43,6 +43,5 @@ def update_imdb_db():
 
 
 if __name__ == '__main__':
-    from dotenv import load_dotenv
-    load_dotenv()
+    check_db_myimdb()
     update_imdb_db()

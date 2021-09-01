@@ -3,7 +3,7 @@ import os
 import time
 
 from utils import get_tmdb
-from utils import logger, connect_mysql, close_mysql, update_many
+from utils import logger, connect_mysql, close_mysql, update_many, check_db_myimdb
 
 REVIEW_INTERVAL_REFRESH = int(os.getenv('REVIEW_INTERVAL_REFRESH'))
 INSERT_RATE = int(os.getenv('INSERT_RATE'))
@@ -58,4 +58,5 @@ def process_items(items, session_not_found):
 
 
 if __name__ == '__main__':
+    check_db_myimdb()
     get_tmdb_data()

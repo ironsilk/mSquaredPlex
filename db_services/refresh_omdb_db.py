@@ -2,7 +2,7 @@ import datetime
 import os
 import time
 
-from utils import setup_logger, connect_mysql, close_mysql, update_many
+from utils import setup_logger, connect_mysql, close_mysql, update_many, check_db_myimdb
 from utils import get_omdb
 
 logger = setup_logger('OMDB_refresher')
@@ -85,4 +85,5 @@ def process_items(items, session_not_found):
 
 
 if __name__ == '__main__':
+    check_db_myimdb()
     get_omdb_data()
