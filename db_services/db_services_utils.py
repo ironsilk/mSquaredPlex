@@ -61,7 +61,7 @@ def get_user_watched_movies(email, account=None, plex=None):
             user = [x for x in users if x.email == email][0]
             plex = plex.switchUser(user.id)
         except IndexError:
-            logger.error('Email not in users')
+            logger.warning("Email not in users, ignore if he's admin.")
             return None
     elif email == PLEX_ADMIN_EMAILS[0]:
         pass

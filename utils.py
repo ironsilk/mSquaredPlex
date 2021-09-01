@@ -150,8 +150,8 @@ def connect_mysql(myimdb=False):
                                user=MYSQL_USER, password=MYSQL_PASS)
     else:
         sql_conn = cnt.connect(host=MYSQL_MYIMDB_HOST, port=MYSQL_MYIMDB_PORT,
-                               database=MYSQL_MYIMDB_USER,
-                               user=MYSQL_USER, password=MYSQL_MYIMDB_PASS)
+                               database=MYSQL_MYIMDB_DB_NAME,
+                               user=MYSQL_MYIMDB_USER, password=MYSQL_MYIMDB_PASS)
     return sql_conn, sql_conn.cursor(dictionary=True)
 
 
