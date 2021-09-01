@@ -11,6 +11,10 @@ services:
       MYSQL_TCP_PORT: ${MYSQL_MYIMDB_PORT}
     volumes:
     - ${MYSQL_MYIMDB_DB_LOCATION}:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", "-P$MYSQL_MYIMDB_PORT"]
+      timeout: 20s
+      retries: 50
 
   imdb_update_service:
     network_mode: host
