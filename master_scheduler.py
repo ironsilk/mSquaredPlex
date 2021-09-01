@@ -14,17 +14,22 @@ from datetime import datetime
 
 load_dotenv()
 
+
 def update_imdb_db():
     print('update_imdb_db! The time is: %s' % datetime.now())
+
 
 def get_tmdb_data():
     print('get_tmdb_data! The time is: %s' % datetime.now())
 
+
 def get_omdb_data():
     print('get_omdb_data! The time is: %s' % datetime.now())
 
+
 def sync_my_imdb():
     print('sync_my_imdb! The time is: %s' % datetime.now())
+
 
 # ENV variables
 TIMEZONE = os.getenv('TIMEZONE')
@@ -41,8 +46,8 @@ DB_URI = "mysql://{u}:{p}@{hp}/{dbname}?charset=utf8".format(
 jobstores = {
     'default': SQLAlchemyJobStore(url=DB_URI)
 }
-
-scheduler = BlockingScheduler(jobstores=jobstores, timezone=TIMEZONE)
+# scheduler = BlockingScheduler(jobstores=jobstores, timezone=TIMEZONE)
+scheduler = BlockingScheduler(timezone=TIMEZONE)
 
 update_imdb_db()
 scheduler.add_job(update_imdb_db, 'cron', day=1, hour=2, name='update_imdb_db', coalesce=True)
@@ -66,12 +71,12 @@ def execution_listener(event):
             print(jobs)
             # second_job = next((j for j in jobs if j.name == 'second_job'), None)
             # if second_job:
-                # run the second job immediately
-                # second_job.modify(next_run_time=datetime.datetime.utcnow())
+            # run the second job immediately
+            # second_job.modify(next_run_time=datetime.datetime.utcnow())
             # else:
-                # job not scheduled, add it and run now
-                # scheduler.add_job(second_job_func, args=(...), kwargs={...},
-                #                 name='second_job')
+            # job not scheduled, add it and run now
+            # scheduler.add_job(second_job_func, args=(...), kwargs={...},
+            #                 name='second_job')
 
 
 def job_starts(event):
@@ -79,8 +84,9 @@ def job_starts(event):
     if job.name == 'get_omdb_data':
         print('our job started')
     return event
-    
-scheduler.add_listener(job_starts, EVENT_JOB_SUBMITTED)
+
+
+scheduler.add_listener(job_starts, EVENT_JOB_SUBMITTED | EVENT_JOB_ERROR)
 scheduler.add_listener(execution_listener, EVENT_JOB_EXECUTED | EVENT_JOB_ERROR)
 
 

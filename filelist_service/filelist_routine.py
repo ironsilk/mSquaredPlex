@@ -39,7 +39,7 @@ def check_in_my_torrents(new_movies, cursor=None):
 def retrieve_bulk_from_dbs(items):
     logger.info("Getting IMDB TMDB and OMDB metadata...")
     # Connections
-    conn, cursor = connect_mysql()
+    conn, cursor = connect_mysql(myimdb=True)
     return [retrieve_one_from_dbs(item, cursor) for item in items]
 
 

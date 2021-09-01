@@ -1,0 +1,49 @@
+version: "2.1"
+services:
+  myimdb_mysql:
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password --max_allowed_packet=32505856 --net_read_timeout=700 --default-storage-engine=MyIsam
+    container_name: myimdb_mysql
+    network_mode: host
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASS}
+      MYSQL_TCP_PORT: ${MYSQL_MYIMDB_PORT}
+    volumes:
+    - ${MYSQL_MYIMDBL_DB_LOCATION}:/var/lib/mysql
+
+  imdb_update_service:
+    image: mikael6/mad_repo:imdb_update_service
+    network_mode: host
+    build:
+      context: ./
+      dockerfile: Dockerfile_imdb_db_update_service
+    env_file:
+      - .env
+    restart: unless-stopped
+    depends_on:
+      - myimdb_mysql
+
+  omdb_update_service:
+    image: mikael6/mad_repo:omdb_update_service
+    network_mode: host
+    build:
+      context: ./
+      dockerfile: Dockerfile_omdb_db_update_service
+    env_file:
+      - .env
+    restart: unless-stopped
+    depends_on:
+      - myimdb_mysql
+
+  tmdb_update_service:
+    image: mikael6/mad_repo:tmdb_update_service
+    network_mode: host
+    build:
+      context: ./
+      dockerfile: Dockerfile_tmdb_db_update_service
+    env_file:
+      - .env
+    restart: unless-stopped
+    depends_on:
+      - myimdb_mysql

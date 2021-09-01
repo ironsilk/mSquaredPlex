@@ -1,5 +1,7 @@
 import logging
 import os
+
+import imdb
 import mysql.connector as cnt
 import mysql.connector.errors
 from plexapi.server import PlexServer
@@ -17,12 +19,22 @@ import time
 from functools import wraps
 from transmission_rpc import Client
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 # ENV variables
 MYSQL_DB_NAME = os.getenv('MYSQL_DB_NAME')
 MYSQL_HOST = os.getenv('MYSQL_HOST')
 MYSQL_PORT = os.getenv('MYSQL_PORT')
 MYSQL_USER = os.getenv('MYSQL_USER')
 MYSQL_PASS = os.getenv('MYSQL_PASS')
+
+MYSQL_MYIMDB_DB_NAME = os.getenv('MYSQL_MYIMDB_DB_NAME')
+MYSQL_MYIMDB_HOST = os.getenv('MYSQL_MYIMDB_HOST')
+MYSQL_MYIMDB_PORT = os.getenv('MYSQL_MYIMDB_PORT')
+MYSQL_MYIMDB_USER = os.getenv('MYSQL_MYIMDB_USER')
+MYSQL_MYIMDB_PASS = os.getenv('MYSQL_MYIMDB_PASS')
 
 PLEX_HOST = os.getenv('PLEX_HOST')
 PLEX_TOKEN = os.getenv('PLEX_TOKEN')
@@ -48,7 +60,7 @@ TORR_DOWNLOAD_FOLDER = os.getenv('TORR_DOWNLOAD_FOLDER')
 PASSKEY = os.getenv('PASSKEY')
 
 
-table_columns = {
+table_columns_plexbuddy = {
     'my_movies': {
         'imdb_id': 'INT(11)',
         'type': 'CHAR(32)',
@@ -64,6 +76,25 @@ table_columns = {
         'status': 'CHAR(32)',
         'requested_by': 'VARCHAR(256)',
     },
+    'users': {
+        'telegram_chat_id': 'INT(11)',
+        'telegram_name': 'VARCHAR(256)',
+        'email': 'VARCHAR(256)',
+        'imdb_id': 'int(11)',
+        'scan_watchlist': 'BOOL',
+        'email_newsletters': 'BOOL',
+    },
+    'watchlists': {
+        'id': 'AUTO-INCREMENT',
+        'movie_id': 'int(11)',
+        'imdb_id': 'int(11)',
+        'status': 'VARCHAR(128)',
+        'excluded_torrents': 'TEXT',
+        'is_downloaded': 'VARCHAR(128)',
+    }
+}
+
+table_columns_myimdb = {
     'tmdb_data': {
         'imdb_id': 'INT(11)',
         'country': 'VARCHAR(128)',
@@ -87,22 +118,6 @@ table_columns = {
         'last_update_omdb': 'DATETIME',
         'hit_omdb': 'BOOL',
     },
-    'users': {
-        'telegram_chat_id': 'INT(11)',
-        'telegram_name': 'VARCHAR(256)',
-        'email': 'VARCHAR(256)',
-        'imdb_id': 'int(11)',
-        'scan_watchlist': 'BOOL',
-        'email_newsletters': 'BOOL',
-    },
-    'watchlists': {
-        'id': 'AUTO-INCREMENT',
-        'movie_id': 'int(11)',
-        'imdb_id': 'int(11)',
-        'status': 'VARCHAR(128)',
-        'excluded_torrents': 'TEXT',
-        'is_downloaded': 'VARCHAR(128)',
-    }
 }
 
 
@@ -127,11 +142,16 @@ logger = setup_logger("PlexUtils")
 
 
 # Primitive db interractions
-def connect_mysql():
+def connect_mysql(myimdb=False):
     # Connects to mysql and returns cursor
-    sql_conn = cnt.connect(host=MYSQL_HOST, port=MYSQL_PORT,
-                           database=MYSQL_DB_NAME,
-                           user=MYSQL_USER, password=MYSQL_PASS)
+    if not myimdb:
+        sql_conn = cnt.connect(host=MYSQL_HOST, port=MYSQL_PORT,
+                               database=MYSQL_DB_NAME,
+                               user=MYSQL_USER, password=MYSQL_PASS)
+    else:
+        sql_conn = cnt.connect(host=MYSQL_MYIMDB_HOST, port=MYSQL_MYIMDB_PORT,
+                               database=MYSQL_MYIMDB_USER,
+                               user=MYSQL_USER, password=MYSQL_MYIMDB_PASS)
     return sql_conn, sql_conn.cursor(dictionary=True)
 
 
@@ -148,27 +168,47 @@ def create_db(name):
     sql_conn.close()
 
 
-def check_db():
+def check_db_plexbuddy():
     logger.info("Checking DB at service startup")
     try:
         conn, cursor = connect_mysql()
     except mysql.connector.errors.ProgrammingError:  # if db doesn't exist, create it
-        create_db('plex_buddy')
+        create_db(MYSQL_DB_NAME)
         conn, cursor = connect_mysql()
     # Check all tables defined in settings.py, table_columns.
-    for table, columns in table_columns.items():
+    for table, columns in table_columns_plexbuddy.items():
         check_table(
             cursor,
             table=table,
             columns=list(columns.keys()),
             column_types=columns,
+            db=MYSQL_DB_NAME,
         )
     close_mysql(conn, cursor)
     logger.info("All tables OK.")
 
 
-def check_table(cursor, table, columns, column_types):
-    db = MYSQL_DB_NAME
+def check_db_myimdb():
+    logger.info("Checking DB at service startup")
+    try:
+        conn, cursor = connect_mysql()
+    except mysql.connector.errors.ProgrammingError:  # if db doesn't exist, create it
+        create_db(MYSQL_MYIMDB_DB_NAME)
+        conn, cursor = connect_mysql()
+    # Check all tables defined in settings.py, table_columns.
+    for table, columns in table_columns_myimdb.items():
+        check_table(
+            cursor,
+            table=table,
+            columns=list(columns.keys()),
+            column_types=columns,
+            db=MYSQL_MYIMDB_DB_NAME,
+        )
+    close_mysql(conn, cursor)
+    logger.info("All tables OK.")
+
+
+def check_table(cursor, table, columns, column_types, db):
     q = '''
     SELECT table_name FROM information_schema.tables WHERE table_name = '{table}' AND table_schema = '{db_name}'
     '''.format(db_name=db, table=table)
@@ -305,9 +345,9 @@ def update_many(data_list=None, mysql_table=None, connection=None, cursor=None):
         cursor.executemany(query, values)
     except Exception as e:
         try:
-            print("MySQL Error [%d]: %s" % (e.args[0], e.args[1]))
+            logger.error("UpdateMany MySQL Error [%d]: %s" % (e.args[0], e.args[1]))
         except IndexError:
-            print("MySQL Error: %s" % str(e))
+            logger.error("UpdateMany MySQL Error: %s" % str(e))
 
         connection.rollback()
         return False
@@ -414,35 +454,60 @@ def retrieve_one_from_dbs(item, cursor=None):
 def get_movie_IMDB(imdb_id, cursor=None):
     if not cursor:
         conn, cursor = connect_mysql()
-    q = f"""SELECT a.*, b.numVotes, b.averageRating, e.title, c.*, d.* FROM title_basics a
-    left join title_ratings b on a.tconst = b.tconst
-    left join tmdb_data c on a.tconst = c.imdb_id
-    left join omdb_data d on a.tconst = d.imdb_id
-    left join title_akas e on a.tconst = e.titleId
-    where a.tconst = {imdb_id} AND e.isOriginalTitle = 1
 
-    """
-    q_crew = f"""SELECT group_concat(primaryName) as 'cast' 
-    FROM name_basics WHERE nconst in 
-    (SELECT nconst FROM title_principals where tconst = {imdb_id} and category = 'actor')
-    """
+    try:
+        q = f"""SELECT a.*, b.numVotes, b.averageRating, e.title, c.*, d.* FROM title_basics a
+        left join title_ratings b on a.tconst = b.tconst
+        left join tmdb_data c on a.tconst = c.imdb_id
+        left join omdb_data d on a.tconst = d.imdb_id
+        left join title_akas e on a.tconst = e.titleId
+        where a.tconst = {imdb_id} AND e.isOriginalTitle = 1
+    
+        """
+        q_crew = f"""SELECT group_concat(primaryName) as 'cast' 
+        FROM name_basics WHERE nconst in 
+        (SELECT nconst FROM title_principals where tconst = {imdb_id} and category = 'actor')
+        """
 
-    q_director = f"""SELECT primaryName as 'director' FROM name_basics 
-    WHERE nconst = (SELECT directors FROM title_crew  where tconst = {imdb_id})
-    """
+        q_director = f"""SELECT primaryName as 'director' FROM name_basics 
+        WHERE nconst = (SELECT directors FROM title_crew  where tconst = {imdb_id})
+        """
 
-    cursor.execute(q)
-    item = cursor.fetchone()
-    if not item:
-        return None
-    # Add crew
-    cursor.execute((q_crew))
-    item.update(cursor.fetchone())
+        cursor.execute(q)
+        item = cursor.fetchone()
+        if not item:
+            return None
+        # Add crew
+        cursor.execute((q_crew))
+        item.update(cursor.fetchone())
 
-    # Add director
-    cursor.execute((q_director))
-    item.update(**cursor.fetchone())
+        # Add director
+        cursor.execute((q_director))
+        item.update(**cursor.fetchone())
+    except mysql.connector.errors.ProgrammingError:
+        # Our DB is down so:
+        # Get IMDB
+        ia = imdb.IMDb()
+        try:
+            movie = ia.get_movie(imdb_id)
+            item = {
+                'cast': ', '.join([x['name'] for x in movie.data['cast']]),
+                'director': movie.data['director'][0].data['name'],
+                'generes': ', '.join(movie.data['genres']),
+                'imdbID': movie.data['imdbID'],
+                'titleType': movie.data['kind'],
+                'averageRating': movie.data['rating'],
+                'title': movie.data['title'],
+                'startYear': movie.data['year'],
+                'numVotes': movie.data['votes'],
+                'runtimeMinutes': movie.data['runtimes'][0]
+            }
 
+        except Exception as e:
+            logger.error(e)
+            return 'IMDB library error'
+        item['hit_tmdb'] = 0
+        item['hit_omdb'] = 0
     return item
 
 
@@ -1048,38 +1113,8 @@ def parse_torr_name(name):
     return PTN.parse(name)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+if __name__ == '__main__':
+    from pprint import pprint
+    check_db_plexbuddy()
+    pprint(retrieve_one_from_dbs({'imdb': 'tt11154906'}))
 
