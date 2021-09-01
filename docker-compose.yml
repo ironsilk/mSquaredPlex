@@ -48,6 +48,11 @@ services:
       MYSQL_TCP_PORT: ${MYSQL_PORT}
     volumes:
     - ${MYSQL_DB_LOCATION}:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:" + ${MYSQL_PORT}]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   imdb_sync_service:
     image: mikael6/mad_repo:imdb_sync_service
@@ -60,8 +65,8 @@ services:
     restart: unless-stopped
     depends_on:
       - plexbuddy_mysql
-    environment:
-      - WAIT_HOSTS: plexbuddy_mysql:${MYSQL_PORT}
+    links:
+      - plexbuddy_mysql
 
   filelist_service:
     image: mikael6/mad_repo:filelist_service
@@ -75,8 +80,8 @@ services:
     depends_on:
       - plexbuddy_mysql
       - torrent_service
-    environment:
-      - WAIT_HOSTS: plexbuddy_mysql:${MYSQL_PORT}
+    links:
+      - plexbuddy_mysql
 
   torrent_service:
     image: mikael6/mad_repo:torrent_service
@@ -103,5 +108,5 @@ services:
     depends_on:
       - plexbuddy_mysql
       - transmission
-    environment:
-      - WAIT_HOSTS: plexbuddy_mysql:${MYSQL_PORT}
+    links:
+      - plexbuddy_mysql
