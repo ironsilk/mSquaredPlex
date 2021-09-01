@@ -1,4 +1,4 @@
-# docker build -t imdb_refresh_service . -f Dockerfile_imdb_db_update_service
+# docker build -t imdb_refresh_service . -f Dockerfile_MOVIELIB_imdb
 FROM python:3.9.1
 
 LABEL Author="Mikael"

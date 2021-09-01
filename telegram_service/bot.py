@@ -17,7 +17,7 @@ from bot_utils import make_movie_reply, get_telegram_users, update_torr_db, bot_
     exclude_torrents_from_watchlist, get_excluded_resolutions, \
     update_watchlist_item_status, invite_friend, get_movie_from_all_databases, get_torrents_for_imdb_id, \
     search_imdb_title
-from utils import update_many, deconvert_imdb_id, send_torrent, compose_link
+from utils import update_many, deconvert_imdb_id, send_torrent, compose_link, check_db_plexbuddy
 
 TELEGRAM_AUTH_TEST_PATH = os.getenv('TELEGRAM_AUTH_TEST_PATH')
 TELEGRAM_AUTH_APPROVE = os.getenv('TELEGRAM_AUTH_APPROVE')
@@ -504,6 +504,7 @@ def end(update, context, message):
 
 
 def main() -> None:
+    check_db_plexbuddy()
     """Start the bot."""
     # Create the Updater and pass it your bot's token.
     updater = Updater("1940395527:AAF1Orhib5d6QvtIMtiOS8WaHWZfN8IrI2Y")

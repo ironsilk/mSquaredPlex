@@ -3,7 +3,8 @@ import time
 import PTN
 import requests
 
-from utils import torr_cypher, connect_mysql, retrieve_one_from_dbs, update_many, setup_logger, timing, check_db
+from utils import torr_cypher, connect_mysql, retrieve_one_from_dbs, update_many, setup_logger, timing, \
+    check_db_plexbuddy
 from email_tools import send_email
 
 API_URL = os.getenv('API_URL')
@@ -120,7 +121,5 @@ def run_forever(cypher=torr_cypher, sleep_time=60*60*FLIST_ROUTINE_SLEEP_TIME):
 
 
 if __name__ == '__main__':
-    from dotenv import load_dotenv
-    load_dotenv()
-    check_db()
+    check_db_plexbuddy()
     run_forever()
