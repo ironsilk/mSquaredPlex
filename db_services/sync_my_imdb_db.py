@@ -8,12 +8,13 @@ import requests
 from bs4 import BeautifulSoup
 from plexapi.exceptions import Unauthorized
 
-from db_tools import get_my_imdb_users, get_my_movies, get_watchlist_intersections, remove_from_watchlist, \
-    get_watchlist_for_user, check_one_in_my_torrents_by_imdb
-from plex_utils import get_user_watched_movies
-from utils import logger, deconvert_imdb_id, update_many
+from db_services_utils import get_my_movies, get_watchlist_intersections, remove_from_watchlist, get_user_watched_movies
+from utils import deconvert_imdb_id, update_many, setup_logger
+from utils import get_my_imdb_users, get_watchlist_for_user, check_one_in_my_torrents_by_imdb
 
 MY_IMDB_REFRESH_INTERVAL = int(os.getenv('MY_IMDB_REFRESH_INTERVAL'))
+
+logger = setup_logger("MyIMDBsync")
 
 
 def sync_my_imdb():
@@ -148,4 +149,5 @@ def sync_watchlist(profile_id):
 
 
 if __name__ == '__main__':
-    run_imdb_sync()
+    from dotenv import load_dotenv
+    load_dotenv()

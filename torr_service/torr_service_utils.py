@@ -1,36 +1,14 @@
 import datetime
-import json
 import os
 from itertools import groupby
 from urllib.parse import unquote
 
-import PTN
 import falcon
-import requests
-from transmission_rpc import Client
 
-from db_tools import connect_mysql, close_mysql
-from settings import setup_logger
-from utils import timing
-from utils import update_many, convert_imdb_id
+from utils import timing, setup_logger, send_torrent, compose_link, update_many, transmission_client, \
+    connect_mysql, close_mysql
 
-PASSKEY = os.getenv('PASSKEY')
 TORR_KEEP_TIME = int(os.getenv('TORR_KEEP_TIME'))
-TORR_HOST = os.getenv('TORR_HOST')
-TORR_PORT = int(os.getenv('TORR_PORT'))
-TORR_USER = os.getenv('TORR_USER')
-TORR_PASS = os.getenv('TORR_PASS')
-TORR_API_HOST = os.getenv('TORR_API_HOST')
-TORR_API_PORT = os.getenv('TORR_API_PORT')
-TORR_API_PATH = os.getenv('TORR_API_PATH')
-TORR_SEED_FOLDER = os.getenv('TORR_SEED_FOLDER')
-TORR_DOWNLOAD_FOLDER = os.getenv('TORR_DOWNLOAD_FOLDER')
-API_URL = os.getenv('API_URL')
-USER = os.getenv('USER')
-MOVIE_HDRO = os.getenv('MOVIE_HDRO')
-MOVIE_4K = os.getenv('MOVIE_4K')
-
-transmission_client = Client(host=TORR_HOST, port=TORR_PORT, username=TORR_USER, password=TORR_PASS)
 
 
 def gtfo(resp):
@@ -42,10 +20,6 @@ def gtfo(resp):
     resp.media = pkg
     resp.status = falcon.HTTP_500
     return
-
-
-def compose_link(id):
-    return f'https://filelist.io/download.php?id={id}&passkey={PASSKEY}'
 
 
 class TORRAPI:
@@ -185,69 +159,3 @@ def refresher_routine():
     logger.info("Routine done, closing connections.")
     refresher.close()
     return
-
-
-def generate_torr_links(item, email, cypher):
-    def compose_link(pkg):
-        pkg = cypher.encrypt(json.dumps(pkg))
-        return f"http://{TORR_API_HOST}:{TORR_API_PORT}{TORR_API_PATH}?{pkg}"
-
-    seed = {
-        'id': item['id'],
-        'imdb_id': item['imdb_id'],
-        'resolution': get_torr_quality(item['name']),
-        'folder': TORR_SEED_FOLDER,
-        'requested_by': email,
-    }
-    download = {
-        'id': item['id'],
-        'imdb_id': item['imdb_id'],
-        'resolution': get_torr_quality(item['name']),
-        'folder': TORR_DOWNLOAD_FOLDER,
-        'requested_by': email,
-    }
-    return compose_link(seed), compose_link(download)
-
-
-def send_torrent(item):
-    return transmission_client.add_torrent(item, download_dir=TORR_DOWNLOAD_FOLDER)
-
-
-def parse_torr_name(name):
-    return PTN.parse(name)
-
-
-def get_torr_quality(name):
-    return int(PTN.parse(name)['resolution'][:-1])
-
-
-def get_torrents_for_imdb_id(idd):
-    r = requests.get(
-        url=API_URL,
-        params={
-            'username': USER,
-            'passkey': PASSKEY,
-            'action': 'search-torrents',
-            'type': 'imdb',
-            'query': convert_imdb_id(idd),
-            'category': ','.join([str(MOVIE_HDRO), str(MOVIE_4K)])
-        },
-    )
-    # Remove 4K if they're not Remux
-    response = []
-    for x in r.json():
-        if x['category'] == MOVIE_4K:
-            if 'Remux' in x['name']:
-                x['resolution'] = get_torr_quality(x['name'])
-                response.append(x)
-        else:
-            x['resolution'] = get_torr_quality(x['name'])
-            response.append(x)
-    return response
-
-
-if __name__ == '__main__':
-    # pprint(get_torrents_for_imdb_id(1763303))  # 281433
-    # pprint(send_torrent(1763303))
-    t = TORR_REFRESHER(logger=setup_logger('test'))
-    t.update_statuses()

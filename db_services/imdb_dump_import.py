@@ -22,12 +22,14 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 """
 
-import os
 import glob
 import gzip
 import logging
+import os
+
 import sqlalchemy
-from utils import logger
+
+from utils import setup_logger
 
 try:
     from tqdm import tqdm
@@ -42,6 +44,8 @@ TSV_EXT = '.tsv.gz'
 BLOCK_SIZE = 1000000
 
 metadata = sqlalchemy.MetaData()
+
+logger = setup_logger("IMDBdump")
 
 
 def generate_content(fd, headers, table):
@@ -182,14 +186,3 @@ def run_import(db_uri, dir_name):
     metadata.bind = engine
     import_dir(dir_name, engine)
     logger.info('DB imports finished.')
-
-
-if __name__ == '__main__':
-    from settings import DB_URI, DUMPS_PATH
-    dir_name = DUMPS_PATH
-    db_uri = DB_URI
-    engine = sqlalchemy.create_engine(db_uri, encoding='utf-8', echo=False)
-    metadata.bind = engine
-    import_dir(dir_name, engine)
-
-

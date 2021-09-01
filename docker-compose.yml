@@ -20,7 +20,7 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Europe/Bucharest
+      - TZ=${TIMEZONE}
       - TRANSMISSION_WEB_HOME=/combustion-release/
       - USER=${TRANSMISSION_USER}
       - PASS=${TRANSMISSION_PASS}
@@ -39,7 +39,7 @@ services:
 
   mysql:
     image: mysql
-    command: --default-authentication-plugin=mysql_native_password
+    command: --default-authentication-plugin=mysql_native_password --max_allowed_packet=32505856 --net_read_timeout=700
     container_name: mysql
     network_mode: host
     restart: always

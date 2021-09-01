@@ -5,9 +5,8 @@ from wsgiref.simple_server import make_server
 import falcon
 from apscheduler.schedulers.background import BackgroundScheduler
 
-from crypto_tools import torr_cypher
-from settings import setup_logger
-from torr_tools import transmission_client, TORRAPI, refresher_routine
+from utils import torr_cypher, setup_logger, transmission_client
+from torr_service_utils import TORRAPI, refresher_routine
 
 TORR_API_PORT = int(os.getenv('TORR_API_PORT'))
 TORR_API_PATH = os.getenv('TORR_API_PATH')

@@ -2,8 +2,10 @@ import datetime
 import os
 import time
 
-from tmdb_omdb_tools import get_omdb
-from utils import logger, connect_mysql, close_mysql, update_many
+from utils import setup_logger, connect_mysql, close_mysql, update_many
+from utils import get_omdb
+
+logger = setup_logger('OMDB_refresher')
 
 REVIEW_INTERVAL_REFRESH = int(os.getenv('REVIEW_INTERVAL_REFRESH'))
 OMDB_API_LIMIT = int(os.getenv('OMDB_API_LIMIT'))
@@ -83,4 +85,5 @@ def process_items(items, session_not_found):
 
 
 if __name__ == '__main__':
-    get_omdb_data()
+    from dotenv import load_dotenv
+    load_dotenv()

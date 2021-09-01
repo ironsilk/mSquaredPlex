@@ -1,15 +1,18 @@
 # -*- coding: utf-8 -*-
 import datetime
+import json
 import os
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 from xml.etree.ElementTree import SubElement
 
-from db_tools import check_in_my_movies, get_my_imdb_users
-from settings import setup_logger
-from tmdb_omdb_tools import OMDB
-from tmdb_omdb_tools import TMDB
-from torr_tools import get_torr_quality, generate_torr_links
+import PTN
+
+from utils import OMDB
+from utils import TMDB
+from utils import get_my_imdb_users
+from utils import get_torr_quality, connect_mysql
+from utils import setup_logger
 
 XML_TRNT_PATH = os.getenv('XML_TRNT_PATH')
 TEMPLATE_PATH = os.getenv('TEMPLATE_PATH')
@@ -19,6 +22,17 @@ EMAIL_USER = os.getenv('EMAIL_USER')
 EMAIL_PASS = os.getenv('EMAIL_PASS')
 EMAIL_HOSTNAME = os.getenv('EMAIL_HOSTNAME')
 PLEX_SERVER_NAME = os.getenv('PLEX_SERVER_NAME')
+
+TORR_KEEP_TIME = int(os.getenv('TORR_KEEP_TIME'))
+TORR_HOST = os.getenv('TORR_HOST')
+TORR_PORT = int(os.getenv('TORR_PORT'))
+TORR_USER = os.getenv('TORR_USER')
+TORR_PASS = os.getenv('TORR_PASS')
+TORR_API_HOST = os.getenv('TORR_API_HOST')
+TORR_API_PORT = os.getenv('TORR_API_PORT')
+TORR_API_PATH = os.getenv('TORR_API_PATH')
+TORR_SEED_FOLDER = os.getenv('TORR_SEED_FOLDER')
+TORR_DOWNLOAD_FOLDER = os.getenv('TORR_DOWNLOAD_FOLDER')
 
 
 logger = setup_logger('EmailSender')
@@ -590,8 +604,75 @@ def prepare_item_for_email(item, email, mtls, cypher):
     return mtls
 
 
+def check_in_my_movies(new_movies, email):
+    """
+    checks if passed new movies are already in database.
+    :param new_movies: dict, returned from FL API
+    :return: filtered dict
+    """
+
+    def get_intersections(new, old):
+        """
+        Makes intersections with database,
+        adds already_in_db and better_quality parameters.
+        :param new:
+        :param old:
+        :return:
+        """
+        lst = []
+        for new_m in new:
+            d = {
+                'already_in_db': False,
+                'better_quality': False,
+            }
+            if new_m['imdb_id'] in [x['imdb_id'] for x in old]:
+                old_quality = [x['resolution'] for x in old if x['imdb_id'] == new_m['imdb_id']][0]
+                new_quality = int(PTN.parse(new_m['name'])['resolution'][:-1])
+                d['already_in_db'] = True
+                if int(new_quality) > int(old_quality):
+                    d['better_quality'] = True
+            lst.append({**new_m, **d})
+        return lst
+
+    conn, cursor = connect_mysql()
+    values = "','".join([str(x['imdb_id']) for x in new_movies])
+    q = f"SELECT * FROM my_movies WHERE imdb_id IN ('{values}') AND " \
+        f"user = '{email}'"
+    cursor.execute(q)
+    already_in_db = cursor.fetchall()
+    new = get_intersections(new_movies, already_in_db)
+    # Filter out new movies already in database and where quality is the same or poorer
+    new = [x for x in new if x['already_in_db'] is False or x['better_quality'] is True]
+
+    return new
+
+
+def generate_torr_links(item, email, cypher):
+    def compose_link(pkg):
+        pkg = cypher.encrypt(json.dumps(pkg))
+        return f"http://{TORR_API_HOST}:{TORR_API_PORT}{TORR_API_PATH}?{pkg}"
+
+    seed = {
+        'id': item['id'],
+        'imdb_id': item['imdb_id'],
+        'resolution': get_torr_quality(item['name']),
+        'folder': TORR_SEED_FOLDER,
+        'requested_by': email,
+    }
+    download = {
+        'id': item['id'],
+        'imdb_id': item['imdb_id'],
+        'resolution': get_torr_quality(item['name']),
+        'folder': TORR_DOWNLOAD_FOLDER,
+        'requested_by': email,
+    }
+    return compose_link(seed), compose_link(download)
+
+
 if __name__ == '__main__':
-    from crypto_tools import torr_cypher
+    from dotenv import load_dotenv
+    load_dotenv()
+    from utils import torr_cypher
     # test package
     xx = {
         'already_in_db': False,

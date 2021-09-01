@@ -15,11 +15,9 @@ from transmission_rpc.error import TransmissionError
 
 from bot_utils import make_movie_reply, get_telegram_users, update_torr_db, bot_watchlist_routine, \
     exclude_torrents_from_watchlist, get_excluded_resolutions, \
-    update_watchlist_item_status
-from db_tools import get_movie_from_all_databases
-from plex_utils import invite_friend
-from torr_tools import get_torrents_for_imdb_id, send_torrent, compose_link
-from utils import search_imdb_title, update_many, deconvert_imdb_id
+    update_watchlist_item_status, invite_friend, get_movie_from_all_databases, get_torrents_for_imdb_id, \
+    search_imdb_title
+from utils import update_many, deconvert_imdb_id, send_torrent, compose_link
 
 TELEGRAM_AUTH_TEST_PATH = os.getenv('TELEGRAM_AUTH_TEST_PATH')
 TELEGRAM_AUTH_APPROVE = os.getenv('TELEGRAM_AUTH_APPROVE')

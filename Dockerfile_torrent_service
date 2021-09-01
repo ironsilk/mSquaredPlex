@@ -10,7 +10,7 @@ COPY torr_service/server.py ./
 COPY crypto_tools.py ./
 COPY settings.py ./
 COPY torr_tools.py ./
-COPY utils.py ./
+COPY utils3.py ./
 COPY db_tools.py ./
 COPY tmdb_omdb_tools.py ./
 COPY plex_utils.py ./

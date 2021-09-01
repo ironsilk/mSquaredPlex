@@ -2,7 +2,7 @@ import datetime
 import os
 import time
 
-from tmdb_omdb_tools import get_tmdb
+from utils import get_tmdb
 from utils import logger, connect_mysql, close_mysql, update_many
 
 REVIEW_INTERVAL_REFRESH = int(os.getenv('REVIEW_INTERVAL_REFRESH'))
@@ -58,4 +58,6 @@ def process_items(items, session_not_found):
 
 
 if __name__ == '__main__':
+    from dotenv import load_dotenv
+    load_dotenv()
     get_tmdb_data()

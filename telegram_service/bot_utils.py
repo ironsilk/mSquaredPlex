@@ -3,12 +3,21 @@ import os
 import PTN
 import requests
 from telegram.ext import CallbackContext
-
-from db_tools import deconvert_imdb_id, get_email_by_tgram_id, get_watchlist_new, get_my_imdb_users
-from torr_tools import get_torrents_for_imdb_id
-from utils import connect_mysql, update_many
+import imdb
+from utils import deconvert_imdb_id, get_my_imdb_users
+from utils import connect_mysql, update_many, connect_plex, setup_logger, convert_imdb_id, get_torr_quality
+from utils import check_one_in_my_torrents_by_imdb, retrieve_one_from_dbs
 
 NO_POSTER_PATH = os.getenv('NO_POSTER_PATH')
+API_URL = os.getenv('API_URL')
+USER = os.getenv('USER')
+PASSKEY = os.getenv('PASSKEY')
+
+MOVIE_HDRO = os.getenv('MOVIE_HDRO')
+MOVIE_4K = os.getenv('MOVIE_4K')
+
+
+logger = setup_logger("BotUtils")
 
 
 def make_movie_reply(pkg):
@@ -212,6 +221,115 @@ def get_excluded_resolutions(movie_id, tg_id):
         return [int(x) for x in excluded.split(', ')]
     else:
         return []
+
+
+def invite_friend(email, account=None, plex=None):
+    if not account:
+        account, plex = connect_plex()
+    try:
+        account.inviteFriend(email, plex)
+    except Exception as e:
+        logger.error(e)
+        return False
+    return True
+
+
+def get_torrents_for_imdb_id(idd):
+    r = requests.get(
+        url=API_URL,
+        params={
+            'username': USER,
+            'passkey': PASSKEY,
+            'action': 'search-torrents',
+            'type': 'imdb',
+            'query': convert_imdb_id(idd),
+            'category': ','.join([str(MOVIE_HDRO), str(MOVIE_4K)])
+        },
+    )
+    # Remove 4K if they're not Remux
+    response = []
+    for x in r.json():
+        if x['category'] == MOVIE_4K:
+            if 'Remux' in x['name']:
+                x['resolution'] = get_torr_quality(x['name'])
+                response.append(x)
+        else:
+            x['resolution'] = get_torr_quality(x['name'])
+            response.append(x)
+    return response
+
+
+def get_movie_from_all_databases(imdb_id):
+    conn, cursor = connect_mysql()
+    # Check if it's in my_movies:
+    my_item = check_one_in_my_movies(imdb_id, cursor)
+    if not my_item:
+        my_item = dict()
+    # Check if it's in my_torrents
+    torr_results = check_one_in_my_torrents_by_imdb(imdb_id, cursor)
+    if torr_results:
+        max_res_item = max(torr_results, key=lambda x: x['resolution'])
+        my_item['torr_result'] = True
+        my_item['torr_status'] = max_res_item['status']
+        my_item['resolution'] = max_res_item['resolution']
+    else:
+        my_item['torr_result'] = False
+    # Get rest of the data
+    pkg = retrieve_one_from_dbs({'imdb': imdb_id}, cursor)
+    if not pkg:
+        return None
+    if my_item:
+        pkg['already_in_my_movies'] = True
+        return {**pkg, **my_item}
+    else:
+        pkg['already_in_my_movies'] = False
+        return pkg
+
+
+def search_imdb_title(item, ia=None):
+    if not ia:
+        try:
+            ia = imdb.IMDb()
+        except Exception as e:
+            logger.error(e)
+            return 'IMDB library error'
+    try:
+        movies = ia.search_movie(item, _episodes=False)
+        # return {x.movieID: x.data for x in movies}
+        res = []
+        for x in movies:
+            if x.data['kind'] == 'movie':
+                x.data['id'] = x.movieID
+                res.append(x.data)
+        return res
+        # return {x.data for x in movies}
+    except Exception as e:
+        logger.error(e)
+        return 'IMDB library error'
+
+
+def check_one_in_my_movies(idd, cursor=None):
+    if not cursor:
+        conn, cursor = connect_mysql()
+    q = f"SELECT * FROM my_movies WHERE imdb_id = {idd}"
+    cursor.execute(q)
+    return cursor.fetchone()
+
+
+def get_email_by_tgram_id(user, cursor=None):
+    if not cursor:
+        conn, cursor = connect_mysql()
+    q = f"SELECT `email` FROM users where telegram_chat_id = '{user}'"
+    cursor.execute(q)
+    return cursor.fetchone()['email']
+
+
+def get_watchlist_new(cursor=None):
+    if not cursor:
+        conn, cursor = connect_mysql()
+    q = f"SELECT * FROM watchlists WHERE status = 'new'"
+    cursor.execute(q)
+    return cursor.fetchall()
 
 
 if __name__ == '__main__':

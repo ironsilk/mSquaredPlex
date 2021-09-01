@@ -1,13 +1,10 @@
 import os
 import time
-
+import PTN
 import requests
 
-from crypto_tools import torr_cypher
-from db_tools import check_in_my_torrents, retrieve_bulk_from_dbs, update_my_torrents_db, check_db
+from utils import torr_cypher, connect_mysql, retrieve_one_from_dbs, update_many, setup_logger, timing, check_db
 from email_tools import send_email
-from utils import logger
-from utils import timing
 
 API_URL = os.getenv('API_URL')
 USER = os.getenv('USER')
@@ -17,7 +14,43 @@ MOVIE_4K = os.getenv('MOVIE_4K')
 FLIST_ROUTINE_SLEEP_TIME = int(os.getenv('FLIST_ROUTINE_SLEEP_TIME'))
 
 
+logger = setup_logger("FilelistRoutine")
+
+
 # https://filelist.io/forums.php?action=viewtopic&topicid=120435
+
+def check_in_my_torrents(new_movies, cursor=None):
+    if not cursor:
+        conn, cursor = connect_mysql()
+    q = "SELECT * FROM {table} WHERE torr_id IN ('{values}')".format(
+        table='my_torrents',
+        values="','".join([str(x['id']) for x in new_movies])
+    )
+    cursor.execute(q)
+    already_in_db = [x['torr_id'] for x in cursor.fetchall()]
+    for movie in new_movies:
+        if movie['id'] in already_in_db:
+            movie['torr_already_processed'] = True
+        else:
+            movie['torr_already_processed'] = False
+    return new_movies
+
+
+def retrieve_bulk_from_dbs(items):
+    logger.info("Getting IMDB TMDB and OMDB metadata...")
+    # Connections
+    conn, cursor = connect_mysql()
+    return [retrieve_one_from_dbs(item, cursor) for item in items]
+
+
+def update_my_torrents_db(items):
+    items = [{'torr_id': x['id'],
+              'imdb_id': x['imdb_id'],
+              'status': 'users notified',
+              'resolution': int(PTN.parse(x['name'])['resolution'][:-1]),
+              }
+             for x in items]
+    update_many(items, 'my_torrents')
 
 
 def get_latest_torrents(n=100, category=MOVIE_HDRO):
@@ -87,5 +120,7 @@ def run_forever(cypher=torr_cypher, sleep_time=60*60*FLIST_ROUTINE_SLEEP_TIME):
 
 
 if __name__ == '__main__':
+    from dotenv import load_dotenv
+    load_dotenv()
     check_db()
     run_forever()

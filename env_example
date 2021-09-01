@@ -4,7 +4,7 @@ PLEX_TV_LIBRARY_FOLDER=/mnt/Media/Movies&TV/TV
 PLEX_MOVIES_LIBRARY_FOLDER=/mnt/Media/Movies&TV/Movies
 
 # TRANSMISSION docker variables
-TRANSMISSION_USER=mike
+TRANSMISSION_USER=
 TRANSMISSION_PASS=
 TRANSMISSION_FILES_LOCATION=/mnt/Media/Movies&TV/transmission
 
@@ -15,10 +15,10 @@ FLIST_ROUTINE_SLEEP_TIME=12
 
 # MYSQL settings
 MYSQL_DB_NAME=plexbuddy
-MYSQL_HOST=broodmother.go.ro
-MYSQL_PORT=5433
+MYSQL_HOST=
+MYSQL_PORT=
 MYSQL_USER=root
-MYSQL_PASS=
+MYSQL_PASS=pass
 MYSQL_DB_LOCATION=/mnt/Media/mysql
 
 # TORR settings
@@ -56,13 +56,13 @@ SOAP_4K=27
 # PLEX server settings
 # How to get the plex token:
 # https://digiex.net/threads/plex-guide-step-by-step-getting-plex-token.15402/
-PLEX_HOST=
+PLEX_HOST=http://192.168.1.99:32400
 PLEX_TOKEN=
 # Will also appear in emails sent
-PLEX_SERVER_NAME=  Michelix
+PLEX_SERVER_NAME=
 PLEX_ADMIN_EMAILS=[mihai.vlad6@gmail.com]
 # If you have multiple admins or other users which are not friends,
-# youve got to mention their emails here unfortunately. Their name must be their email. Not tested tho, dont have
+# you ve got to mention their emails here unfortunately. Their name must be their email. Not tested tho, dont have
 # plex pass.
 # The account the TOKEN belongs to should always be first, AKA your account
 
@@ -81,7 +81,7 @@ IMDB_DB_REFRESH_INTERVAL=30
 # days
 REVIEW_INTERVAL_REFRESH=180
 DUMPS_URL=https://datasets.imdbws.com/
-DUMPS_PATH=/dumps
+DUMPS_PATH=./
 
 # EMAIL settings
 XML_TRNT_PATH=views/new_trnt.xml

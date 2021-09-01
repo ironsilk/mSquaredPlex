@@ -9,7 +9,7 @@ WORKDIR /app
 COPY db_services/refresh_tmdb_db.py ./
 COPY tmdb_omdb_tools.py ./
 COPY settings.py ./
-COPY utils.py ./
+COPY utils3.py ./
 COPY db_services/last_update.txt ./
 COPY tmdb_omdb_tools.py ./
 
