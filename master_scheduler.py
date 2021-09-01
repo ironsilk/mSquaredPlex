@@ -1,7 +1,7 @@
 from datetime import datetime
 import os
 
-from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR
+from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR, EVENT_JOB_SUBMITTED
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 # from db_services.refresh_imdb_db import update_imdb_db  # IMDB_DB_REFRESH_INTERVAL
@@ -72,8 +72,15 @@ def execution_listener(event):
                 # job not scheduled, add it and run now
                 # scheduler.add_job(second_job_func, args=(...), kwargs={...},
                 #                 name='second_job')
-    
 
+
+def job_starts(event):
+    job = scheduler.get_job(event.job_id)
+    if job.name == 'get_omdb_data':
+        print('our job started')
+    return event
+    
+scheduler.add_listener(job_starts, EVENT_JOB_SUBMITTED)
 scheduler.add_listener(execution_listener, EVENT_JOB_EXECUTED | EVENT_JOB_ERROR)
 
 
