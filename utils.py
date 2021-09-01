@@ -193,7 +193,11 @@ def check_db_myimdb():
     try:
         conn, cursor = connect_mysql(myimdb=True)
     except mysql.connector.errors.ProgrammingError:  # if db doesn't exist, create it
-        create_db(MYSQL_MYIMDB_DB_NAME)
+        sql_conn = cnt.connect(
+            host=MYSQL_MYIMDB_HOST, port=MYSQL_MYIMDB_PORT,
+            user=MYSQL_MYIMDB_USER, password=MYSQL_MYIMDB_PASS)
+        sql_conn.cursor().execute("CREATE DATABASE {x}".format(x=MYSQL_MYIMDB_DB_NAME))
+        sql_conn.close()
         conn, cursor = connect_mysql()
     # Check all tables defined in settings.py, table_columns.
     for table, columns in table_columns_myimdb.items():
