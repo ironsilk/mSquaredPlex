@@ -60,7 +60,10 @@ internet so no functions will be affected.
    rebuild images from scratch.
 
 
+## Known bugs:
 
+- There might be some errors in logs when starting up for the first time, until you login into telegram yourself.
+All containers are set to restart `on-failiure` so no worries.
 
 
 

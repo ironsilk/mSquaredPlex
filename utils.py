@@ -500,6 +500,7 @@ def get_movie_IMDB(imdb_id, cursor=None):
                 'titleType': movie.data['kind'],
                 'averageRating': movie.data['rating'],
                 'title': movie.data['title'],
+                'originalTitle': movie.data['localized title'],
                 'startYear': movie.data['year'],
                 'numVotes': movie.data['votes'],
                 'runtimeMinutes': movie.data['runtimes'][0]
