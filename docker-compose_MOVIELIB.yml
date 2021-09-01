@@ -26,7 +26,8 @@ services:
       - .env
     restart: on-failure
     depends_on:
-      - myimdb_mysql
+      myimdb_mysql:
+        condition: service_healthy
 
   omdb_update_service:
     container_name: MOVIELIB_omdb
@@ -38,7 +39,8 @@ services:
       - .env
     restart: on-failure
     depends_on:
-      - myimdb_mysql
+      myimdb_mysql:
+        condition: service_healthy
 
   tmdb_update_service:
     container_name: MOVIELIB_tmdb
@@ -50,4 +52,5 @@ services:
       - .env
     restart: on-failure
     depends_on:
-      - myimdb_mysql
+      myimdb_mysql:
+        condition: service_healthy
