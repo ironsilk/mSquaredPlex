@@ -1034,10 +1034,13 @@ torr_cypher = AESCipher(TORR_HASH_KEY)
 
 
 # TORR utils
-transmission_client = Client(host=TORR_HOST, port=TORR_PORT, username=TORR_USER, password=TORR_PASS)
+def make_client():
+    return Client(host=TORR_HOST, port=TORR_PORT, username=TORR_USER, password=TORR_PASS)
 
 
-def send_torrent(item):
+def send_torrent(item, transmission_client=None):
+    if not transmission_client:
+        transmission_client = Client(host=TORR_HOST, port=TORR_PORT, username=TORR_USER, password=TORR_PASS)
     return transmission_client.add_torrent(item, download_dir=TORR_DOWNLOAD_FOLDER)
 
 

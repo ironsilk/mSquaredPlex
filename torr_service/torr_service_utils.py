@@ -5,8 +5,8 @@ from urllib.parse import unquote
 
 import falcon
 
-from utils import timing, setup_logger, send_torrent, compose_link, update_many, transmission_client, \
-    connect_mysql, close_mysql
+from utils import timing, setup_logger, send_torrent, compose_link, update_many, \
+    connect_mysql, close_mysql, make_client
 
 TORR_KEEP_TIME = int(os.getenv('TORR_KEEP_TIME'))
 
@@ -75,7 +75,7 @@ class TORRAPI:
 class TORR_REFRESHER:
     def __init__(self, logger):
         self.logger = logger
-        self.torr_client = transmission_client
+        self.torr_client = make_client()
         self.conn, self.cursor = connect_mysql()
 
     def close(self):
