@@ -1,6 +1,7 @@
 import os
 import time
 import PTN
+import mysql.connector.errors
 import requests
 
 from utils import torr_cypher, connect_mysql, retrieve_one_from_dbs, update_many, setup_logger, timing, \
@@ -40,7 +41,10 @@ def check_in_my_torrents(new_movies, cursor=None):
 def retrieve_bulk_from_dbs(items):
     logger.info("Getting IMDB TMDB and OMDB metadata...")
     # Connections
-    conn, cursor = connect_mysql(myimdb=True)
+    try:
+        conn, cursor = connect_mysql(myimdb=True)
+    except mysql.connector.errors.DatabaseError:
+        conn, cursor = None, None
     return [retrieve_one_from_dbs(item, cursor) for item in items]
 
 

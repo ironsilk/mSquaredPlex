@@ -428,7 +428,7 @@ def check_one_in_my_torrents_by_imdb(idd, cursor=None):
 
 def retrieve_one_from_dbs(item, cursor=None):
     if not cursor:
-        conn, cursor = connect_mysql()
+        conn, cursor = connect_mysql(myimdb=True)
     # ID
     imdb_id_number = deconvert_imdb_id(item['imdb'])
     # Search in local_db
