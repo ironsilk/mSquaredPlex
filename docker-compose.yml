@@ -1,4 +1,4 @@
-version: "2.1"
+version: "3"
 services:
   plex:
     image: ghcr.io/linuxserver/plex
@@ -60,6 +60,8 @@ services:
     restart: unless-stopped
     depends_on:
       - plexbuddy_mysql
+    environment:
+      - WAIT_HOSTS: plexbuddy_mysql:${MYSQL_PORT}
 
   filelist_service:
     image: mikael6/mad_repo:filelist_service
@@ -73,6 +75,8 @@ services:
     depends_on:
       - plexbuddy_mysql
       - torrent_service
+    environment:
+      - WAIT_HOSTS: plexbuddy_mysql:${MYSQL_PORT}
 
   torrent_service:
     image: mikael6/mad_repo:torrent_service
@@ -99,3 +103,5 @@ services:
     depends_on:
       - plexbuddy_mysql
       - transmission
+    environment:
+      - WAIT_HOSTS: plexbuddy_mysql:${MYSQL_PORT}
