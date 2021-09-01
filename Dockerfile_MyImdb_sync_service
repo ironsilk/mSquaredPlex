@@ -7,11 +7,8 @@ RUN mkdir /app
 WORKDIR /app
 
 COPY db_services/sync_my_imdb_db.py ./
-COPY db_tools.py ./
+COPY db_services/db_services_utils.py ./
 COPY utils.py ./
-COPY plex_utils.py ./
-COPY settings.py ./
-COPY tmdb_omdb_tools.py ./
 
 
 COPY requirements.txt ./
