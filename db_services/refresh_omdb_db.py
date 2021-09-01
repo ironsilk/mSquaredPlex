@@ -52,7 +52,7 @@ def get_omdb_data(session_not_found=[]):
 
 def get_new_imdb_titles(target_table, session_not_found):
     values = ', '.join([str(x) for x in session_not_found])
-    conn, cursor = connect_mysql()
+    conn, cursor = connect_mysql(myimdb=True)
     refresh_interval_date = datetime.datetime.now() - datetime.timedelta(days=REVIEW_INTERVAL_REFRESH)
     q = f"SELECT tconst FROM title_basics WHERE  tconst NOT IN (SELECT imdb_id FROM {target_table} " \
         f"WHERE last_update_omdb > '{str(refresh_interval_date)}')"
@@ -67,7 +67,7 @@ def get_new_imdb_titles(target_table, session_not_found):
 
 def get_omdb_api_limit():
     refresh_interval_date = datetime.datetime.now() - datetime.timedelta(days=1)
-    conn, cursor = connect_mysql()
+    conn, cursor = connect_mysql(myimdb=True)
     q = f"SELECT imdb_id FROM  `omdb_data`" \
         f"WHERE last_update_omdb > '{str(refresh_interval_date)}'"
     cursor.execute(q)
@@ -85,5 +85,4 @@ def process_items(items, session_not_found):
 
 
 if __name__ == '__main__':
-    from dotenv import load_dotenv
-    load_dotenv()
+    get_omdb_data()

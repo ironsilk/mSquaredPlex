@@ -37,7 +37,7 @@ def get_tmdb_data(session_not_found=[]):
 
 
 def get_new_imdb_titles(target_table):
-    conn, cursor = connect_mysql()
+    conn, cursor = connect_mysql(myimdb=True)
     refresh_interval_date = datetime.datetime.now() - datetime.timedelta(days=REVIEW_INTERVAL_REFRESH)
     q = f"SELECT tconst FROM title_basics WHERE  tconst NOT IN (SELECT imdb_id FROM {target_table} " \
         f"WHERE last_update_tmdb > '{str(refresh_interval_date)}')"
@@ -58,6 +58,4 @@ def process_items(items, session_not_found):
 
 
 if __name__ == '__main__':
-    from dotenv import load_dotenv
-    load_dotenv()
     get_tmdb_data()
