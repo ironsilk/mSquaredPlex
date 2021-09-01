@@ -20,7 +20,7 @@ services:
       dockerfile: Dockerfile_MOVIELIB_imdb
     env_file:
       - .env
-    restart: unless-stopped
+    restart: on-failure
     depends_on:
       - myimdb_mysql
 
@@ -44,6 +44,6 @@ services:
       dockerfile: Dockerfile_MOVIELIB_tmdb
     env_file:
       - .env
-    restart: unless-stopped
+    restart: on-failure
     depends_on:
       - myimdb_mysql

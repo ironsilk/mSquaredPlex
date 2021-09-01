@@ -4,10 +4,9 @@ import os
 from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR, EVENT_JOB_SUBMITTED
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.triggers.interval import IntervalTrigger
-# from db_services.refresh_imdb_db import update_imdb_db  # IMDB_DB_REFRESH_INTERVAL
-# from db_services.refresh_tmdb_db import get_tmdb_data  # no sleep
-# from db_services.refresh_omdb_db import get_omdb_data  # sleep 1 hr between runs
-# from db_services.sync_my_imdb_db import sync_my_imdb  # MY_IMDB_REFRESH_INTERVAL
+# from refresh_imdb_db import update_imdb_db  # IMDB_DB_REFRESH_INTERVAL
+# from refresh_tmdb_db import get_tmdb_data  # no sleep
+# from refresh_omdb_db import get_omdb_data  # sleep 1 hr between runs
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from dotenv import load_dotenv
 from datetime import datetime
@@ -40,7 +39,7 @@ DB_URI = "mysql://{u}:{p}@{hp}/{dbname}?charset=utf8".format(
     u=os.getenv('MYSQL_USER'),
     p=os.getenv('MYSQL_PASS'),
     hp=':'.join([os.getenv('MYSQL_HOST'), os.getenv('MYSQL_PORT')]),
-    dbname=os.getenv('MYSQL_DB_NAME'),
+    dbname=os.getenv('MYSQL_MYIMDB_DB_NAME'),
 )
 
 jobstores = {

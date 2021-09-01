@@ -62,7 +62,7 @@ services:
       dockerfile: Dockerfile_MAINSTACK_myimdb
     env_file:
       - .env
-    restart: unless-stopped
+    restart: on-failure
     depends_on:
       plexbuddy_mysql:
         condition: service_healthy
@@ -76,7 +76,7 @@ services:
       dockerfile: Dockerfile_MAINSTACK_newsletter
     env_file:
       - .env
-    restart: unless-stopped
+    restart: on-failure
     depends_on:
       plexbuddy_mysql:
         condition: service_healthy
@@ -90,7 +90,7 @@ services:
       dockerfile: Dockerfile_MAINSTACK_torrapi
     env_file:
       - .env
-    restart: unless-stopped
+    restart: on-failure
     depends_on:
       plexbuddy_mysql:
         condition: service_healthy
@@ -104,7 +104,7 @@ services:
       dockerfile: Dockerfile_MAINSTACK_telegram
     env_file:
       - .env
-    restart: unless-stopped
+    restart: on-failure
     depends_on:
       plexbuddy_mysql:
         condition: service_healthy
