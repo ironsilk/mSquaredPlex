@@ -13,7 +13,7 @@ services:
     volumes:
     - ${MYSQL_MYIMDB_DB_LOCATION}:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", "-P$MYSQL_MYIMDB_PORT"]
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "$MYSQL_MYIMDB_HOST", "-P$MYSQL_MYIMDB_PORT"]
       timeout: 20s
       retries: 50
 
