@@ -428,7 +428,10 @@ def check_one_in_my_torrents_by_imdb(idd, cursor=None):
 
 def retrieve_one_from_dbs(item, cursor=None):
     if not cursor:
-        conn, cursor = connect_mysql(myimdb=True)
+        try:
+            conn, cursor = connect_mysql(myimdb=True)
+        except mysql.connector.errors.DatabaseError:
+            conn, cursor = None, None
     # ID
     imdb_id_number = deconvert_imdb_id(item['imdb'])
     # Search in local_db
@@ -452,10 +455,9 @@ def retrieve_one_from_dbs(item, cursor=None):
 
 
 def get_movie_IMDB(imdb_id, cursor=None):
-    if not cursor:
-        conn, cursor = connect_mysql()
-
     try:
+        if not cursor:
+            conn, cursor = connect_mysql(myimdb=True)
         q = f"""SELECT a.*, b.numVotes, b.averageRating, e.title, c.*, d.* FROM title_basics a
         left join title_ratings b on a.tconst = b.tconst
         left join tmdb_data c on a.tconst = c.imdb_id
@@ -484,7 +486,7 @@ def get_movie_IMDB(imdb_id, cursor=None):
         # Add director
         cursor.execute((q_director))
         item.update(**cursor.fetchone())
-    except mysql.connector.errors.ProgrammingError:
+    except (mysql.connector.errors.DatabaseError, mysql.connector.errors.ProgrammingError):
         # Our DB is down so:
         # Get IMDB
         ia = imdb.IMDb()
