@@ -1,3 +1,5 @@
+TZ=Europe/Bucharest
+
 # PLEX docker variables
 PLEX_FILES_LOCATION=/mnt/Media/Movies&TV/plex
 PLEX_TV_LIBRARY_FOLDER=/mnt/Media/Movies&TV/TV
@@ -13,13 +15,21 @@ TRANSMISSION_FILES_LOCATION=/mnt/Media/Movies&TV/transmission
 # hrs
 FLIST_ROUTINE_SLEEP_TIME=12
 
-# MYSQL settings
+# MYSQL PLEX settings
 MYSQL_DB_NAME=plexbuddy
 MYSQL_HOST=
 MYSQL_PORT=
 MYSQL_USER=root
 MYSQL_PASS=pass
-MYSQL_DB_LOCATION=/mnt/Media/mysql
+MYSQL_DB_LOCATION=/mnt/Media/plexBuddy
+
+# MYSQL MYIMDB settings
+MYSQL_MYIMDB_DB_NAME=myimdb
+MYSQL_MYIMDB_HOST=
+MYSQL_MYIMDB_PORT=
+MYSQL_MYIMDB_USER=
+MYSQL_MYIMDB_PASS=
+MYSQL_MYIMDB_DB_LOCATION=/mnt/Media/myImdb
 
 # TORR settings
 API_URL=https://filelist.io/api.php
@@ -60,7 +70,8 @@ PLEX_HOST=http://192.168.1.99:32400
 PLEX_TOKEN=
 # Will also appear in emails sent
 PLEX_SERVER_NAME=
-PLEX_ADMIN_EMAILS=[mihai.vlad6@gmail.com]
+# list of emails, separated by ", " - the space is important.
+PLEX_ADMIN_EMAILS="mihai.vlad6@gmail.com"
 # If you have multiple admins or other users which are not friends,
 # you ve got to mention their emails here unfortunately. Their name must be their email. Not tested tho, dont have
 # plex pass.
