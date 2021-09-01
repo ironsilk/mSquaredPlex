@@ -149,5 +149,4 @@ def sync_watchlist(profile_id):
 
 
 if __name__ == '__main__':
-    from dotenv import load_dotenv
-    load_dotenv()
+    run_imdb_sync()
