@@ -495,7 +495,7 @@ def get_movie_IMDB(imdb_id, cursor=None):
             item = {
                 'cast': ', '.join([x['name'] for x in movie.data['cast']]),
                 'director': movie.data['director'][0].data['name'],
-                'generes': ', '.join(movie.data['genres']),
+                'genres': ', '.join(movie.data['genres']),
                 'imdbID': movie.data['imdbID'],
                 'titleType': movie.data['kind'],
                 'averageRating': movie.data['rating'],
