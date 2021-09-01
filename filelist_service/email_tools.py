@@ -241,7 +241,7 @@ class Mtls:
         try:
             tree = ET.parse(xml_file_path)
         except Exception as e:
-            logger.debug('fisier XML corupt: ' + str(e))
+            logger.error('fisier XML corupt: ' + str(e))
 
         root = tree.getroot()
 

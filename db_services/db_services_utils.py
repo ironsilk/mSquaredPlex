@@ -4,6 +4,10 @@ import os
 from utils import setup_logger, connect_mysql, connect_plex, get_plex_users
 
 PLEX_ADMIN_EMAILS = os.getenv('PLEX_ADMIN_EMAILS')
+if ',' in PLEX_ADMIN_EMAILS:
+    PLEX_ADMIN_EMAILS = PLEX_ADMIN_EMAILS.split(', ')
+else:
+    PLEX_ADMIN_EMAILS = [PLEX_ADMIN_EMAILS]
 
 logger = setup_logger("DbServicesUtils")
 
