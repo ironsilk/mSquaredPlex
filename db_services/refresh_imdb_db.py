@@ -1,14 +1,10 @@
 import os
-import time
-from datetime import datetime
 
 import requests
-from dateutil import parser as d_util
 from lxml import html
 
-from db_services.imdb_dump_import import run_import
+from imdb_dump_import import run_import
 from utils import setup_logger
-
 
 IMDB_DB_REFRESH_INTERVAL = int(os.getenv('IMDB_DB_REFRESH_INTERVAL'))
 DUMPS_URL = os.getenv('DUMPS_URL')
