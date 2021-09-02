@@ -135,8 +135,7 @@ class TORR_REFRESHER:
         return torrents
 
     def check_seeding_status(self, torr):
-        # TODO PLEX check here if it was seen in plex and mb change logic, mb go after seed ratio
-        # need third state here, 2 - for torrent and data removal.
+        # TODO maybe send delete notification to users?
         if (datetime.datetime.now() - torr.date_done.replace(tzinfo=None)).days < TORR_KEEP_TIME:
             return True
         else:

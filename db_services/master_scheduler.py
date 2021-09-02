@@ -78,16 +78,24 @@ def at_job_start(event):
 if __name__ == '__main__':
     scheduler = BlockingScheduler(jobstores=jobstores, timezone=TZ)
 
-    scheduler.add_job(update_imdb_db, 'cron', day=1, hour=1, id='update_imdb_db', coalesce=True,
-                      misfire_grace_time=300, replace_existing=True)
-    scheduler.add_job(get_tmdb_data, 'interval', hours=1, id='get_tmdb_data', coalesce=True,
-                      misfire_grace_time=300, replace_existing=True)
-    scheduler.add_job(get_omdb_data, 'interval', hours=1, id='get_omdb_data', coalesce=True,
-                      misfire_grace_time=300, replace_existing=True)
-    scheduler.add_job(info_jobs, 'interval', minutes=30, id='info', coalesce=True, next_run_time=datetime.now(),
-                      misfire_grace_time=300, replace_existing=True)
+    try:
+        scheduler.add_job(update_imdb_db, 'cron', day=1, hour=1, id='update_imdb_db', coalesce=True,
+                          misfire_grace_time=300, replace_existing=True)
+        scheduler.add_job(get_tmdb_data, 'interval', hours=1, id='get_tmdb_data', coalesce=True,
+                          misfire_grace_time=300, replace_existing=True)
+        scheduler.add_job(get_omdb_data, 'interval', hours=1, id='get_omdb_data', coalesce=True,
+                          misfire_grace_time=300, replace_existing=True)
+        scheduler.add_job(info_jobs, 'interval', minutes=30, id='info', coalesce=True, next_run_time=datetime.now(),
+                          misfire_grace_time=300, replace_existing=True)
 
-    scheduler.add_listener(at_job_start, EVENT_JOB_SUBMITTED)
-    scheduler.add_listener(at_execution_finish, EVENT_JOB_EXECUTED)
 
+
+        scheduler.add_listener(at_job_start, EVENT_JOB_SUBMITTED)
+        scheduler.add_listener(at_execution_finish, EVENT_JOB_EXECUTED)
+    except:
+        # Means they're already in the database
+        scheduler = BlockingScheduler(jobstores=jobstores, timezone=TZ)
+        scheduler.add_listener(at_job_start, EVENT_JOB_SUBMITTED)
+        scheduler.add_listener(at_execution_finish, EVENT_JOB_EXECUTED)
+    scheduler.get_job(job_id='update_imdb_db').modify(nex_run_time=datetime.now())
     scheduler.start()
