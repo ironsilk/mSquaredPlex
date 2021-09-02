@@ -1,8 +1,6 @@
 import os
 from datetime import datetime
 
-import apscheduler.jobstores.base
-import sqlalchemy
 from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_SUBMITTED
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.schedulers.blocking import BlockingScheduler
