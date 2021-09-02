@@ -8,7 +8,7 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 from refresh_imdb_db import update_imdb_db
 from refresh_omdb_db import get_omdb_data
 from refresh_tmdb_db import get_tmdb_data
-from utils import setup_logger
+from utils import setup_logger, check_db_myimdb
 
 # ENV variables
 TZ = os.getenv('TZ')
@@ -97,5 +97,5 @@ if __name__ == '__main__':
         scheduler = BlockingScheduler(jobstores=jobstores, timezone=TZ)
         scheduler.add_listener(at_job_start, EVENT_JOB_SUBMITTED)
         scheduler.add_listener(at_execution_finish, EVENT_JOB_EXECUTED)
-
+    check_db_myimdb()
     scheduler.start()
