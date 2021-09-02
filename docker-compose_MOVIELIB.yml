@@ -17,38 +17,12 @@ services:
       timeout: 20s
       retries: 50
 
-  imdb_update_service:
+  update_master:
     network_mode: host
-    container_name: MOVIELIB_imdb
+    container_name: MOVIELIB_updater
     build:
       context: ./
-      dockerfile: Dockerfile_MOVIELIB_imdb
-    env_file:
-      - .env
-    restart: on-failure
-    depends_on:
-      myimdb_mysql:
-        condition: service_healthy
-
-  omdb_update_service:
-    container_name: MOVIELIB_omdb
-    network_mode: host
-    build:
-      context: ./
-      dockerfile: Dockerfile_MOVIELIB_omdb
-    env_file:
-      - .env
-    restart: on-failure
-    depends_on:
-      myimdb_mysql:
-        condition: service_healthy
-
-  tmdb_update_service:
-    container_name: MOVIELIB_tmdb
-    network_mode: host
-    build:
-      context: ./
-      dockerfile: Dockerfile_MOVIELIB_tmdb
+      dockerfile: Dockerfile_MOVIELIB_master
     env_file:
       - .env
     restart: on-failure

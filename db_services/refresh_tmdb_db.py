@@ -29,19 +29,21 @@ def get_tmdb_data(session_not_found=[]):
         conn, new_for_tmdb_cursor = None, None
     if new_for_tmdb_cursor:
         while new_for_tmdb_cursor.with_rows:
-            batch = new_for_tmdb_cursor.fetchmany(INSERT_RATE)
-            batch, session_not_found = process_items(batch, session_not_found)
-            update_many(batch, 'tmdb_data')
-            tmdb_inserted += 1
-            logger.info(f"Inserted {tmdb_inserted * INSERT_RATE} into TMDB database")
+            try:
+                batch = new_for_tmdb_cursor.fetchmany(INSERT_RATE)
+                batch, session_not_found = process_items(batch, session_not_found)
+                update_many(batch, 'tmdb_data')
+                tmdb_inserted += 1
+                logger.info(f"Inserted {tmdb_inserted * INSERT_RATE} into TMDB database")
+            except Exception as e:
+                logger.error(f"Some other erorr while pulling IMDB data: {e}")
+                return
         # Sleep 1hr and repeat
         close_mysql(conn, new_for_tmdb_cursor)
-        logger.info('Sleeping for 1 hour.')
-        time.sleep(360)
-        get_tmdb_data(session_not_found)
+        logger.info('Finishing routine...')
     else:
-        logger.info('IMDB refresh going on... Sleeping for 1 hour.')
-        time.sleep(360)
+        logger.info('IMDB refresh going on... Finishing routine...')
+
 
 
 def get_new_imdb_titles(target_table):

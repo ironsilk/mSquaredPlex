@@ -41,21 +41,22 @@ def get_omdb_data(session_not_found=[]):
                 stop = True
             if calls_to_make < 0:
                 calls_to_make = 0
-            batch = new_for_omdb_cursor.fetchmany(calls_to_make)
-            batch, session_not_found = process_items(batch, session_not_found)
-            update_many(batch, 'omdb_data')
-            logger.info(f"Inserted {calls_to_make} into OMDB database")
-            api_calls -= calls_to_make
-            if stop:
-                # Sleep 1hr and repeat
-                close_mysql(conn, new_for_omdb_cursor)
-                logger.info('Sleeping for 1 hour.')
-                time.sleep(360)
-                get_omdb_data(session_not_found)
-                break
+            try:
+                batch = new_for_omdb_cursor.fetchmany(calls_to_make)
+                batch, session_not_found = process_items(batch, session_not_found)
+                update_many(batch, 'omdb_data')
+                logger.info(f"Inserted {calls_to_make} into OMDB database")
+                api_calls -= calls_to_make
+                if stop:
+                    # Sleep 1hr and repeat
+                    close_mysql(conn, new_for_omdb_cursor)
+                    logger.info('Hit OMDB API limit. Finishing up.')
+                    return
+            except Exception as e:
+                logger.error(f"Some other erorr while pulling IMDB data: {e}")
+                return
     else:
-        logger.info('IMDB refresh going on... Sleeping for 1 hour.')
-        time.sleep(360)
+        logger.info('IMDB refresh going on... Finishing up.')
 
 
 def get_new_imdb_titles(target_table, session_not_found):
