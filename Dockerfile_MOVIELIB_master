@@ -6,7 +6,7 @@ LABEL Author="Mikael"
 RUN mkdir /app
 WORKDIR /app
 
-COPY db_services/master_scheduler.py
+COPY db_services/master_scheduler.py ./
 COPY db_services/imdb_dump_import.py ./
 COPY db_services/refresh_imdb_db.py ./
 COPY db_services/refresh_omdb_db.py ./
