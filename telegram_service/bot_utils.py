@@ -138,7 +138,7 @@ def get_telegram_users():
 def update_torr_db(pkg, torr_response, tgram_id):
     update_many([{
         'torr_id': pkg['id'],
-        'torr_client_id': torr_response.id,
+        'torr_name': torr_response.name,
         'imdb_id': deconvert_imdb_id(pkg['imdb']),
         'resolution': pkg['resolution'],
         'status': 'requested download',

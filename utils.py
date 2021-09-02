@@ -70,7 +70,7 @@ table_columns_plexbuddy = {
     },
     'my_torrents': {
         'torr_id': 'INT(11)',
-        'torr_client_id': 'INT(11)',
+        'torr_name': 'INT(11)',
         'imdb_id': 'INT(11)',
         'resolution': 'int(11)',
         'status': 'CHAR(32)',
@@ -443,6 +443,8 @@ def retrieve_one_from_dbs(item, cursor=None):
     # Search online if TMDB, OMDB not found in local DB
     if not imdb_keys:
         return None
+    if type(imdb_keys) == str:
+        return None
     if imdb_keys['hit_tmdb'] != 1:
         tmdb = get_tmdb(imdb_id_number)
         if tmdb['hit_tmdb'] == 1:
@@ -496,6 +498,8 @@ def get_movie_IMDB(imdb_id, cursor=None):
         ia = imdb.IMDb()
         try:
             movie = ia.get_movie(imdb_id)
+            if 'rating' not in movie.data.keys():
+                movie.data['rating'] = None
             item = {
                 'cast': ', '.join([x['name'] for x in movie.data['cast'][:5]]),
                 'director': movie.data['director'][0].data['name'],

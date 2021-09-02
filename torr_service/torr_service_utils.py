@@ -57,7 +57,7 @@ class TORRAPI:
         # Update in torrents DB
         update_many([{
             'torr_id': pkg['id'],
-            'torr_client_id': torr_response.id,
+            'torr_name': torr_response.name,
             'imdb_id': pkg['imdb_id'],
             'resolution': pkg['resolution'],
             'status': 'requested download',
@@ -67,7 +67,7 @@ class TORRAPI:
 
         # Give response
         resp.media = 'Torrent successfully queued for download.'
-        self.logger.info(f"Torrent with id {pkg['id']} and torr_client_id {torr_response.id} successfully queued for "
+        self.logger.info(f"Torrent with id {pkg['id']} and torr_name {torr_response.name} successfully queued for "
                          f"download.")
         return
 
@@ -85,7 +85,7 @@ class TORR_REFRESHER:
         q = "SELECT * FROM my_torrents WHERE status != 'removed'"
         self.cursor.execute(q)
         results = self.cursor.fetchall()
-        results = [x for x in results if x['torr_client_id']]
+        results = [x for x in results if x['torr_name']]
         return results
 
     def update_statuses(self):
@@ -96,7 +96,11 @@ class TORR_REFRESHER:
         self.logger.info("Checking for duplicate lower res movies...")
         torrents = self.remove_low_res(torrents)
         for torr in torrents:
-            torr_response = self.torr_client.get_torrent(torr['torr_client_id'])
+            print(torr)
+            print(torr['torr_name'])
+            torr_response = self.torr_client.get_torrent(torrent_id=torr['torr_name'])
+            self.torr_client.get_torrent(to)
+            print(torr_response)
             if torr_response.status == 'seeding':
                 # Decide whether to remove it or keep it
                 if self.check_seeding_status(torr_response):
@@ -105,7 +109,7 @@ class TORR_REFRESHER:
                         update_many([torr], 'my_torrents')
                 else:
                     # remove torrent and data
-                    self.remove_torrent_and_files(torr['torr_client_id'])
+                    self.remove_torrent_and_files(torr['torr_name'])
                     # change status
                     torr['status'] = 'removed'
                     update_many([torr], 'my_torrents')
@@ -158,3 +162,6 @@ def refresher_routine():
     logger.info("Routine done, closing connections.")
     refresher.close()
     return
+
+x = TORR_REFRESHER(setup_logger('cacat'))
+x.update_statuses()

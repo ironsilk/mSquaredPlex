@@ -6,6 +6,10 @@ from lxml import html
 from imdb_dump_import import run_import
 from utils import setup_logger, check_db_myimdb
 
+# Alternatives, maybe:
+# https://stackoverflow.com/questions/1231900/mysql-load-data-local-infile-example-in-python
+# https://dev.mysql.com/doc/refman/8.0/en/load-data.html
+
 IMDB_DB_REFRESH_INTERVAL = int(os.getenv('IMDB_DB_REFRESH_INTERVAL'))
 DUMPS_URL = os.getenv('DUMPS_URL')
 DUMPS_PATH = os.getenv('DUMPS_PATH')
