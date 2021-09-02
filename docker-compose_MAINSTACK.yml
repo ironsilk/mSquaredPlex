@@ -51,7 +51,7 @@ services:
     healthcheck:
       test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", "-P$MYSQL_PORT"]
       timeout: 20s
-      retries: 10
+      retries: 50
 
   imdb_sync_service:
     container_name: PLEXSTACK_IMDB_sync
