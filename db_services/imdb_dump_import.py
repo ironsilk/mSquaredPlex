@@ -41,7 +41,7 @@ from imdb.parser.s3.utils import DB_TRANSFORM, title_soundex, name_soundexes
 
 TSV_EXT = '.tsv.gz'
 # how many entries to write to the database at a time.
-BLOCK_SIZE = 1000000
+BLOCK_SIZE = 100000
 
 metadata = sqlalchemy.MetaData()
 
