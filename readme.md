@@ -64,6 +64,8 @@ internet so no functions will be affected.
 
 - There might be some errors in logs when starting up for the first time, until you login into telegram yourself.
 All containers are set to restart `on-failiure` so no worries.
+  
+- Mysql might be slow: this might help: https://phpforus.com/how-to-make-mysql-run-fast-with-ext4-on-ubuntu/
 
 
 

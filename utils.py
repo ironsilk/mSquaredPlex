@@ -443,8 +443,6 @@ def retrieve_one_from_dbs(item, cursor=None):
     # Search online if TMDB, OMDB not found in local DB
     if not imdb_keys:
         return None
-    if type(imdb_keys) == str:
-        return None
     if imdb_keys['hit_tmdb'] != 1:
         tmdb = get_tmdb(imdb_id_number)
         if tmdb['hit_tmdb'] == 1:
@@ -461,6 +459,16 @@ def retrieve_one_from_dbs(item, cursor=None):
 
 
 def get_movie_IMDB(imdb_id, cursor=None):
+    item = get_movie_from_local_db(imdb_id, cursor)
+    if not item:
+        item = get_movie_from_imdb_online(imdb_id)
+    if item:
+        item['hit_tmdb'] = 0
+        item['hit_omdb'] = 0
+    return item
+
+
+def get_movie_from_local_db(imdb_id, cursor):
     try:
         if not cursor:
             conn, cursor = connect_mysql(myimdb=True)
@@ -470,7 +478,7 @@ def get_movie_IMDB(imdb_id, cursor=None):
         left join omdb_data d on a.tconst = d.imdb_id
         left join title_akas e on a.tconst = e.titleId
         where a.tconst = {imdb_id} AND e.isOriginalTitle = 1
-    
+
         """
         q_crew = f"""SELECT group_concat(primaryName) as 'cast' 
         FROM name_basics WHERE nconst in 
@@ -492,33 +500,35 @@ def get_movie_IMDB(imdb_id, cursor=None):
         # Add director
         cursor.execute((q_director))
         item.update(**cursor.fetchone())
-    except (mysql.connector.errors.DatabaseError, mysql.connector.errors.ProgrammingError):
-        # Our DB is down so:
-        # Get IMDB
-        ia = imdb.IMDb()
-        try:
-            movie = ia.get_movie(imdb_id)
-            if 'rating' not in movie.data.keys():
-                movie.data['rating'] = None
-            item = {
-                'cast': ', '.join([x['name'] for x in movie.data['cast'][:5]]),
-                'director': movie.data['director'][0].data['name'],
-                'genres': ', '.join(movie.data['genres']),
-                'imdbID': movie.data['imdbID'],
-                'titleType': movie.data['kind'],
-                'averageRating': movie.data['rating'],
-                'title': movie.data['title'],
-                'originalTitle': movie.data['localized title'],
-                'startYear': movie.data['year'],
-                'numVotes': movie.data['votes'],
-                'runtimeMinutes': movie.data['runtimes'][0]
-            }
+    except (mysql.connector.errors.DatabaseError, mysql.connector.errors.ProgrammingError) as e:
+        logger.warning(f"IMDB db is down or programming error: {e}")
+        return None
+    return item
 
-        except Exception as e:
-            logger.error(e)
-            return 'IMDB library error'
-        item['hit_tmdb'] = 0
-        item['hit_omdb'] = 0
+
+def get_movie_from_imdb_online(imdb_id):
+    ia = imdb.IMDb()
+    try:
+        movie = ia.get_movie(imdb_id)
+        if 'rating' not in movie.data.keys():
+            movie.data['rating'] = None
+        item = {
+            'cast': ', '.join([x['name'] for x in movie.data['cast'][:5]]),
+            'director': movie.data['director'][0].data['name'],
+            'genres': ', '.join(movie.data['genres']),
+            'imdbID': movie.data['imdbID'],
+            'titleType': movie.data['kind'],
+            'averageRating': movie.data['rating'],
+            'title': movie.data['title'],
+            'originalTitle': movie.data['localized title'],
+            'startYear': movie.data['year'],
+            'numVotes': movie.data['votes'],
+            'runtimeMinutes': movie.data['runtimes'][0]
+        }
+
+    except Exception as e:
+        logger.error(f"IMDB online error: {e}")
+        item = None
     return item
 
 

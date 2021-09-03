@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup
 from plexapi.exceptions import Unauthorized
 
 from db_services_utils import get_my_movies, get_watchlist_intersections, remove_from_watchlist, get_user_watched_movies
-from utils import deconvert_imdb_id, update_many, setup_logger
+from utils import deconvert_imdb_id, update_many, setup_logger, check_db_plexbuddy
 from utils import get_my_imdb_users, get_watchlist_for_user, check_one_in_my_torrents_by_imdb
 
 MY_IMDB_REFRESH_INTERVAL = int(os.getenv('MY_IMDB_REFRESH_INTERVAL'))
@@ -149,4 +149,5 @@ def sync_watchlist(profile_id):
 
 
 if __name__ == '__main__':
+    check_db_plexbuddy()
     run_imdb_sync()

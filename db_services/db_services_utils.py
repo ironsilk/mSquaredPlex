@@ -77,3 +77,8 @@ def get_user_watched_movies(email, account=None, plex=None):
     movies = movies.search(unwatched=False)
     ids = [return_movie_id(movie) for movie in movies]
     return [x for x in ids if x]
+
+
+if __name__ == '__main__':
+    from pprint import pprint
+    pprint(get_user_watched_movies('mihai.vlad6@gmail.com'))
