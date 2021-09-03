@@ -70,7 +70,7 @@ table_columns_plexbuddy = {
     },
     'my_torrents': {
         'torr_id': 'INT(11)',
-        'torr_name': 'INT(11)',
+        'torr_name': 'TEXT',
         'imdb_id': 'INT(11)',
         'resolution': 'int(11)',
         'status': 'CHAR(32)',

@@ -39,7 +39,7 @@ services:
 
   plexbuddy_mysql:
     image: mysql
-    command: --default-authentication-plugin=mysql_native_password --max_allowed_packet=32505856 --net_read_timeout=700
+    command: --default-authentication-plugin=mysql_native_password
     container_name: PLEXSTACK_Mysql
     network_mode: host
     restart: always
