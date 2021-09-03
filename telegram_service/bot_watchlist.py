@@ -4,7 +4,7 @@ import PTN
 import requests
 from telegram.ext import CallbackContext
 
-from telegram_service.bot_utils import get_watchlist_item
+from bot_utils import get_watchlist_item
 from utils import connect_mysql, update_many, convert_imdb_id, get_torr_quality
 from utils import get_my_imdb_users, setup_logger
 

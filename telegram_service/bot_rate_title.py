@@ -1,6 +1,6 @@
 from telegram.ext import CallbackContext
 
-from telegram_service.bot_utils import get_movie_from_all_databases, make_movie_reply, get_image, _title_header
+from bot_utils import get_movie_from_all_databases, make_movie_reply, get_image, _title_header
 from utils import setup_logger, connect_mysql, get_my_imdb_users, update_many
 
 logger = setup_logger("BotRateTitles")
