@@ -184,11 +184,13 @@ def invite_friend(email, account=None, plex=None):
 
 
 def get_movie_from_all_databases(imdb_id):
+    new_movie = False
     conn, cursor = connect_mysql()
     # Check if it's in my_movies:
     my_item = check_one_in_my_movies(imdb_id, cursor)
     if not my_item:
         my_item = dict()
+        new_movie = True
     # Check if it's in my_torrents
     torr_results = check_one_in_my_torrents_by_imdb(imdb_id, cursor)
     if torr_results:
@@ -202,7 +204,7 @@ def get_movie_from_all_databases(imdb_id):
     pkg = retrieve_one_from_dbs({'imdb': imdb_id}, cursor)
     if not pkg:
         return None
-    if my_item:
+    if not new_movie:
         pkg['already_in_my_movies'] = True
         return {**pkg, **my_item}
     else:
@@ -246,6 +248,43 @@ def get_email_by_tgram_id(user, cursor=None):
     q = f"SELECT `email` FROM users where telegram_chat_id = '{user}'"
     cursor.execute(q)
     return cursor.fetchone()['email']
+
+
+def get_imdb_id_by_trgram_id(user, cursor=None):
+    if not cursor:
+        conn, cursor = connect_mysql()
+    q = f"SELECT `imdb_id` FROM users where telegram_chat_id = '{user}'"
+    cursor.execute(q)
+    return cursor.fetchone()['imdb_id']
+
+
+def add_to_watchlist(movie_id, imdb_id, status, excluded_torrents=None):
+
+    # See if movie already there
+    conn, cursor = connect_mysql()
+    q = f"SELECT * FROM watchlists WHERE movie_id = {movie_id} " \
+        f"AND imdb_id = {imdb_id}"
+    cursor.execute(q)
+    in_watchlist = cursor.fetchone()
+    to_update = {
+        'movie_id': movie_id,
+        'imdb_id': imdb_id,
+        'status': status,
+        'excluded_torrents': None
+    }
+    if excluded_torrents:
+        to_update['excluded_torrents'] = ', '.join([str(x) for x in excluded_torrents])
+    if in_watchlist:
+        to_update['id'] = in_watchlist['id']
+        if in_watchlist['excluded_torrents']:
+            if excluded_torrents:
+                old = in_watchlist['excluded_torrents'].split(', ')
+                new = list(set(old + excluded_torrents))
+                to_update['excluded_torrents'] = ', '.join([str(x) for x in new])
+            else:
+                to_update['excluded_torrents'] = in_watchlist['excluded_torrents']
+
+    update_many([to_update], 'watchlists')
 
 
 if __name__ == '__main__':

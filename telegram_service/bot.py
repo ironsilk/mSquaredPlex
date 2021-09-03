@@ -15,7 +15,8 @@ from transmission_rpc.error import TransmissionError
 
 from bot_utils import make_movie_reply, get_telegram_users, update_torr_db, \
     exclude_torrents_from_watchlist, get_excluded_resolutions, \
-    invite_friend, get_movie_from_all_databases, search_imdb_title, check_one_in_my_movies
+    invite_friend, get_movie_from_all_databases, search_imdb_title, check_one_in_my_movies, get_imdb_id_by_trgram_id, \
+    add_to_watchlist
 from bot_watchlist import bot_watchlist_routine, update_watchlist_item_status, get_torrents_for_imdb_id
 from telegram_service.bot_rate_title import bot_rate_titles
 from utils import update_many, deconvert_imdb_id, send_torrent, compose_link, check_db_plexbuddy, convert_imdb_id
@@ -43,7 +44,8 @@ logger = logging.getLogger('MovieTimeBot')
 
 # Stages
 CHOOSE_TASK, IDENTIFY_MOVIE, CHOOSE_MULTIPLE, CHOOSE_ONE, CONFIRM_REDOWNLOAD_ACTION, SEARCH_FOR_TORRENTS, \
-DOWNLOAD_TORRENT, CHECK_RIDDLE_RESPONSE, CHECK_EMAIL, GIVE_IMDB, CHECK_IMDB, SUBMIT_RATING = range(12)
+DOWNLOAD_TORRENT, CHECK_RIDDLE_RESPONSE, CHECK_EMAIL, GIVE_IMDB, CHECK_IMDB, SUBMIT_RATING, \
+WATCHLIST_NO_TORR, = range(13)
 
 # Keyboards
 menu_keyboard = [
@@ -320,7 +322,7 @@ def check_movie_status(update: Update, context: CallbackContext) -> int:
     movie = context.user_data['pkg']
     # Check if you've already seen it and send info
     if movie['already_in_my_movies']:
-        message = f"Movie already in your DB."
+        message = f"You know this movie."
         if 'my_score' in movie.keys():
             message += f"\nYour score: {movie['my_score']}"
         if 'seen_date' in movie.keys():
@@ -354,10 +356,10 @@ def confirm_redownload_action(update: Update, context: CallbackContext) -> int:
 def search_for_torrents(update: Update, context: CallbackContext) -> int:
     update.message.reply_text('Searching for available torrents...')
     torrents = get_torrents_for_imdb_id(context.user_data['pkg']['imdb'])
-    context.user_data['pkg'] = sorted(torrents, key=lambda k: k['size'])
+    torrents = sorted(torrents, key=lambda k: k['size'])
     if torrents:
+        context.user_data['pkg']['torrents'] = sorted(torrents, key=lambda k: k['size'])
         keyboard = [[]]
-        torrents = sorted(torrents, key=lambda k: k['size'])
         # Check if we need to filter excluded resolutions
         if 'from_watchlist' in context.user_data.keys():
             movie_id = deconvert_imdb_id(torrents[0]['imdb'])
@@ -381,12 +383,38 @@ def search_for_torrents(update: Update, context: CallbackContext) -> int:
         )
         return DOWNLOAD_TORRENT
     else:
+        # aici
         update.message.reply_text(
             "We couldn't find any torrents for this title.\n"
-            "What would you like to do next?",
-            reply_markup=ReplyKeyboardMarkup(menu_keyboard, one_time_keyboard=True, resize_keyboard=True),
+            "Would you like to add it to your watchlist?",
+            reply_markup=ReplyKeyboardMarkup(bool_keyboard, one_time_keyboard=True, resize_keyboard=True),
         )
-        return CHOOSE_TASK
+        return WATCHLIST_NO_TORR
+
+
+@auth_wrap
+def add_to_watchlist_no_torrent(update: Update, context: CallbackContext) -> int:
+    if update.message.text == 'Yes':
+        # Try to get user's IMDB id if he has any
+        try:
+            imdb_id = get_imdb_id_by_trgram_id(update.effective_user['id'])
+        except Exception as e:
+            logger.warning(f"Error upon retrieving IMDB id for user with tgram_id {update.effective_user['id']} "
+                           f"might not have any. Error: {e}")
+            imdb_id = None
+        if 'torrents' not in context.user_data['pkg'].keys():
+            add_to_watchlist(deconvert_imdb_id(context.user_data['pkg']['imdb']), imdb_id, 'new')
+        else:
+            add_to_watchlist(deconvert_imdb_id(context.user_data['pkg']['imdb']), imdb_id, 'new',
+                             [x['id'] for x in context.user_data['pkg']['torrents']])
+        message = "Added to watchlist! What's next?"
+    else:
+        message = "Ok, what would you like to do next?"
+    update.message.reply_text(
+        message,
+        reply_markup=ReplyKeyboardMarkup(menu_keyboard, one_time_keyboard=True, resize_keyboard=True),
+    )
+    return CHOOSE_TASK
 
 
 @auth_wrap
@@ -397,7 +425,7 @@ def download_torrent(update: Update, context: CallbackContext) -> int:
         query.edit_message_text(text=f"Thanks, sending download request...")
         # Send download request
         try:
-            torr = [x for x in context.user_data['pkg'] if query.data == str(x['id'])][0]
+            torr = [x for x in context.user_data['pkg']['torrents'] if query.data == str(x['id'])][0]
             # Send torrent to daemon
             torr_client_resp = send_torrent(compose_link(query.data))
             # Update torrent DB
@@ -414,8 +442,13 @@ def download_torrent(update: Update, context: CallbackContext) -> int:
                                          "regarding this movie.")
             return exclude_res_from_watchlist(update, context)
         else:
-            query.edit_message_text(text="Ok, have a great day!")
-            return ConversationHandler.END
+            # query.edit_message_text(text="Shit")
+            print(update.message)
+            update.effective_message.reply_text('Would you like to add it to your watchlist?',
+                                                reply_markup=ReplyKeyboardMarkup(bool_keyboard,
+                                                                                 one_time_keyboard=True,
+                                                                                 resize_keyboard=True))
+            return WATCHLIST_NO_TORR
 
 
 @auth_wrap
@@ -502,7 +535,7 @@ def remove_watchlist_entry(update: Update, context: CallbackContext) -> int:
 
 @auth_wrap
 def exclude_res_from_watchlist(update: Update, context: CallbackContext) -> int:
-    torrents = context.user_data['pkg']
+    torrents = context.user_data['pkg']['torrents']
     movie_id = deconvert_imdb_id(torrents[0]['imdb'])
     exclude_torrents_from_watchlist(movie_id, update.effective_user['id'], [x['id'] for x in torrents])
     update.callback_query.edit_message_text(text="Removed these torrent quality for future recommendations "
@@ -644,6 +677,11 @@ def main() -> None:
             SUBMIT_RATING: [
                 MessageHandler(
                     Filters.text, submit_rating
+                ),
+            ],
+            WATCHLIST_NO_TORR: [
+                MessageHandler(
+                    Filters.text, add_to_watchlist_no_torrent
                 ),
             ],
         },

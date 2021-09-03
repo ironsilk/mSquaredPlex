@@ -82,10 +82,19 @@ class TORR_REFRESHER:
         close_mysql(self.conn, self.cursor)
 
     def get_torrents(self):
+        # Get DB torrents
         q = "SELECT * FROM my_torrents WHERE status != 'removed'"
         self.cursor.execute(q)
         results = self.cursor.fetchall()
         results = [x for x in results if x['torr_name']]
+        # Match them with client torrents
+        client_torrents = self.torr_client.get_torrents()
+        client_torrents = {x.name: x for x in client_torrents}
+        for torr in results:
+            if torr['torr_name'] in client_torrents.keys():
+                torr['torr_obj'] = client_torrents[torr['torr_name']]
+            else:
+                torr['id'] = None
         return results
 
     def update_statuses(self):
@@ -96,11 +105,7 @@ class TORR_REFRESHER:
         self.logger.info("Checking for duplicate lower res movies...")
         torrents = self.remove_low_res(torrents)
         for torr in torrents:
-            print(torr)
-            print(torr['torr_name'])
-            torr_response = self.torr_client.get_torrent(torrent_id=torr['torr_name'])
-            self.torr_client.get_torrent(to)
-            print(torr_response)
+            torr_response = torr.pop('torr_obj', None)
             if torr_response.status == 'seeding':
                 # Decide whether to remove it or keep it
                 if self.check_seeding_status(torr_response):
@@ -109,7 +114,7 @@ class TORR_REFRESHER:
                         update_many([torr], 'my_torrents')
                 else:
                     # remove torrent and data
-                    self.remove_torrent_and_files(torr['torr_name'])
+                    self.remove_torrent_and_files(torr['torr_id'])
                     # change status
                     torr['status'] = 'removed'
                     update_many([torr], 'my_torrents')
@@ -163,5 +168,8 @@ def refresher_routine():
     refresher.close()
     return
 
-x = TORR_REFRESHER(setup_logger('cacat'))
-x.update_statuses()
+
+if __name__ == '__main__':
+    from pprint import pprint
+    x = TORR_REFRESHER(setup_logger('cacat'))
+    x.update_statuses()
