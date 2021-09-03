@@ -53,7 +53,8 @@ def get_user_watched_movies(email, account=None, plex=None):
 
     if not account:
         account, plex = connect_plex()
-    print(email, PLEX_ADMIN_EMAILS)
+    logger.info(email)
+    logger.info(str(PLEX_ADMIN_EMAILS))
     if email not in PLEX_ADMIN_EMAILS:
         # Get users
         users = get_plex_users(account, plex)
