@@ -18,7 +18,7 @@ from bot_utils import make_movie_reply, get_telegram_users, update_torr_db, \
     invite_friend, get_movie_from_all_databases, search_imdb_title, check_one_in_my_movies, get_imdb_id_by_trgram_id, \
     add_to_watchlist
 from bot_watchlist import bot_watchlist_routine, update_watchlist_item_status, get_torrents_for_imdb_id
-from telegram_service.bot_rate_title import bot_rate_titles
+from bot_rate_title import bot_rate_titles
 from utils import update_many, deconvert_imdb_id, send_torrent, compose_link, check_db_plexbuddy, convert_imdb_id
 
 TELEGRAM_AUTH_TEST_PATH = os.getenv('TELEGRAM_AUTH_TEST_PATH')
@@ -318,7 +318,6 @@ def accept_reject_title(update: Update, context: CallbackContext) -> int:
 
 @auth_wrap
 def check_movie_status(update: Update, context: CallbackContext) -> int:
-    # TODO prettify here
     movie = context.user_data['pkg']
     # Check if you've already seen it and send info
     if movie['already_in_my_movies']:

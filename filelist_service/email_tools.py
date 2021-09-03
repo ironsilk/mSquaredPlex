@@ -580,8 +580,8 @@ def prepare_item_for_email(item, email, mtls, cypher):
     item['runtime'] = item['runtimeMinutes']
     item['imdb_score'] = item['averageRating']  # TODO asta nu iese momentan
     item['score'] = item['tmdb_score']
-    item['my_imdb_score'] = None  # TODO n-am momentan
-    item['seen_date'] = None  # TODO PLEX?
+    item['my_imdb_score'] = item['my_score']
+    item['seen_date'] = item['seen_date']
     item['resolution'] = str(get_torr_quality(item['name'])) + 'p'
     item['trend'] = ''  # TODO asta nu stiu de unde sa-l iau
     item['id'] = str(item['id'])

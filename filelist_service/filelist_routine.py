@@ -111,7 +111,6 @@ def feed_routine(cypher):
 
 
 def run_forever(cypher=torr_cypher, sleep_time=60*60*FLIST_ROUTINE_SLEEP_TIME):
-    # TODO maybe make it run at a certain hour, 8AM 8 PM for example
     """
     Run routine - run time is negligible, will sleep for full time provided in settings.
     :param cypher: AES cypher for torrent API hashes
