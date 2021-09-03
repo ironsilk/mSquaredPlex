@@ -67,6 +67,7 @@ table_columns_plexbuddy = {
         'my_score': 'float',
         'seen_date': 'DATETIME',
         'user': 'VARCHAR(256)',
+        'rating_status': 'VARCHAR(128)',
     },
     'my_torrents': {
         'torr_id': 'INT(11)',
@@ -348,10 +349,7 @@ def update_many(data_list=None, mysql_table=None, connection=None, cursor=None):
     try:
         cursor.executemany(query, values)
     except Exception as e:
-        try:
-            logger.error("UpdateMany MySQL Error [%d]: %s" % (e.args[0], e.args[1]))
-        except IndexError:
-            logger.error("UpdateMany MySQL Error: %s" % str(e))
+        logger.warning(f"UpdateMany MySQL Error: {e}")
 
         connection.rollback()
         return False

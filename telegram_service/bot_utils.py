@@ -3,7 +3,6 @@ import os
 import imdb
 import requests
 
-from telegram_service.bot_utils import get_watchlist_item
 from utils import check_one_in_my_torrents_by_imdb, retrieve_one_from_dbs
 from utils import connect_mysql, update_many, connect_plex
 from utils import deconvert_imdb_id

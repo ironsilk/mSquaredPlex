@@ -58,6 +58,11 @@ internet so no functions will be affected.
 2. Git clone repo on server
 3. Run `sudo docker-compose -f docker_compose_MAINSTACK.yml up -d --build`. Flags: -d means `detached`, `--build` will 
    rebuild images from scratch.
+   
+
+## COMMANDS
+
+`sudo docker-compose -f docker-compose_MAINSTACK.yml up --build --force-recreate --no-deps -d imdb_sync_service`
 
 
 ## Known bugs:

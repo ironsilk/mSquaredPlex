@@ -1,4 +1,3 @@
-import datetime
 import os
 
 from utils import setup_logger, connect_mysql, connect_plex, get_plex_users
@@ -53,8 +52,6 @@ def get_user_watched_movies(email, account=None, plex=None):
 
     if not account:
         account, plex = connect_plex()
-    logger.info(email)
-    logger.info(str(PLEX_ADMIN_EMAILS))
     if email not in PLEX_ADMIN_EMAILS:
         # Get users
         users = get_plex_users(account, plex)
@@ -78,9 +75,3 @@ def get_user_watched_movies(email, account=None, plex=None):
     movies = movies.search(unwatched=False)
     ids = [return_movie_id(movie) for movie in movies]
     return [x for x in ids if x]
-
-
-if __name__ == '__main__':
-    from pprint import pprint
-    print(PLEX_ADMIN_EMAILS)
-    pprint(get_user_watched_movies('mihai.vlad6@gmail.com'))

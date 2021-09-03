@@ -13,16 +13,18 @@ from telegram.ext import Updater, MessageHandler, Filters, CallbackContext, Conv
     CommandHandler
 from transmission_rpc.error import TransmissionError
 
-from bot_utils import make_movie_reply, get_telegram_users, update_torr_db,\
+from bot_utils import make_movie_reply, get_telegram_users, update_torr_db, \
     exclude_torrents_from_watchlist, get_excluded_resolutions, \
-    invite_friend, get_movie_from_all_databases, search_imdb_title
+    invite_friend, get_movie_from_all_databases, search_imdb_title, check_one_in_my_movies
 from bot_watchlist import bot_watchlist_routine, update_watchlist_item_status, get_torrents_for_imdb_id
-from utils import update_many, deconvert_imdb_id, send_torrent, compose_link, check_db_plexbuddy
+from telegram_service.bot_rate_title import bot_rate_titles
+from utils import update_many, deconvert_imdb_id, send_torrent, compose_link, check_db_plexbuddy, convert_imdb_id
 
 TELEGRAM_AUTH_TEST_PATH = os.getenv('TELEGRAM_AUTH_TEST_PATH')
 TELEGRAM_AUTH_APPROVE = os.getenv('TELEGRAM_AUTH_APPROVE')
 TELEGRAM_IMDB_RATINGS = os.getenv('TELEGRAM_IMDB_RATINGS')
 TELEGRAM_WATCHLIST_ROUTINE_INTERVAL = int(os.getenv('TELEGRAM_WATCHLIST_ROUTINE_INTERVAL'))
+TELEGRAM_RATE_ROUTINE_INTERVAL = int(os.getenv('TELEGRAM_RATE_ROUTINE_INTERVAL'))
 
 # Other info:
 # https://github.com/Ambro17/AmbroBot
@@ -41,7 +43,7 @@ logger = logging.getLogger('MovieTimeBot')
 
 # Stages
 CHOOSE_TASK, IDENTIFY_MOVIE, CHOOSE_MULTIPLE, CHOOSE_ONE, CONFIRM_REDOWNLOAD_ACTION, SEARCH_FOR_TORRENTS, \
-DOWNLOAD_TORRENT, CHECK_RIDDLE_RESPONSE, CHECK_EMAIL, GIVE_IMDB, CHECK_IMDB = range(11)
+DOWNLOAD_TORRENT, CHECK_RIDDLE_RESPONSE, CHECK_EMAIL, GIVE_IMDB, CHECK_IMDB, SUBMIT_RATING = range(12)
 
 # Keyboards
 menu_keyboard = [
@@ -56,6 +58,14 @@ movie_selection_keyboard = [
     ['Yes'],
     ['No'],
     ['Exit'],
+]
+rate_keyboard = [
+    ['1', '2'],
+    ['3', '4'],
+    ['5', '6'],
+    ['7', '8'],
+    ['9', '10'],
+    ["I've changed my mind"]
 ]
 
 # Get users from db
@@ -394,6 +404,7 @@ def download_torrent(update: Update, context: CallbackContext) -> int:
             update_torr_db(torr, torr_client_resp, update.effective_user['id'])
             message = f"Download started, have a great day!"
         except TransmissionError as e:
+            logger.error(f"Error on torrent send: {e}")
             message = f"Download failed, please check logs and try again."
         query.edit_message_text(text=message)
         return ConversationHandler.END
@@ -428,11 +439,12 @@ def go_back(update, context, message):
 
 @auth_wrap
 def help_command(update: Update, context: CallbackContext) -> None:
+    """Displays info on how to use the bot."""
+
     watchlist_status = 'MONITORING' if USERS[update.effective_user.id]['scan_watchlist'] == 1 else 'NOT MONITORING'
     email_status = 'RECEIVING' if USERS[update.effective_user.id]['email_newsletters'] else 'NOT RECEIVING'
-    """Displays info on how to use the bot."""
     update.message.reply_text("Type anything for the bot to start.\n\n"
-                              f"Right now we are {watchlist_status} your watchlist (10pg max). "
+                              f"Right now we are {watchlist_status} your watchlist. "
                               f"Type /change_watchlist "
                               "to reverse the status.\n\n"
                               f"Right now you are {email_status} the email newsletters. Type /change_newsletter "
@@ -499,6 +511,45 @@ def exclude_res_from_watchlist(update: Update, context: CallbackContext) -> int:
 
 
 @auth_wrap
+def rate_title_entry(update: Update, context: CallbackContext) -> int:
+    context.user_data['pkg'] = {
+        'imdb': int(update.message.text.replace('/RateTitle', '')),
+    }
+
+    message = f"Please choose a rating."
+    update.effective_message.reply_html(message, reply_markup=ReplyKeyboardMarkup(rate_keyboard,
+                                                                                  one_time_keyboard=True,
+                                                                                  resize_keyboard=True,
+                                                                                  ))
+    return SUBMIT_RATING
+
+
+@auth_wrap
+def submit_rating(update: Update, context: CallbackContext) -> int:
+    if update.message.text in [str(x) for x in list(range(1, 11))]:
+        # Got rating
+        item = check_one_in_my_movies(context.user_data['pkg']['imdb'])
+        item['rating_status'] = 'rated in telegram'
+        item['my_score'] = int(update.message.text)
+        update_many([item], 'my_movies')
+        update.effective_message.reply_text(f"Ok, great! Here's a link if you also want to rate it on IMDB:\n"
+                                            f"https://www.imdb.com/title/"
+                                            f"{convert_imdb_id(context.user_data['pkg']['imdb'])}/")
+        return ConversationHandler.END
+
+    elif update.message.text == "I've changed my mind":
+        item = check_one_in_my_movies(context.user_data['pkg']['imdb'])
+        item['rating_status'] = 'refused to rate'
+        update_many([item], 'my_movies')
+        update.effective_message.reply_text("Ok, no worries! I won't bother you about this title anymore.\n"
+                                            "Have a great day!")
+        return ConversationHandler.END
+    else:
+        update.effective_message.reply_text("Please choose an option from the keyboard.")
+        return SUBMIT_RATING
+
+
+@auth_wrap
 def end(update, context, message):
     return ConversationHandler.END
 
@@ -516,6 +567,7 @@ def main() -> None:
         entry_points=[
             MessageHandler(Filters.regex(r'^/WatchMatch\d+$'), watchlist_entry),
             MessageHandler(Filters.regex(r'^/UnWatchMatch\d+$'), remove_watchlist_entry),
+            MessageHandler(Filters.regex(r'^/RateTitle\d+$'), rate_title_entry),
             MessageHandler(Filters.text, start),
         ],
         states={
@@ -589,6 +641,11 @@ def main() -> None:
                     Filters.text, wrong_input
                 ),
             ],
+            SUBMIT_RATING: [
+                MessageHandler(
+                    Filters.text, submit_rating
+                ),
+            ],
         },
         fallbacks=[MessageHandler(Filters.text, end)],
         per_message=False
@@ -603,6 +660,7 @@ def main() -> None:
     updater.start_polling()
     job_queue = updater.job_queue
     job_queue.run_repeating(bot_watchlist_routine, interval=TELEGRAM_WATCHLIST_ROUTINE_INTERVAL * 60, first=5)
+    job_queue.run_repeating(bot_rate_titles, interval=TELEGRAM_WATCHLIST_ROUTINE_INTERVAL * 60, first=5)
 
     updater.idle()
 
