@@ -53,7 +53,7 @@ def get_user_watched_movies(email, account=None, plex=None):
 
     if not account:
         account, plex = connect_plex()
-
+    print(email, PLEX_ADMIN_EMAILS)
     if email not in PLEX_ADMIN_EMAILS:
         # Get users
         users = get_plex_users(account, plex)
@@ -63,14 +63,14 @@ def get_user_watched_movies(email, account=None, plex=None):
         except IndexError:
             logger.warning("Email not in users, ignore if he's admin.")
             return None
-    elif email == PLEX_ADMIN_EMAILS[0]:
+    if email == PLEX_ADMIN_EMAILS[0]:
         pass
     else:
         try:
             user = [x.name for x in plex.systemAccounts() if x.name == email][0]
             plex = plex.switchUser(user)
         except IndexError:
-            logger.error('Email not in users')
+            logger.error('Email not in users or admins.')
             return None
 
     movies = plex.library.section('Movies')
@@ -81,4 +81,5 @@ def get_user_watched_movies(email, account=None, plex=None):
 
 if __name__ == '__main__':
     from pprint import pprint
+    print(PLEX_ADMIN_EMAILS)
     pprint(get_user_watched_movies('mihai.vlad6@gmail.com'))

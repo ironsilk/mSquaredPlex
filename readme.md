@@ -66,6 +66,10 @@ internet so no functions will be affected.
 All containers are set to restart `on-failiure` so no worries.
   
 - Mysql might be slow: this might help: https://phpforus.com/how-to-make-mysql-run-fast-with-ext4-on-ubuntu/
-
+ So slow that you might need to startup the services twice on first DB initialisation.
+  Might be also slow because of fking up of docker volumes so to remove unused volumes: `sudo docker volume prune`.
+  The final solution for this shit is always `sudo docker system prune -a` - Attention, it removes everything (volumes,
+  networks, containers) not in use by any active docker container at that time. Run it before running again
+  `sudo docker-compose -f docker-compose_MAINSTACK.yml up -d --buil`
 
 

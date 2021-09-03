@@ -13,10 +13,10 @@ from telegram.ext import Updater, MessageHandler, Filters, CallbackContext, Conv
     CommandHandler
 from transmission_rpc.error import TransmissionError
 
-from bot_utils import make_movie_reply, get_telegram_users, update_torr_db, bot_watchlist_routine, \
+from bot_utils import make_movie_reply, get_telegram_users, update_torr_db,\
     exclude_torrents_from_watchlist, get_excluded_resolutions, \
-    update_watchlist_item_status, invite_friend, get_movie_from_all_databases, get_torrents_for_imdb_id, \
-    search_imdb_title
+    invite_friend, get_movie_from_all_databases, search_imdb_title
+from bot_watchlist import bot_watchlist_routine, update_watchlist_item_status, get_torrents_for_imdb_id
 from utils import update_many, deconvert_imdb_id, send_torrent, compose_link, check_db_plexbuddy
 
 TELEGRAM_AUTH_TEST_PATH = os.getenv('TELEGRAM_AUTH_TEST_PATH')
