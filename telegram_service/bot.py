@@ -697,7 +697,7 @@ def main() -> None:
     updater.start_polling()
     job_queue = updater.job_queue
     job_queue.run_repeating(bot_watchlist_routine, interval=TELEGRAM_WATCHLIST_ROUTINE_INTERVAL * 60, first=5)
-    job_queue.run_repeating(bot_rate_titles, interval=TELEGRAM_WATCHLIST_ROUTINE_INTERVAL * 60, first=5)
+    job_queue.run_repeating(bot_rate_titles, interval=TELEGRAM_RATE_ROUTINE_INTERVAL * 60, first=5)
 
     updater.idle()
 

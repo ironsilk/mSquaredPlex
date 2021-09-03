@@ -62,6 +62,16 @@ internet so no functions will be affected.
 
 ## COMMANDS
 
+1. Start all services:
+
+`sudo docker-compose -f docker-compose_MAINSTACK.yml up -d --build --remove-orphans`
+
+2. Stop all services:
+
+`sudo docker-compose -f docker-compose_MAINSTACK.yml down`
+
+3. Recreate one service
+
 `sudo docker-compose -f docker-compose_MAINSTACK.yml up --build --force-recreate --no-deps -d imdb_sync_service`
 
 
@@ -76,5 +86,20 @@ All containers are set to restart `on-failiure` so no worries.
   The final solution for this shit is always `sudo docker system prune -a` - Attention, it removes everything (volumes,
   networks, containers) not in use by any active docker container at that time. Run it before running again
   `sudo docker-compose -f docker-compose_MAINSTACK.yml up -d --buil`
+  
+
+## TODO
+
+- Torrents download status for each user
+- Download a CSV with my database - ratings and views
+- Upload Netflix view history :X and integrate it.
+- Joke engine - send random jokes to random users.
+- reccomend a movie
+- Show my watchlist
+- notification when movie was downloaded
+- see if we need to manually add movies to plex
+- add functionality to say you've watched the movie with someone else so they also get notification
+to rate the movie (meh, maybe)
+  
 
 

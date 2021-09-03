@@ -586,6 +586,7 @@ def prepare_item_for_email(item, email, mtls, cypher):
     item['trend'] = ''  # TODO asta nu stiu de unde sa-l iau
     item['id'] = str(item['id'])
     item['freeleech'] = True if item['freeleech'] == 1 else False
+    item['trailer'] = item['trailer_link']
 
     # Add keys for torrent API and generate AES hash for each torrent
     item['torr_link_seed'], item['torr_link_download'] = generate_torr_links(item, email, cypher)
