@@ -1,6 +1,9 @@
-import os
-import os
-import urllib.request
-# pkg = '&'.join([torr_id, torr_name, torr_label])
+#!/bin/bash
 
-s = 'http:192.168.1.99:9092/torr_finished?2&&&The.Hangover.2009.UNRATED.1080p.Bluray.x264.RoSubbed-EbP&&&'
+jq '."script-torrent-done-enabled" = true' /defaults/settings.json
+jq '."script-torrent-done-filename" = "/torr_finished_routine.sh"' /defaults/settings.json
+jq '."incomplete-dir-enabled" = false' /defaults/settings.json
+
+jq '."script-torrent-done-enabled" = true' /config/settings.json
+jq '."script-torrent-done-filename" = "/torr_finished_routine.sh"' /config/settings.json
+jq '."incomplete-dir-enabled" = false' /config/settings.json
