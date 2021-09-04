@@ -29,6 +29,7 @@ services:
       - USER=${TRANSMISSION_USER}
       - PASS=${TRANSMISSION_PASS}
     volumes:
+      - ${TRANSMISSION_FILES_LOCATION}:/config
       - ${TRANSMISSION_FILES_LOCATION}/downloads:/downloads
       - ${TRANSMISSION_FILES_LOCATION}/watch:/watch
       - ${PLEX_TV_LIBRARY_FOLDER}:/tv
