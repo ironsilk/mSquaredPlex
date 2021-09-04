@@ -1,0 +1,11 @@
+# docker build -t imdb_refresh_service . -f Dockerfile_MOVIELIB_imdb
+FROM ghcr.io/linuxserver/transmission
+
+LABEL Author="Mikael"
+
+COPY torr_service/finished_torrent_routine.py ./
+COPY torr_service/torr_finished_routine.sh ./
+
+RUN chmod 777 finished_torrent_routine.py
+RUN chmod 777 torr_finished_routine.sh
+

@@ -91,15 +91,18 @@ All containers are set to restart `on-failiure` so no worries.
 ## TODO
 
 - Torrents download status for each user
+- notification when movie was downloaded
 - Download a CSV with my database - ratings and views
 - Upload Netflix view history :X and integrate it.
 - Joke engine - send random jokes to random users.
 - reccomend a movie
 - Show my watchlist
-- notification when movie was downloaded
 - see if we need to manually add movies to plex
+- ask user who asked for download and didnt watch the movie before deletion
+  and maybe confirm in with the admin.
 - add functionality to say you've watched the movie with someone else so they also get notification
 to rate the movie (meh, maybe)
+- fix autoscan, not working right now
   
 
 

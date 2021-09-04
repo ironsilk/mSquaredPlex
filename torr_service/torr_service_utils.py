@@ -24,9 +24,8 @@ def gtfo(resp):
 
 class TORRAPI:
 
-    def __init__(self, cypher, torr_client, logger):
+    def __init__(self, cypher, logger):
         self.cy = cypher
-        self.torr = torr_client
         self.logger = logger
 
     @classmethod
@@ -69,6 +68,25 @@ class TORRAPI:
         resp.media = 'Torrent successfully queued for download.'
         self.logger.info(f"Torrent with id {pkg['id']} and torr_name {torr_response.name} successfully queued for "
                          f"download.")
+        return
+
+
+class TORR_FINISHED:
+
+    def __init__(self, logger):
+        self.logger = logger
+
+    @classmethod
+    def get_classname(cls):
+        return cls.__name__
+
+    def on_get(self, req, resp):
+        """Handles GET requests"""
+        pkg = req.query_string
+        if not pkg:
+            return gtfo(resp)
+
+        print(pkg)
         return
 
 

@@ -1,12 +1,4 @@
 import os
-
-
-
-# doesnt work, dunno why.
-# docker run -it --rm --network host exoplatform/mysqltuner --host 192.168.1.99 --user root --pass pass --forcemem 128
-
-
-import os
 import urllib.request
 
 # api_host = os.getenv('TORR_API_HOST')
@@ -22,8 +14,3 @@ torr_label = os.getenv('TR_TORRENT_LABELS') or ''
 pkg = '&'.join([torr_id, torr_name, torr_label])
 # Send request
 contents = urllib.request.urlopen(api_url + pkg).read()
-
-# Just for testing
-envs = '&'.join([f'{k}: {v}' for k, v in sorted(os.environ.items())])
-with open("ceva2.txt", "w") as text_file:
-    text_file.write("Purchase Amount: %s" % envs)
