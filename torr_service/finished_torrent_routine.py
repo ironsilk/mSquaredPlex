@@ -9,6 +9,7 @@ api_url = "http://" + api_host + ":" + str(api_port) + api_endpoint + "?"
 torr_name = os.getenv('TR_TORRENT_NAME') or ''
 torr_id = os.getenv('TR_TORRENT_ID') or ''
 torr_label = os.getenv('TR_TORRENT_LABELS') or ''
+torr_name = torr_name.replace(' ', '^')
 
 pkg = '&&&'.join([torr_id, torr_name, torr_label])
 # Send request

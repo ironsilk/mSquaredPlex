@@ -58,6 +58,14 @@ internet so no functions will be affected.
 2. Git clone repo on server
 3. Run `sudo docker-compose -f docker_compose_MAINSTACK.yml up -d --build`. Flags: -d means `detached`, `--build` will 
    rebuild images from scratch.
+4. Haven't yet found a better way... These changes will persist during the next docker restarts but we need
+   to make them manually right now. Need to stop the `transmission container`, go where you've defined
+ `TRANSMISSION_FILES_LOCATION` environment variable and change the following settings in `settings.json`:
+   - "script-torrent-done-enabled" -> true
+   - "script-torrent-done-filename" -> "/torr_finished_routine.sh"'
+   - "incomplete-dir-enabled" -> false
+    
+     
    
 
 ## COMMANDS
@@ -86,7 +94,7 @@ All containers are set to restart `on-failiure` so no worries.
   The final solution for this shit is always `sudo docker system prune -a` - Attention, it removes everything (volumes,
   networks, containers) not in use by any active docker container at that time. Run it before running again
   `sudo docker-compose -f docker-compose_MAINSTACK.yml up -d --buil`
-  
+- Still haven't figured out how to make those transmission startup settings. 
 
 ## TODO
 

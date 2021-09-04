@@ -95,6 +95,7 @@ class TORR_FINISHED:
         if not pkg:
             return gtfo(resp)
         torr_id, torr_name, torr_labels = pkg.split('&&&')
+        torr_name = torr_name.replace('^', ' ')
         # Get users who requested this torrent
         torr = check_one_in_my_torrents_by_torr_name(torr_name)
         users = torr['requested_by'].split(',')

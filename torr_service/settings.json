@@ -1,4 +1,0 @@
-{
-    "download-queue-enabled": true,
-    "script-torrent-done-enabled": true,
-    "script-torrent-done-filename": "/torr_finished_routine.sh"

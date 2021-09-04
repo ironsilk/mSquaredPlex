@@ -10,6 +10,7 @@ COPY torr_service/torr_finished_routine.sh ./
 RUN chmod 777 finished_torrent_routine.py
 RUN chmod 777 torr_finished_routine.sh
 
-COPY torr_service/settings.json /config/settings.json
-
-
+# Add routine to change transmission settings.
+COPY torr_service/change_transmission_settings.sh ./config/custom-cont-init.d/
+RUN chmod +x ./config/custom-cont-init.d/change_transmission_settings.sh
+RUN chmod 777 ./config/custom-cont-init.d/change_transmission_settings.sh
