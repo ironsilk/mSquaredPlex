@@ -9,7 +9,11 @@ COPY torr_service/torr_finished_routine.sh ./
 # Set run rights -i know they're too broad but fk it
 RUN chmod 777 finished_torrent_routine.py
 RUN chmod 777 torr_finished_routine.sh
-# Change settings.
-RUN jq '."script-torrent-done-filename" = "/torr_finished_routine.sh"' /config/settings.json
-RUN jq '."script-torrent-done-enabled" = false' /config/settings.json
+
+# Add routine to change transmission settings.
+COPY torr_service/change_transmission_settings.sh ./config/custom-cont-init.d/
+RUN chmod 777 ./config/custom-cont-init.d/change_transmission_settings.sh
+
+# RUN jq '."script-torrent-done-filename" = "/torr_finished_routine.sh"' /config/settings.json
+# RUN jq '."script-torrent-done-enabled" = false' /config/settings.json
 
