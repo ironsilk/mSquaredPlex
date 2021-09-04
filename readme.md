@@ -91,7 +91,7 @@ All containers are set to restart `on-failiure` so no worries.
 ## TODO
 
 - Torrents download status for each user
-- notification when movie was downloaded - **done**
+- notification when movie was downloaded - work in progress
 - Download a CSV with my database - ratings and views
 - Upload Netflix view history :X and integrate it.
 - Show my watchlist
