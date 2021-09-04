@@ -6,7 +6,8 @@ from urllib.parse import unquote
 import falcon
 
 from utils import timing, setup_logger, send_torrent, compose_link, update_many, \
-    connect_mysql, close_mysql, make_client
+    connect_mysql, close_mysql, make_client, check_one_in_my_torrents_by_torr_id, \
+    check_one_in_my_torrents_by_torr_name, send_message_to_bot, get_tgram_user_by_email
 
 TORR_KEEP_TIME = int(os.getenv('TORR_KEEP_TIME'))
 
@@ -53,6 +54,14 @@ class TORRAPI:
             resp.status = falcon.HTTP_500
             return
 
+        # Check if torrent is already requested
+        torr = check_one_in_my_torrents_by_torr_id(pkg['id'])
+        if torr:
+            requesters = torr['requested_by'].split(',')
+            requesters.append(pkg['requested_by'])
+            requesters = ','.join(list(set(requesters)))
+        else:
+            requesters = pkg['requested_by']
         # Update in torrents DB
         update_many([{
             'torr_id': pkg['id'],
@@ -60,7 +69,7 @@ class TORRAPI:
             'imdb_id': pkg['imdb_id'],
             'resolution': pkg['resolution'],
             'status': 'requested download',
-            'requested_by': pkg['requested_by']
+            'requested_by': requesters
         }],
             'my_torrents')
 
@@ -85,8 +94,17 @@ class TORR_FINISHED:
         pkg = req.query_string
         if not pkg:
             return gtfo(resp)
-
-        print(pkg)
+        torr_id, torr_name, torr_labels = pkg.split('&&&')
+        # Get users who requested this torrent
+        torr = check_one_in_my_torrents_by_torr_name(torr_name)
+        users = torr['requested_by'].split(',')
+        message = f"Your requested torrent,\n" \
+                  f"{torr_name}\n" \
+                  f"has been downloaded. 🏁"
+        for user in users:
+            resp = send_message_to_bot(get_tgram_user_by_email(user), message)
+            if not resp:
+                self.logger.erro(f"Failed to send message: {torr_name}, {user}")
         return
 
 
@@ -188,6 +206,5 @@ def refresher_routine():
 
 
 if __name__ == '__main__':
-    from pprint import pprint
     x = TORR_REFRESHER(setup_logger('cacat'))
     x.update_statuses()

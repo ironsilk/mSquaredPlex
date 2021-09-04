@@ -4,6 +4,7 @@ import os
 import imdb
 import mysql.connector as cnt
 import mysql.connector.errors
+import requests
 from plexapi.server import PlexServer
 import re
 import xml.etree.ElementTree as ET
@@ -57,6 +58,8 @@ TORR_API_PATH = os.getenv('TORR_API_PATH')
 TORR_SEED_FOLDER = os.getenv('TORR_SEED_FOLDER')
 TORR_DOWNLOAD_FOLDER = os.getenv('TORR_DOWNLOAD_FOLDER')
 
+TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
+
 PASSKEY = os.getenv('PASSKEY')
 
 
@@ -75,7 +78,7 @@ table_columns_plexbuddy = {
         'imdb_id': 'INT(11)',
         'resolution': 'int(11)',
         'status': 'CHAR(32)',
-        'requested_by': 'VARCHAR(256)',
+        'requested_by': 'TEXT',
     },
     'users': {
         'telegram_chat_id': 'INT(11)',
@@ -403,6 +406,11 @@ def compose_link(id):
     return f'https://filelist.io/download.php?id={id}&passkey={PASSKEY}'
 
 
+def send_message_to_bot(chat_id, message):
+    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage?chat_id={chat_id}&text={message}"
+    r = requests.get(url)
+    return r['ok']
+
 # DB queries
 def get_my_imdb_users(cursor=None):
     if not cursor:
@@ -426,6 +434,22 @@ def check_one_in_my_torrents_by_imdb(idd, cursor=None):
     q = f"SELECT * FROM my_torrents WHERE imdb_id = {idd}"
     cursor.execute(q)
     return cursor.fetchall()
+
+
+def check_one_in_my_torrents_by_torr_id(idd, cursor=None):
+    if not cursor:
+        conn, cursor = connect_mysql()
+    q = f"SELECT * FROM my_torrents WHERE torr_id = {idd}"
+    cursor.execute(q)
+    return cursor.fetchone()
+
+
+def check_one_in_my_torrents_by_torr_name(name, cursor=None):
+    if not cursor:
+        conn, cursor = connect_mysql()
+    q = f"SELECT * FROM my_torrents WHERE torr_name = {name}"
+    cursor.execute(q)
+    return cursor.fetchone()
 
 
 def retrieve_one_from_dbs(item, cursor=None):
@@ -528,6 +552,14 @@ def get_movie_from_imdb_online(imdb_id):
         logger.error(f"IMDB online error: {e}")
         item = None
     return item
+
+
+def get_tgram_user_by_email(email, cursor=None):
+    if not cursor:
+        conn, cursor = connect_mysql()
+    q = f"SELECT `telegram_chat_id` FROM users where email = '{email}'"
+    cursor.execute(q)
+    return cursor.fetchone()['telegram_chat_id']
 
 
 # PLEX utils
@@ -1134,6 +1166,5 @@ def parse_torr_name(name):
 
 if __name__ == '__main__':
     from pprint import pprint
-    check_db_plexbuddy()
-    pprint(retrieve_one_from_dbs({'imdb': 'tt11154906'}))
+    # check_db_plexbuddy()
 

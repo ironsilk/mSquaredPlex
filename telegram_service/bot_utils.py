@@ -5,7 +5,7 @@ import requests
 
 from utils import check_one_in_my_torrents_by_imdb, retrieve_one_from_dbs
 from utils import connect_mysql, update_many, connect_plex
-from utils import deconvert_imdb_id
+from utils import deconvert_imdb_id, check_one_in_my_torrents_by_torr_id
 from utils import setup_logger
 
 NO_POSTER_PATH = os.getenv('NO_POSTER_PATH')
@@ -129,13 +129,22 @@ def get_telegram_users():
 
 
 def update_torr_db(pkg, torr_response, tgram_id):
+    # Check if torrent is already requested
+    torr = check_one_in_my_torrents_by_torr_id(pkg['id'])
+    if torr:
+        requesters = torr['requested_by'].split(',')
+        requesters.append(get_email_by_tgram_id(tgram_id))
+        requesters = ','.join(list(set(requesters)))
+    else:
+        requesters = get_email_by_tgram_id(tgram_id)
+
     update_many([{
         'torr_id': pkg['id'],
         'torr_name': torr_response.name,
         'imdb_id': deconvert_imdb_id(pkg['imdb']),
         'resolution': pkg['resolution'],
         'status': 'requested download',
-        'requested_by': get_email_by_tgram_id(tgram_id)
+        'requested_by': requesters
     }],
         'my_torrents')
 
