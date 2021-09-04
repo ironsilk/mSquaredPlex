@@ -96,7 +96,6 @@ class TORR_FINISHED:
             return gtfo(resp)
         torr_id, torr_name, torr_labels = pkg.split('&&&')
         # Get users who requested this torrent
-        print(torr_id, torr_name, torr_labels)
         torr = check_one_in_my_torrents_by_torr_name(torr_name)
         users = torr['requested_by'].split(',')
         message = f"Your requested torrent,\n" \

@@ -409,7 +409,7 @@ def compose_link(id):
 def send_message_to_bot(chat_id, message):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage?chat_id={chat_id}&text={message}"
     r = requests.get(url)
-    return r['ok']
+    return r.json()['ok']
 
 # DB queries
 def get_my_imdb_users(cursor=None):
