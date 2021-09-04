@@ -3,8 +3,6 @@ FROM ghcr.io/linuxserver/transmission
 
 LABEL Author="Mikael"
 
-
-RUN chown 1000:1000 -R /config
 # Copy files
 COPY torr_service/finished_torrent_routine.py ./
 COPY torr_service/torr_finished_routine.sh ./
@@ -14,6 +12,7 @@ RUN chmod 777 torr_finished_routine.sh
 
 # Add routine to change transmission settings.
 COPY torr_service/change_transmission_settings.sh ./config/custom-cont-init.d/
+COPY torr_service/change_transmission_settings.sh ./
 RUN chmod 777 ./config/custom-cont-init.d/change_transmission_settings.sh
 
 
