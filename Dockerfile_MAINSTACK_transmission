@@ -10,13 +10,6 @@ COPY torr_service/torr_finished_routine.sh ./
 RUN chmod 777 finished_torrent_routine.py
 RUN chmod 777 torr_finished_routine.sh
 
-# Add routine to change transmission settings.
-COPY torr_service/change_transmission_settings.sh ./config/custom-cont-init.d/
-RUN chmod +x ./config/custom-cont-init.d/change_transmission_settings.sh
-RUN chmod 777 ./config/custom-cont-init.d/change_transmission_settings.sh
-
-
-RUN jq '."script-torrent-done-enabled" = true' /defaults/settings.json
-RUN jq '."script-torrent-done-filename" = "/torr_finished_routine.sh"' /defaults/settings.json
-# test 1231
-RUN jq '."incomplete-dir-enabled" = false' /defaults/settings.json
+ENV TRANSMISSION_SCRIPT_TORRENT_DONE_ENABLED=true
+ENV TRANSMISSION_SCRIPT_TORRENT_DONE-FILENAME="/torr_finished_routine.sh"
+ENV TRANSMISSION_INCOMPLETE_DIR_ENABLED=false
