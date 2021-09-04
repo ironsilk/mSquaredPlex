@@ -447,7 +447,7 @@ def check_one_in_my_torrents_by_torr_id(idd, cursor=None):
 def check_one_in_my_torrents_by_torr_name(name, cursor=None):
     if not cursor:
         conn, cursor = connect_mysql()
-    q = f"SELECT * FROM my_torrents WHERE torr_name = {name}"
+    q = f"SELECT * FROM my_torrents WHERE torr_name = '{name}'"
     cursor.execute(q)
     return cursor.fetchone()
 
