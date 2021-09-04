@@ -10,8 +10,6 @@ COPY torr_service/torr_finished_routine.sh ./
 RUN chmod 777 finished_torrent_routine.py
 RUN chmod 777 torr_finished_routine.sh
 
-RUN mkdir /custom_settings
-COPY torr_service/settings.json /custom_settings/settings.json
+COPY torr_service/settings.json /config/settings.json
 
-ENV TRANSMISSION_HOME="/custom_settings"
 
