@@ -14,8 +14,3 @@ RUN chmod 777 torr_finished_routine.sh
 COPY torr_service/change_transmission_settings.sh ./config/custom-cont-init.d/
 RUN chmod +x ./config/custom-cont-init.d/change_transmission_settings.sh
 RUN chmod 777 ./config/custom-cont-init.d/change_transmission_settings.sh
-
-RUN jq '."script-torrent-done-enabled" = true' /defaults/settings.json
-RUN jq '."script-torrent-done-filename" = "/torr_finished_routine.sh"' /defaults/settings.json
-
-
