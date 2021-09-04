@@ -3,9 +3,13 @@ FROM ghcr.io/linuxserver/transmission
 
 LABEL Author="Mikael"
 
+# Copy files
 COPY torr_service/finished_torrent_routine.py ./
 COPY torr_service/torr_finished_routine.sh ./
-
+# Set run rights -i know they're too broad but fk it
 RUN chmod 777 finished_torrent_routine.py
 RUN chmod 777 torr_finished_routine.sh
+# Change settings.
+RUN jq '."script-torrent-done-filename" = "/torr_finished_routine.sh"' /config/settings.json
+RUN jq '."script-torrent-done-enabled" = false' /config/settings.json
 
