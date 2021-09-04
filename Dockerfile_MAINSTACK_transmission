@@ -10,6 +10,6 @@ COPY torr_service/torr_finished_routine.sh ./
 RUN chmod 777 finished_torrent_routine.py
 RUN chmod 777 torr_finished_routine.sh
 
-ENV script-torrent-done-enabled=true
-ENV script-torrent-done-filename="/torr_finished_routine.sh"
-ENV incomplete-dir-enabled=false
+ENV script_torrent_done_enabled=true
+ENV script_torrent_done_filename="/torr_finished_routine.sh"
+ENV incomplete_dir_enabled=false
