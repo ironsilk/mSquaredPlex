@@ -112,7 +112,7 @@ All containers are set to restart `on-failiure` so no worries.
 
 
 
-###Right now:
+### Right now:
 
 Implement this and change port, integrate with other dockers:
 https://github.com/JonForest/html-to-image
@@ -125,6 +125,23 @@ https://github.com/sbi-rviot/ph_table
 
 another reference:
 https://stackoverflow.com/questions/10615901/trim-whitespace-using-pil
+
+
+### In order to solve TRANSMISSION configuration problem:
+
+This is not gonna be easy. https://github.com/linuxserver/docker-mods 
+
+1. Create a public repo on dockerhub, mine is mikael6/just_fun:transmission_mod
+2. `docker build -t mikael6/just_fun:transmission_mod` when you're in the folder `transmission_mod`
+3. `docker push mikael6/just_fun:transmission_mod`
+4. So right now you have a mod which is going to change the `defaults.json` used by transmission on
+startup.
+5. You need to create this container:
+
+`docker create --name=test -e PUID=1000 -e PGID=1000 -e DOCKER_MODS=mikael6/just_fun:transmission_mod --restart unless-stopped linuxserver/transmission`
+It will return a container ID
+6. `docker start {ID}` that ID. You can open a CLI into the container and use `cat defaults/settings.json` and `cat config/settings.json` to see that
+your configs have been saved.
   
 
 
