@@ -1,0 +1,16 @@
+FROM node:boron
+
+# Create app directory
+RUN mkdir -p /usr/src/app
+RUN mkdir -p /usr/src/app/public
+WORKDIR /usr/src/app
+
+# Install app dependencies
+COPY html_to_image2/package.json /usr/src/app/
+RUN npm install
+RUN npm install forever -g
+
+# Bundle app source
+COPY html_to_image2/. /usr/src/app
+
+CMD [ "forever", "app.js"]

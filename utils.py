@@ -389,6 +389,10 @@ def get_torr_quality(name):
     return int(PTN.parse(name)['resolution'][:-1])
 
 
+def get_torr_name(name):
+    return PTN.parse(name)['title']
+
+
 def timing(f):
     @wraps(f)
     def wrap(*args, **kw):
@@ -419,10 +423,35 @@ def get_my_imdb_users(cursor=None):
     return cursor.fetchall()
 
 
+def get_email_by_tgram_id(user, cursor=None):
+    if not cursor:
+        conn, cursor = connect_mysql()
+    q = f"SELECT `email` FROM users where telegram_chat_id = '{user}'"
+    cursor.execute(q)
+    return cursor.fetchone()['email']
+
+
+def get_imdb_id_by_trgram_id(user, cursor=None):
+    if not cursor:
+        conn, cursor = connect_mysql()
+    q = f"SELECT `imdb_id` FROM users where telegram_chat_id = '{user}'"
+    cursor.execute(q)
+    return cursor.fetchone()['imdb_id']
+
+
 def get_watchlist_for_user(user_imdb_id, cursor=None):
     if not cursor:
         conn, cursor = connect_mysql()
     q = f"SELECT * FROM watchlists WHERE imdb_id = {user_imdb_id} and status = 'new'"
+    cursor.execute(q)
+    return cursor.fetchall()
+
+
+def get_requested_torrents_for_tgram_user(user, cursor=None):
+    if not cursor:
+        conn, cursor = connect_mysql()
+    email = get_email_by_tgram_id(user, cursor=cursor)
+    q = f"SELECT * FROM my_torrents WHERE requested_by = '{email}'"
     cursor.execute(q)
     return cursor.fetchall()
 
@@ -1165,5 +1194,5 @@ def parse_torr_name(name):
 
 if __name__ == '__main__':
     from pprint import pprint
-    # check_db_plexbuddy()
+    pprint(get_requested_torrents_for_tgram_user(1700079840))
 

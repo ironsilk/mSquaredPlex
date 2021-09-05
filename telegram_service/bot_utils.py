@@ -251,22 +251,6 @@ def check_one_in_my_movies(idd, cursor=None):
     return cursor.fetchone()
 
 
-def get_email_by_tgram_id(user, cursor=None):
-    if not cursor:
-        conn, cursor = connect_mysql()
-    q = f"SELECT `email` FROM users where telegram_chat_id = '{user}'"
-    cursor.execute(q)
-    return cursor.fetchone()['email']
-
-
-def get_imdb_id_by_trgram_id(user, cursor=None):
-    if not cursor:
-        conn, cursor = connect_mysql()
-    q = f"SELECT `imdb_id` FROM users where telegram_chat_id = '{user}'"
-    cursor.execute(q)
-    return cursor.fetchone()['imdb_id']
-
-
 def add_to_watchlist(movie_id, imdb_id, status, excluded_torrents=None):
 
     # See if movie already there

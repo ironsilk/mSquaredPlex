@@ -10,7 +10,6 @@ COPY db_services/sync_my_imdb_db.py ./
 COPY db_services/db_services_utils.py ./
 COPY utils.py ./
 
-
 COPY requirements.txt ./
 RUN pip install -r requirements.txt
 

@@ -7,7 +7,7 @@ from telegram import (
     ReplyKeyboardMarkup,
     InlineKeyboardMarkup,
     InlineKeyboardButton,
-    Update,
+    Update, ParseMode,
 )
 from telegram.ext import Updater, MessageHandler, Filters, CallbackContext, ConversationHandler, CallbackQueryHandler, \
     CommandHandler
@@ -15,11 +15,13 @@ from transmission_rpc.error import TransmissionError
 
 from bot_utils import make_movie_reply, get_telegram_users, update_torr_db, \
     exclude_torrents_from_watchlist, get_excluded_resolutions, \
-    invite_friend, get_movie_from_all_databases, search_imdb_title, check_one_in_my_movies, get_imdb_id_by_trgram_id, \
+    invite_friend, get_movie_from_all_databases, search_imdb_title, check_one_in_my_movies, \
     add_to_watchlist
 from bot_watchlist import bot_watchlist_routine, update_watchlist_item_status, get_torrents_for_imdb_id
 from bot_rate_title import bot_rate_titles
-from utils import update_many, deconvert_imdb_id, send_torrent, compose_link, check_db_plexbuddy, convert_imdb_id
+from utils import update_many, deconvert_imdb_id, send_torrent, compose_link, check_db_plexbuddy, convert_imdb_id, \
+    get_imdb_id_by_trgram_id
+from bot_get_progress import get_torrents_for_user
 
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 TELEGRAM_AUTH_TEST_PATH = os.getenv('TELEGRAM_AUTH_TEST_PATH')
@@ -46,12 +48,12 @@ logger = logging.getLogger('MovieTimeBot')
 # Stages
 CHOOSE_TASK, IDENTIFY_MOVIE, CHOOSE_MULTIPLE, CHOOSE_ONE, CONFIRM_REDOWNLOAD_ACTION, SEARCH_FOR_TORRENTS, \
 DOWNLOAD_TORRENT, CHECK_RIDDLE_RESPONSE, CHECK_EMAIL, GIVE_IMDB, CHECK_IMDB, SUBMIT_RATING, \
-WATCHLIST_NO_TORR, = range(13)
+WATCHLIST_NO_TORR, DOWNLOAD_PROGRESS= range(14)
 
 # Keyboards
 menu_keyboard = [
     ["📥 Download a movie"],
-    ["📈 Check progress"],
+    ["📈 Check download progress"],
 ]
 bool_keyboard = [
     ['Yes'],
@@ -196,8 +198,9 @@ def choose_task(update: Update, context: CallbackContext) -> int:
         return IDENTIFY_MOVIE
 
     elif update.message.text == menu_keyboard[1][0]:
-        message = 'Not implemented yet'
-        update.message.reply_text(message)
+        update.effective_message.reply_text('Ok, retrieving data... (might be slow sometimes)')
+        context.user_data['download_progress'] = 0
+        return get_download_progress(update, context)
 
     return ConversationHandler.END
 
@@ -383,7 +386,6 @@ def search_for_torrents(update: Update, context: CallbackContext) -> int:
         )
         return DOWNLOAD_TORRENT
     else:
-        # aici
         update.message.reply_text(
             "We couldn't find any torrents for this title.\n"
             "Would you like to add it to your watchlist?",
@@ -449,6 +451,42 @@ def download_torrent(update: Update, context: CallbackContext) -> int:
                                                                                  one_time_keyboard=True,
                                                                                  resize_keyboard=True))
             return WATCHLIST_NO_TORR
+
+
+@auth_wrap
+def get_download_progress(update: Update, context: CallbackContext) -> int:
+    def load_more(torrents, context):
+        # TODO prettyfy this text here, right now it's crap.
+        message = f"Torrent statuses:\n" \
+                  f"{torrents}"
+        context.user_data['download_progress'] += 5
+        context.bot.send_message(user,
+                                 message,
+                                 reply_markup=InlineKeyboardMarkup(
+                                     [[InlineKeyboardButton('Show more', callback_data=1)]],
+                                     one_time_keyboard=True),
+                                 )
+        return DOWNLOAD_PROGRESS
+
+    user = update.effective_user['id']
+    torrents = get_torrents_for_user(user, get_next=context.user_data['download_progress'], logger=logger)[:5]
+    if update.message:
+        # Means that it's the first time we got here
+        if torrents:
+            return load_more(torrents, context)
+        else:
+            update.message.reply_text('No torrents to show. Have a great one!')
+            return ConversationHandler.END
+    else:
+        # User pressed "Show more"
+        update.callback_query.answer()
+        if torrents:
+            update.callback_query.edit_message_text(update.callback_query.message.text)
+            return load_more(torrents, context)
+        else:
+            update.callback_query.edit_message_text(update.callback_query.message.text)
+            context.bot.send_message(user, 'No more torrents to show. Bazinga!')
+            return ConversationHandler.END
 
 
 @auth_wrap
@@ -683,6 +721,14 @@ def main() -> None:
                 MessageHandler(
                     Filters.text, add_to_watchlist_no_torrent
                 ),
+            ],
+            DOWNLOAD_PROGRESS: [
+                MessageHandler(
+                    Filters.text, get_download_progress
+                ),
+                CallbackQueryHandler(
+                    get_download_progress
+                )
             ],
         },
         fallbacks=[MessageHandler(Filters.text, end)],

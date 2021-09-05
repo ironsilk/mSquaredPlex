@@ -98,7 +98,7 @@ All containers are set to restart `on-failiure` so no worries.
 
 ## TODO
 
-- Torrents download status for each user
+- Torrents download status for each user **done** - need to prettify
 - notification when movie was downloaded - **done**
 - Download a CSV with my database - ratings and views
 - Upload Netflix view history :X and integrate it.
@@ -108,7 +108,23 @@ All containers are set to restart `on-failiure` so no worries.
 - add functionality to say you've watched the movie with someone else so they also get notification
   to rate the movie (meh, maybe)
 - fix autoscan, not working right now
-- reccomend a movie
+- reccomend a movie - later stages, complex.
+
+
+
+###Right now:
+
+Implement this and change port, integrate with other dockers:
+https://github.com/JonForest/html-to-image
+
+THis is better:
+https://github.com/lampnick/doctron
+
+use this to prettify the tables 
+https://github.com/sbi-rviot/ph_table
+
+another reference:
+https://stackoverflow.com/questions/10615901/trim-whitespace-using-pil
   
 
 

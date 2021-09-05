@@ -1,0 +1,4 @@
+/node_modules
+
+# Cached images are stored here
+/public/*.png
