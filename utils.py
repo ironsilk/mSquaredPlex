@@ -353,7 +353,6 @@ def update_many(data_list=None, mysql_table=None, connection=None, cursor=None):
         cursor.executemany(query, values)
     except Exception as e:
         logger.warning(f"UpdateMany MySQL Error: {e}")
-
         connection.rollback()
         return False
 

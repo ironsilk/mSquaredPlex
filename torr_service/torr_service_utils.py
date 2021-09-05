@@ -143,20 +143,26 @@ class TORR_REFRESHER:
         torrents = self.remove_low_res(torrents)
         for torr in torrents:
             torr_response = torr.pop('torr_obj', None)
-            if torr_response.status == 'seeding':
-                # Decide whether to remove it or keep it
-                if self.check_seeding_status(torr_response):
-                    if torr['status'] == 'requested download':
-                        torr['status'] = 'seeding'
+            if torr_response:
+                if torr_response.status == 'seeding':
+                    # Decide whether to remove it or keep it
+                    if self.check_seeding_status(torr_response):
+                        if torr['status'] == 'requested download':
+                            torr['status'] = 'seeding'
+                            update_many([torr], 'my_torrents')
+                    else:
+                        # remove torrent and data
+                        self.remove_torrent_and_files(torr['torr_id'])
+                        # change status
+                        torr['status'] = 'removed'
                         update_many([torr], 'my_torrents')
-                else:
-                    # remove torrent and data
-                    self.remove_torrent_and_files(torr['torr_id'])
-                    # change status
-                    torr['status'] = 'removed'
+                elif torr_response.status == 'downloading' and torr['status'] == 'requested download':
+                    torr['status'] = 'downloading'
                     update_many([torr], 'my_torrents')
-            elif torr_response.status == 'downloading' and torr['status'] == 'requested download':
-                torr['status'] = 'downloading'
+            else:
+                self.logger.warning("Torrent no longer in torrent client, removing from DB as well.")
+                torr['status'] = 'removed'
+                del torr['id']
                 update_many([torr], 'my_torrents')
 
     def remove_low_res(self, torrents):
