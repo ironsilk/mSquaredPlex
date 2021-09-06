@@ -3,7 +3,7 @@ import os
 import imdb
 import requests
 
-from utils import check_one_in_my_torrents_by_imdb, retrieve_one_from_dbs
+from utils import check_one_in_my_torrents_by_imdb, retrieve_one_from_dbs, get_email_by_tgram_id
 from utils import connect_mysql, update_many, connect_plex
 from utils import deconvert_imdb_id, check_one_in_my_torrents_by_torr_id
 from utils import setup_logger

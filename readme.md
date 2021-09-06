@@ -109,6 +109,7 @@ All containers are set to restart `on-failiure` so no worries.
   to rate the movie (meh, maybe)
 - fix autoscan, not working right now
 - reccomend a movie - later stages, complex.
+- Favorite a director/actor whatever and receive notifications when a new movie of his/hers is available.
 
 
 

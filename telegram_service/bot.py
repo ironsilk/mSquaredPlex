@@ -1,7 +1,9 @@
+import io
 import logging
 import os
 import re
 from functools import wraps
+import pandas as pd
 
 from telegram import (
     ReplyKeyboardMarkup,
@@ -22,6 +24,7 @@ from bot_rate_title import bot_rate_titles
 from utils import update_many, deconvert_imdb_id, send_torrent, compose_link, check_db_plexbuddy, convert_imdb_id, \
     get_imdb_id_by_trgram_id
 from bot_get_progress import get_torrents_for_user
+from bot_load_csv import csv_upload_handler
 
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 TELEGRAM_AUTH_TEST_PATH = os.getenv('TELEGRAM_AUTH_TEST_PATH')
@@ -171,7 +174,8 @@ def register_user(update: Update, context: CallbackContext):
     update_many([context.user_data['new_user']], 'users')
     USERS = get_telegram_users()
     update.effective_message.reply_text("Ok, that's it. I'll take care of the rest, from now on "
-                                        "anytime you type something i'll be here to help you out. Enjoy!")
+                                        "anytime you type something i'll be here to help you out. Enjoy!\n"
+                                        "Type \\help to find out more.")
     return start(update, context)
 
 
@@ -206,9 +210,14 @@ def choose_task(update: Update, context: CallbackContext) -> int:
 
     elif update.message.text == menu_keyboard[2][0]:
         update.message.reply_photo(photo=open(TELEGRAM_NETFLIX_PNG, 'rb'),
-                                             caption="Ok, follow the instructions, "
-                                                     "hit `Download all` and upload here the "
-                                                     "resulting .csv")
+                                   caption="Ok, follow the instructions, "
+                                           "hit `Download all` and upload here the resulting .csv.\n"
+                                           "You may add any other records to "
+                                           "the CSV, given that you don't change the column names.\n"
+                                           "If you want to also add ratings, create an extra column "
+                                           "named 'ratings' and it will be picked up.\n"
+                                           "Any overlapping ratings/seen dates will be overwritten. However, "
+                                           "IMDB ratings, seen dates and PLEX seen dates will have prevalence.")
         # return netflix_csv(update, context)
         return NETFLIX_CSV
 
@@ -454,8 +463,6 @@ def download_torrent(update: Update, context: CallbackContext) -> int:
                                          "regarding this movie.")
             return exclude_res_from_watchlist(update, context)
         else:
-            # query.edit_message_text(text="Shit")
-            print(update.message)
             update.effective_message.reply_text('Would you like to add it to your watchlist?',
                                                 reply_markup=ReplyKeyboardMarkup(bool_keyboard,
                                                                                  one_time_keyboard=True,
@@ -525,6 +532,7 @@ def help_command(update: Update, context: CallbackContext) -> None:
     watchlist_status = 'MONITORING' if USERS[update.effective_user.id]['scan_watchlist'] == 1 else 'NOT MONITORING'
     email_status = 'RECEIVING' if USERS[update.effective_user.id]['email_newsletters'] else 'NOT RECEIVING'
     update.message.reply_text("Type anything for the bot to start.\n\n"
+                              "Type /reset to get out of any situation.\n\n"
                               f"Right now we are {watchlist_status} your watchlist. "
                               f"Type /change_watchlist "
                               "to reverse the status.\n\n"
@@ -534,6 +542,12 @@ def help_command(update: Update, context: CallbackContext) -> None:
                               "and we'll ask you to retake the login process. Once started, you must complete "
                               "the entire process.")
 
+
+@auth_wrap
+def reset_command(update: Update, context: CallbackContext) -> None:
+    """Dude u messed up:)"""
+    update.message.reply_text("I just died'ed. Report to the admin if i messed up badly. His fault.")
+    return ConversationHandler.END
 
 @auth_wrap
 def change_watchlist_command(update: Update, context: CallbackContext) -> None:
@@ -641,11 +655,10 @@ def update_netflix(update: Update, context: CallbackContext) -> int:
 
 @auth_wrap
 def netflix_csv(update: Update, context: CallbackContext) -> int:
-    print('here')
-    file = context.bot.getFile(update.message.document.file_id)
-    print(file)
-    # tell user he can fill up the table with other movies as well, also tell him there are onyl movies
-    # and any overlapping will result in an update.
+    context.job_queue.run_once(callback=csv_upload_handler(update, context))
+    update.message.reply_text("Thanks!We started the upload process, we'll let you know "
+                              "when it's done or if there's any trouble.")
+    return ConversationHandler.END
     # make a function or service to deal with this and launch it in another thread
     # notify user when it's done.
     # should be able to do it with job_queue.scheduler or maybe job_queue.run_custom.
@@ -777,6 +790,7 @@ def main() -> None:
         fallbacks=[MessageHandler(Filters.text, end)],
         per_message=False
     )
+    dispatcher.add_handler(CommandHandler('reset', reset_command))
     dispatcher.add_handler(CommandHandler('help', help_command))
     dispatcher.add_handler(CommandHandler('change_watchlist', change_watchlist_command))
     dispatcher.add_handler(CommandHandler('change_newsletter', change_newsletter_command))
