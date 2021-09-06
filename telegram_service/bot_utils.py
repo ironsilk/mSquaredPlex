@@ -281,4 +281,4 @@ def add_to_watchlist(movie_id, imdb_id, status, excluded_torrents=None):
 
 
 if __name__ == '__main__':
-    pass
+    print(get_movie_from_all_databases(6763664))

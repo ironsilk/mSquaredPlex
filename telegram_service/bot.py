@@ -52,7 +52,7 @@ logger = logging.getLogger('MovieTimeBot')
 # Stages
 CHOOSE_TASK, IDENTIFY_MOVIE, CHOOSE_MULTIPLE, CHOOSE_ONE, CONFIRM_REDOWNLOAD_ACTION, SEARCH_FOR_TORRENTS, \
 DOWNLOAD_TORRENT, CHECK_RIDDLE_RESPONSE, CHECK_EMAIL, GIVE_IMDB, CHECK_IMDB, SUBMIT_RATING, \
-WATCHLIST_NO_TORR, DOWNLOAD_PROGRESS, UPDATE_NETFLIX, NETFLIX_CSV = range(16)
+WATCHLIST_NO_TORR, DOWNLOAD_PROGRESS, NETFLIX_CSV, RATE_OR_NOT_TO_RATE = range(16)
 
 # Keyboards
 menu_keyboard = [
@@ -217,9 +217,14 @@ def choose_task(update: Update, context: CallbackContext) -> int:
                                            "If you want to also add ratings, create an extra column "
                                            "named 'ratings' and it will be picked up.\n"
                                            "Any overlapping ratings/seen dates will be overwritten. However, "
-                                           "IMDB ratings, seen dates and PLEX seen dates will have prevalence.")
+                                           "IMDB ratings, seen dates and PLEX seen dates will have prevalence.\n"
+                                           "☢️☢️!! If these titles are not rated in the CSV you'll receive "
+                                           "notifications to rate all of them.\n\n"
+                                           "Choose Yes/No",
+                                   reply_markup=ReplyKeyboardMarkup(bool_keyboard, one_time_keyboard=True,
+                                                                    resize_keyboard=True))
         # return netflix_csv(update, context)
-        return NETFLIX_CSV
+        return RATE_OR_NOT_TO_RATE
 
     return ConversationHandler.END
 
@@ -545,9 +550,12 @@ def help_command(update: Update, context: CallbackContext) -> None:
 
 @auth_wrap
 def reset_command(update: Update, context: CallbackContext) -> None:
-    """Dude u messed up:)"""
+    """Dude u messed up :) """
     update.message.reply_text("I just died'ed. Report to the admin if i messed up badly. His fault.")
+    context.user_data.clear()
+    # TODO nu iese treaba asta aici, trebuie sa vad cum fac sa mi iasa cand dau /reset
     return ConversationHandler.END
+
 
 @auth_wrap
 def change_watchlist_command(update: Update, context: CallbackContext) -> None:
@@ -645,28 +653,44 @@ def submit_rating(update: Update, context: CallbackContext) -> int:
 
 
 @auth_wrap
-def update_netflix(update: Update, context: CallbackContext) -> int:
-    update.message.reply_photo(photo=TELEGRAM_NETFLIX_PNG,
-                               caption="Ok, follow the instructions, "
-                                       "hit `Download all` and upload here the "
-                                       "resulting .csv")
+def netflix_rate_or_not(update: Update, context: CallbackContext) -> int:
+    if update.message.text == 'No':
+        context.user_data['send_notifications'] = False
+    else:
+        context.user_data['send_notifications'] = True
+    update.message.reply_text("K, now upload the .csv file please.")
     return NETFLIX_CSV
 
 
 @auth_wrap
 def netflix_csv(update: Update, context: CallbackContext) -> int:
-    context.job_queue.run_once(callback=csv_upload_handler(update, context))
+    csv_context = {
+        'user': update.effective_user.id,
+        'file': update.message.document.file_id,
+        'send_notifications': context.user_data['send_notifications'],
+    }
     update.message.reply_text("Thanks!We started the upload process, we'll let you know "
                               "when it's done or if there's any trouble.")
+    context.job_queue.run_once(
+        callback=csv_upload_handler,
+        context=csv_context,
+        when=0
+    )
     return ConversationHandler.END
-    # make a function or service to deal with this and launch it in another thread
-    # notify user when it's done.
-    # should be able to do it with job_queue.scheduler or maybe job_queue.run_custom.
-    # nop, here it is, run_once.
-    # https://python-telegram-bot.readthedocs.io/en/stable/telegram.ext.jobqueue.html
 
 
 @auth_wrap
+def netflix_no_csv(update: Update, context: CallbackContext) -> int:
+    update.message.reply_text("Upload the .csv or hit /reset to go back.")
+    return NETFLIX_CSV
+
+
+@auth_wrap
+def netflix_no_rate_option(update: Update, context: CallbackContext) -> int:
+    update.message.reply_text("Choose Yes or No, bro.")
+    return RATE_OR_NOT_TO_RATE
+
+
 def end(update, context, message):
     return ConversationHandler.END
 
@@ -776,20 +800,35 @@ def main() -> None:
                     get_download_progress
                 )
             ],
-            UPDATE_NETFLIX: [
+            RATE_OR_NOT_TO_RATE: [
                 MessageHandler(
-                    Filters.text, update_netflix
+                    Filters.regex("^Yes$|^No$"), netflix_rate_or_not
+                ),
+                MessageHandler(
+                    Filters.text, netflix_no_rate_option
                 ),
             ],
             NETFLIX_CSV: [
                 MessageHandler(
                     Filters.document, netflix_csv
                 ),
+                MessageHandler(
+                    Filters.regex("^Yes$|^No$"), netflix_csv
+                ),
+                MessageHandler(
+                    Filters.text, netflix_no_csv
+                ),
             ],
+            ConversationHandler.END: [
+                MessageHandler(
+                    Filters.text, start
+                )
+            ]
         },
-        fallbacks=[MessageHandler(Filters.text, end)],
+        fallbacks=[],
         per_message=False
     )
+
     dispatcher.add_handler(CommandHandler('reset', reset_command))
     dispatcher.add_handler(CommandHandler('help', help_command))
     dispatcher.add_handler(CommandHandler('change_watchlist', change_watchlist_command))

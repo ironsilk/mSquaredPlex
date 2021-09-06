@@ -562,9 +562,11 @@ def get_movie_from_imdb_online(imdb_id):
         movie = ia.get_movie(imdb_id)
         if 'rating' not in movie.data.keys():
             movie.data['rating'] = None
+        if 'director' not in movie.data.keys():
+            movie.data['director'] = None
+
         item = {
             'cast': ', '.join([x['name'] for x in movie.data['cast'][:5]]),
-            'director': movie.data['director'][0].data['name'],
             'genres': ', '.join(movie.data['genres']),
             'imdbID': movie.data['imdbID'],
             'titleType': movie.data['kind'],
