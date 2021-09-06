@@ -27,6 +27,7 @@ TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 TELEGRAM_AUTH_TEST_PATH = os.getenv('TELEGRAM_AUTH_TEST_PATH')
 TELEGRAM_AUTH_APPROVE = os.getenv('TELEGRAM_AUTH_APPROVE')
 TELEGRAM_IMDB_RATINGS = os.getenv('TELEGRAM_IMDB_RATINGS')
+TELEGRAM_NETFLIX_PNG = os.getenv('TELEGRAM_NETFLIX_PNG')
 TELEGRAM_WATCHLIST_ROUTINE_INTERVAL = int(os.getenv('TELEGRAM_WATCHLIST_ROUTINE_INTERVAL'))
 TELEGRAM_RATE_ROUTINE_INTERVAL = int(os.getenv('TELEGRAM_RATE_ROUTINE_INTERVAL'))
 
@@ -48,12 +49,13 @@ logger = logging.getLogger('MovieTimeBot')
 # Stages
 CHOOSE_TASK, IDENTIFY_MOVIE, CHOOSE_MULTIPLE, CHOOSE_ONE, CONFIRM_REDOWNLOAD_ACTION, SEARCH_FOR_TORRENTS, \
 DOWNLOAD_TORRENT, CHECK_RIDDLE_RESPONSE, CHECK_EMAIL, GIVE_IMDB, CHECK_IMDB, SUBMIT_RATING, \
-WATCHLIST_NO_TORR, DOWNLOAD_PROGRESS= range(14)
+WATCHLIST_NO_TORR, DOWNLOAD_PROGRESS, UPDATE_NETFLIX, NETFLIX_CSV = range(16)
 
 # Keyboards
 menu_keyboard = [
     ["📥 Download a movie"],
     ["📈 Check download progress"],
+    ["❤☠🤖 Upload Netflix activity"]
 ]
 bool_keyboard = [
     ['Yes'],
@@ -201,6 +203,14 @@ def choose_task(update: Update, context: CallbackContext) -> int:
         update.effective_message.reply_text('Ok, retrieving data... (might be slow sometimes)')
         context.user_data['download_progress'] = 0
         return get_download_progress(update, context)
+
+    elif update.message.text == menu_keyboard[2][0]:
+        update.message.reply_photo(photo=open(TELEGRAM_NETFLIX_PNG, 'rb'),
+                                             caption="Ok, follow the instructions, "
+                                                     "hit `Download all` and upload here the "
+                                                     "resulting .csv")
+        # return netflix_csv(update, context)
+        return NETFLIX_CSV
 
     return ConversationHandler.END
 
@@ -621,6 +631,29 @@ def submit_rating(update: Update, context: CallbackContext) -> int:
 
 
 @auth_wrap
+def update_netflix(update: Update, context: CallbackContext) -> int:
+    update.message.reply_photo(photo=TELEGRAM_NETFLIX_PNG,
+                               caption="Ok, follow the instructions, "
+                                       "hit `Download all` and upload here the "
+                                       "resulting .csv")
+    return NETFLIX_CSV
+
+
+@auth_wrap
+def netflix_csv(update: Update, context: CallbackContext) -> int:
+    print('here')
+    file = context.bot.getFile(update.message.document.file_id)
+    print(file)
+    # tell user he can fill up the table with other movies as well, also tell him there are onyl movies
+    # and any overlapping will result in an update.
+    # make a function or service to deal with this and launch it in another thread
+    # notify user when it's done.
+    # should be able to do it with job_queue.scheduler or maybe job_queue.run_custom.
+    # nop, here it is, run_once.
+    # https://python-telegram-bot.readthedocs.io/en/stable/telegram.ext.jobqueue.html
+
+
+@auth_wrap
 def end(update, context, message):
     return ConversationHandler.END
 
@@ -729,6 +762,16 @@ def main() -> None:
                 CallbackQueryHandler(
                     get_download_progress
                 )
+            ],
+            UPDATE_NETFLIX: [
+                MessageHandler(
+                    Filters.text, update_netflix
+                ),
+            ],
+            NETFLIX_CSV: [
+                MessageHandler(
+                    Filters.document, netflix_csv
+                ),
             ],
         },
         fallbacks=[MessageHandler(Filters.text, end)],

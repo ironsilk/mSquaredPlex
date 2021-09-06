@@ -10,6 +10,7 @@ COPY telegram_service/bot.py ./
 COPY telegram_service/bot_utils.py ./
 COPY telegram_service/bot_watchlist.py ./
 COPY telegram_service/bot_rate_title.py ./
+COPY telegram_service/bot_get_progress.py ./
 
 COPY telegram_service/images ./images
 COPY utils.py ./

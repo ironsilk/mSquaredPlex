@@ -94,7 +94,7 @@ All containers are set to restart `on-failiure` so no worries.
   The final solution for this shit is always `sudo docker system prune -a` - Attention, it removes everything (volumes,
   networks, containers) not in use by any active docker container at that time. Run it before running again
   `sudo docker-compose -f docker-compose_MAINSTACK.yml up -d --buil`
-- Still haven't figured out how to make those transmission startup settings. 
+- Still haven't figured out how to make those transmission startup settings. - **done, see bottom page**
 
 ## TODO
 
