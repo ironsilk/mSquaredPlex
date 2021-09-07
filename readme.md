@@ -99,17 +99,24 @@ All containers are set to restart `on-failiure` so no worries.
 ## TODO
 
 - Fix movieLib!
+- ask user who asked for download and didnt watch the movie before deletion
+  and maybe confirm in with the admin.
+- Show my watchlist.
 - Torrents download status for each user **done** - need to prettify the dataframe maybe
 - notification when movie was downloaded - **done**
 - Download a CSV with my database - ratings and views. - **done**
 - Upload Netflix view history :X and integrate it. - **done**
 - Choose whether to rate unrated CSV titles or not. - **done**
-- Show my watchlist
-- ask user who asked for download and didnt watch the movie before deletion
-  and maybe confirm in with the admin.
 - fix autoscaling, not working right now - **done**
+
+
+
+### Wishlist
 - recommend a movie - later stages, complex.
 - Favorite a director/actor whatever and receive notifications when a new movie of his/hers is available.
+- Torrents download status for each user **done** - need to prettify the dataframe maybe
+
+
 
 
 ### In order to solve TRANSMISSION configuration problem:

@@ -13,12 +13,13 @@ from utils import setup_logger, check_db_myimdb
 IMDB_DB_REFRESH_INTERVAL = int(os.getenv('IMDB_DB_REFRESH_INTERVAL'))
 DUMPS_URL = os.getenv('DUMPS_URL')
 DUMPS_PATH = os.getenv('DUMPS_PATH')
-DB_URI = "mysql://{u}:{p}@{hp}/{dbname}?charset=utf8".format(
-    u=os.getenv('MYSQL_MYIMDB_USER'),
-    p=os.getenv('MYSQL_MYIMDB_PASS'),
-    hp=':'.join([os.getenv('MYSQL_MYIMDB_HOST'), os.getenv('MYSQL_MYIMDB_PORT')]),
-    dbname=os.getenv('MYSQL_MYIMDB_DB_NAME'),
+DB_URI = "postgresql+psycopg2://{u}:{p}@{hp}/{dbname}".format(
+    u='mike',
+    p='pass',
+    hp=':'.join(['192.168.1.99', '5432']),
+    dbname='movielib',
 )
+DB_URI = "postgresql://mike:pass@192.168.1.99/movielib"
 
 logger = setup_logger("IMDB_db_updater")
 
@@ -41,11 +42,12 @@ def fetch_database_dumps():
 
 def update_imdb_db():
     # Download latest dumps
-    fetch_database_dumps()
+    # fetch_database_dumps()
     # Update database with 'em
     run_import(DB_URI, DUMPS_PATH)
 
 
 if __name__ == '__main__':
-    check_db_myimdb()
+    # check_db_myimdb()
+    print(DB_URI)
     update_imdb_db()

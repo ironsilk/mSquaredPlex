@@ -35,7 +35,7 @@ from imdb.parser.s3.utils import DB_TRANSFORM, title_soundex, name_soundexes
 
 TSV_EXT = '.tsv.gz'
 # how many entries to write to the database at a time.
-BLOCK_SIZE = 100000
+BLOCK_SIZE = 200000
 
 metadata = sqlalchemy.MetaData()
 
@@ -172,6 +172,7 @@ def import_dir(dir_name, engine):
 
 def run_import(db_uri, dir_name):
     logger.info('Starting imports')
+    print(db_uri)
     engine = sqlalchemy.create_engine(db_uri, encoding='utf-8', echo=False)
     metadata.bind = engine
     import_dir(dir_name, engine)
@@ -180,13 +181,14 @@ def run_import(db_uri, dir_name):
 
 if __name__ == '__main__':
     from dotenv import load_dotenv
+
     load_dotenv()
 
-    DB_URI = "mysql://{u}:{p}@{hp}/{dbname}?charset=utf8".format(
-    u=os.getenv('MYSQL_MYIMDB_USER'),
-    p=os.getenv('MYSQL_MYIMDB_PASS'),
-    hp=':'.join([os.getenv('MYSQL_MYIMDB_HOST'), os.getenv('MYSQL_MYIMDB_PORT')]),
-    dbname=os.getenv('MYSQL_MYIMDB_DB_NAME'),
-)
+    DB_URI = "postgresql://{u}:{p}@{hp}/{dbname}?charset=utf8".format(
+        u='mike',
+        p='pass',
+        hp=':'.join(['192.168.1.99', '5432']),
+        dbname='movielib',
+    )
 
     run_import(DB_URI, r"C:\Users\mihai\Downloads\movielib")
