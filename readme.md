@@ -98,9 +98,8 @@ All containers are set to restart `on-failiure` so no worries.
 
 ## TODO
 
-- Fix get download progress table
 - Fix movieLib!
-- Torrents download status for each user **done** - need to prettify
+- Torrents download status for each user **done** - need to prettify the dataframe maybe
 - notification when movie was downloaded - **done**
 - Download a CSV with my database - ratings and views. - **done**
 - Upload Netflix view history :X and integrate it. - **done**
