@@ -98,16 +98,16 @@ All containers are set to restart `on-failiure` so no worries.
 
 ## TODO
 
+- Fix get download progress table
+- Fix movieLib!
 - Torrents download status for each user **done** - need to prettify
 - notification when movie was downloaded - **done**
-- Download a CSV with my database - ratings and views.
+- Download a CSV with my database - ratings and views. - **done**
 - Upload Netflix view history :X and integrate it. - **done**
 - Choose whether to rate unrated CSV titles or not. - **done**
 - Show my watchlist
 - ask user who asked for download and didnt watch the movie before deletion
   and maybe confirm in with the admin.
-- add functionality to say you've watched the movie with someone else so they also get notification
-  to rate the movie (meh, maybe)
 - fix autoscaling, not working right now - **done**
 - recommend a movie - later stages, complex.
 - Favorite a director/actor whatever and receive notifications when a new movie of his/hers is available.

@@ -7,7 +7,7 @@ import pandas as pd
 import sqlalchemy
 from telegram.ext import CallbackContext
 
-from utils import get_email_by_tgram_id, deconvert_imdb_id, update_many
+from utils import get_email_by_tgram_id, deconvert_imdb_id, update_many, get_my_movies, retrieve_one_from_dbs
 from bot_utils import check_one_in_my_movies
 
 soap_pattern = re.compile(": Season \d+:")
@@ -92,3 +92,30 @@ def csv_upload_handler(context: CallbackContext):
                                   f"series or likewise. The rest were already in your database "
                                   f"({len(df) - len(identified_movies) - soap_or_unidentified})",
                              chat_id=tgram_user)
+
+
+def csv_download_handler(context: CallbackContext):
+    tgram_user = context.job.context['user']
+    email = get_email_by_tgram_id(tgram_user)
+    # Get movies from my_movies:
+    my_movies = get_my_movies(email)
+    enhanced = []
+    # Get titles for each movie :)
+    for movie in my_movies[:2]:
+        enhanced.append(retrieve_one_from_dbs(movie))
+    df = pd.DataFrame(enhanced)
+    # Create an in-memory file
+    f = io.BytesIO()
+    # Write to buffer
+    df.to_csv(f)
+    # Pointer is at the end of the file so reset it to 0.
+    f.seek(0)
+    context.bot.send_document(
+        chat_id=tgram_user,
+        document=f,
+        filename='MoviesExport.csv',
+        caption="Here's your requested movie DB export.\n"
+                "Have a great day!"
+    )
+
+

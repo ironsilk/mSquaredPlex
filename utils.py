@@ -19,6 +19,7 @@ import json
 from time import time
 from functools import wraps
 from transmission_rpc import Client
+from mysql.connector.errors import  InterfaceError, DatabaseError, ProgrammingError
 
 from dotenv import load_dotenv
 
@@ -484,10 +485,13 @@ def retrieve_one_from_dbs(item, cursor=None):
     if not cursor:
         try:
             conn, cursor = connect_mysql(myimdb=True)
-        except mysql.connector.errors.DatabaseError:
+        except (mysql.connector.errors.DatabaseError, mysql.connector.errors.InterfaceError):
             conn, cursor = None, None
     # ID
-    imdb_id_number = deconvert_imdb_id(item['imdb'])
+    try:
+        imdb_id_number = deconvert_imdb_id(item['imdb'])
+    except:
+        imdb_id_number = deconvert_imdb_id(item['imdb_id'])
     # Search in local_db
     imdb_keys = get_movie_IMDB(imdb_id_number, cursor)
     # Search online if TMDB, OMDB not found in local DB
@@ -550,7 +554,7 @@ def get_movie_from_local_db(imdb_id, cursor):
         # Add director
         cursor.execute((q_director))
         item.update(**cursor.fetchone())
-    except (mysql.connector.errors.DatabaseError, mysql.connector.errors.ProgrammingError) as e:
+    except (DatabaseError, ProgrammingError, InterfaceError) as e:
         logger.warning(f"IMDB db is down or programming error: {e}")
         return None
     return item
@@ -590,6 +594,14 @@ def get_tgram_user_by_email(email, cursor=None):
     q = f"SELECT `telegram_chat_id` FROM users where email = '{email}'"
     cursor.execute(q)
     return cursor.fetchone()['telegram_chat_id']
+
+
+def get_my_movies(email, cursor=None):
+    if not cursor:
+        conn, cursor = connect_mysql()
+    q = f"SELECT * FROM my_movies where user = '{email}'"
+    cursor.execute(q)
+    return cursor.fetchall()
 
 
 # PLEX utils

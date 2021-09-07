@@ -24,7 +24,7 @@ from bot_rate_title import bot_rate_titles
 from utils import update_many, deconvert_imdb_id, send_torrent, compose_link, check_db_plexbuddy, convert_imdb_id, \
     get_imdb_id_by_trgram_id
 from bot_get_progress import get_torrents_for_user
-from bot_load_csv import csv_upload_handler
+from bot_csv import csv_upload_handler, csv_download_handler
 
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 TELEGRAM_AUTH_TEST_PATH = os.getenv('TELEGRAM_AUTH_TEST_PATH')
@@ -52,13 +52,13 @@ logger = logging.getLogger('MovieTimeBot')
 # Stages
 CHOOSE_TASK, IDENTIFY_MOVIE, CHOOSE_MULTIPLE, CHOOSE_ONE, CONFIRM_REDOWNLOAD_ACTION, SEARCH_FOR_TORRENTS, \
 DOWNLOAD_TORRENT, CHECK_RIDDLE_RESPONSE, CHECK_EMAIL, GIVE_IMDB, CHECK_IMDB, SUBMIT_RATING, \
-WATCHLIST_NO_TORR, DOWNLOAD_PROGRESS, NETFLIX_CSV, RATE_OR_NOT_TO_RATE = range(16)
+WATCHLIST_NO_TORR, DOWNLOAD_PROGRESS, NETFLIX_CSV, RATE_OR_NOT_TO_RATE, DOWNLOAD_CSV = range(17)
 
 # Keyboards
 menu_keyboard = [
     ["📥 Download a movie"],
     ["📈 Check download progress"],
-    ["❤☠🤖 Upload Netflix activity"]
+    ["❤☠🤖 Upload Netflix activity", '💾 Download my movies']
 ]
 bool_keyboard = [
     ['Yes'],
@@ -223,8 +223,10 @@ def choose_task(update: Update, context: CallbackContext) -> int:
                                            "Choose Yes/No",
                                    reply_markup=ReplyKeyboardMarkup(bool_keyboard, one_time_keyboard=True,
                                                                     resize_keyboard=True))
-        # return netflix_csv(update, context)
         return RATE_OR_NOT_TO_RATE
+    elif update.message.text == menu_keyboard[2][1]:
+        update.message.reply_text("Ok, we've started the process, we'll let you know once it's done.")
+        return download_csv(update, context)
 
     return ConversationHandler.END
 
@@ -691,6 +693,19 @@ def netflix_no_rate_option(update: Update, context: CallbackContext) -> int:
     return RATE_OR_NOT_TO_RATE
 
 
+@auth_wrap
+def download_csv(update: Update, context: CallbackContext) -> int:
+    csv_context = {
+        'user': update.effective_user.id,
+    }
+    context.job_queue.run_once(
+        callback=csv_download_handler,
+        context=csv_context,
+        when=0
+    )
+    return ConversationHandler.END
+
+
 def end(update, context, message):
     return ConversationHandler.END
 
@@ -819,11 +834,6 @@ def main() -> None:
                     Filters.text, netflix_no_csv
                 ),
             ],
-            ConversationHandler.END: [
-                MessageHandler(
-                    Filters.text, start
-                )
-            ]
         },
         fallbacks=[],
         per_message=False

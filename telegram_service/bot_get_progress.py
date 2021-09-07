@@ -84,4 +84,10 @@ if __name__ == '__main__':
     image = requests.post(url = HCTI_API_ENDPOINT, data = data, auth=(HCTI_API_USER_ID, HCTI_API_KEY))
     print(image.json())
     print("Your image URL is: %s"%image.json()['url'])
+    
+    PANDAS TO THE RESCUE, AS ALWAYS
+    https://stackoverflow.com/questions/35634238/how-to-save-a-pandas-dataframe-table-as-a-png
+    
+    
+    
     '''
