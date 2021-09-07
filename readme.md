@@ -113,22 +113,6 @@ All containers are set to restart `on-failiure` so no worries.
 - Favorite a director/actor whatever and receive notifications when a new movie of his/hers is available.
 
 
-
-### Right now:
-
-Implement this and change port, integrate with other dockers:
-https://github.com/JonForest/html-to-image
-
-THis is better:
-https://github.com/lampnick/doctron
-
-use this to prettify the tables 
-https://github.com/sbi-rviot/ph_table
-
-another reference:
-https://stackoverflow.com/questions/10615901/trim-whitespace-using-pil
-
-
 ### In order to solve TRANSMISSION configuration problem:
 
 This is not gonna be easy. https://github.com/linuxserver/docker-mods 
