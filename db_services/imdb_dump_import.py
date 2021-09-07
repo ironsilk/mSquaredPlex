@@ -31,12 +31,6 @@ import sqlalchemy
 
 from utils import setup_logger
 
-try:
-    from tqdm import tqdm
-    HAS_TQDM = True
-except ImportError:
-    HAS_TQDM = False
-
 from imdb.parser.s3.utils import DB_TRANSFORM, title_soundex, name_soundexes
 
 TSV_EXT = '.tsv.gz'
@@ -147,12 +141,8 @@ def import_file(fn, engine):
             pass
         insert = table.insert()
         metadata.create_all(tables=[table])
-        if HAS_TQDM and logger.isEnabledFor(logging.DEBUG):
-            tqdm_ = tqdm
-        else:
-            tqdm_ = lambda it, **kwargs: it
         try:
-            for block in generate_content(tqdm_(gz_file, total=nr_of_lines), headers, table):
+            for block in generate_content(gz_file, headers, table):
                 try:
                     connection.execute(insert, block)
                 except Exception as e:
@@ -186,3 +176,17 @@ def run_import(db_uri, dir_name):
     metadata.bind = engine
     import_dir(dir_name, engine)
     logger.info('DB imports finished.')
+
+
+if __name__ == '__main__':
+    from dotenv import load_dotenv
+    load_dotenv()
+
+    DB_URI = "mysql://{u}:{p}@{hp}/{dbname}?charset=utf8".format(
+    u=os.getenv('MYSQL_MYIMDB_USER'),
+    p=os.getenv('MYSQL_MYIMDB_PASS'),
+    hp=':'.join([os.getenv('MYSQL_MYIMDB_HOST'), os.getenv('MYSQL_MYIMDB_PORT')]),
+    dbname=os.getenv('MYSQL_MYIMDB_DB_NAME'),
+)
+
+    run_import(DB_URI, r"C:\Users\mihai\Downloads\movielib")

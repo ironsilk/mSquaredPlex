@@ -93,7 +93,7 @@ All containers are set to restart `on-failiure` so no worries.
   Might be also slow because of fking up of docker volumes so to remove unused volumes: `sudo docker volume prune`.
   The final solution for this shit is always `sudo docker system prune -a` - Attention, it removes everything (volumes,
   networks, containers) not in use by any active docker container at that time. Run it before running again
-  `sudo docker-compose -f docker-compose_MAINSTACK.yml up -d --buil`
+  `sudo docker-compose -f docker-compose_MAINSTACK.yml up -d --build`
 - Still haven't figured out how to make those transmission startup settings. - **done, see bottom page**
 
 ## TODO
@@ -127,6 +127,20 @@ startup.
 It will return a container ID
 6. `docker start {ID}` that ID. You can open a CLI into the container and use `cat defaults/settings.json` and `cat config/settings.json` to see that
 your configs have been saved.
+   
+
+### MYSQL docker problems:
+
+Might be this:
+https://jsatt.com/blog/mysql-docker-performance/ - which leads to this: https://stackoverflow.com/questions/5474662/mysql-optimize-all-tables
+
+
+Could be this tho, the drive:
+https://phpforus.com/how-to-make-mysql-run-fast-with-ext4-on-ubuntu/
+
+or this https://github.com/docker/for-linux/issues/247
+
+
   
 
 
