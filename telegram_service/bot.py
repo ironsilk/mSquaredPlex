@@ -23,7 +23,7 @@ from bot_watchlist import bot_watchlist_routine, update_watchlist_item_status, g
 from bot_rate_title import bot_rate_titles
 from utils import update_many, deconvert_imdb_id, send_torrent, compose_link, check_db_plexbuddy, convert_imdb_id, \
     get_imdb_id_by_trgram_id
-from bot_get_progress import get_torrents_for_user
+from bot_get_progress import get_progress
 from bot_csv import csv_upload_handler, csv_download_handler
 
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
@@ -481,34 +481,35 @@ def download_torrent(update: Update, context: CallbackContext) -> int:
 def get_download_progress(update: Update, context: CallbackContext) -> int:
     def load_more(torrents, context):
         # TODO prettyfy this text here, right now it's crap.
-        message = f"Torrent statuses:\n" \
-                  f"{torrents}"
+        message = f"Torrent statuses"
         context.user_data['download_progress'] += 5
-        context.bot.send_message(user,
-                                 message,
-                                 reply_markup=InlineKeyboardMarkup(
-                                     [[InlineKeyboardButton('Show more', callback_data=1)]],
-                                     one_time_keyboard=True),
-                                 )
+        context.bot.send_photo(
+            chat_id=user,
+            caption=message,
+            photo=torrents,
+            reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton('Show more', callback_data=1)]],
+                one_time_keyboard=True),
+        )
         return DOWNLOAD_PROGRESS
 
     user = update.effective_user['id']
-    torrents = get_torrents_for_user(user, get_next=context.user_data['download_progress'], logger=logger)[:5]
+    photo_response = get_progress(user, get_next=context.user_data['download_progress'], logger=logger)
     if update.message:
         # Means that it's the first time we got here
-        if torrents:
-            return load_more(torrents, context)
+        if photo_response:
+            return load_more(photo_response, context)
         else:
             update.message.reply_text('No torrents to show. Have a great one!')
             return ConversationHandler.END
     else:
         # User pressed "Show more"
         update.callback_query.answer()
-        if torrents:
-            update.callback_query.edit_message_text(update.callback_query.message.text)
-            return load_more(torrents, context)
+        if photo_response:
+            update.callback_query.edit_message_reply_markup(reply_markup=None)
+            return load_more(photo_response, context)
         else:
-            update.callback_query.edit_message_text(update.callback_query.message.text)
+            update.callback_query.edit_message_reply_markup(reply_markup=None)
             context.bot.send_message(user, 'No more torrents to show. Bazinga!')
             return ConversationHandler.END
 
