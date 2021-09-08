@@ -22,8 +22,9 @@ from mysql.connector.errors import InterfaceError, DatabaseError, ProgrammingErr
 from plexapi.server import PlexServer
 from transmission_rpc import Client
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, ARRAY, \
-    Float, MetaData, create_engine, select
+    Float, MetaData, create_engine, select, inspect, Table
 from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy.ext.declarative import DeferredReflection
 
 load_dotenv()
 
@@ -82,14 +83,16 @@ def setup_logger(name, log_file=None, level=logging.INFO):
 # Setup a logger
 logger = setup_logger("PlexUtils")
 
-# declarative base class
-Base = declarative_base()
-
 # DB ENGINE
 engine = create_engine(DB_URI, encoding='utf-8', echo=False)
 
+# declarative base class
+Base = declarative_base()
+
 # MetaData
-META_DATA = MetaData(bind=engine)
+META_DATA = MetaData(engine)
+META_DATA.reflect()
+
 
 # an example mapping using the base
 class User(Base):
@@ -166,11 +169,8 @@ class OmdbMovie(Base):
     hit_omdb = Column(Boolean)
 
 
-try:
-    TitleBasics = META_DATA.tables['title_basics']
-except KeyError:
-    logger.warning("TitleBasics table not found.")
-    TitleBasics = None
+class TitleBasics(DeferredReflection, Base):
+    __tablename__ = 'title_basics'
 
 try:
     NameBasics = META_DATA.tables['name_basics']
@@ -236,19 +236,17 @@ def get_new_imdb_titles_for_omdb(excluded_ids):
     conn = connect_db()
     refresh_interval_date = datetime.datetime.now() - datetime.timedelta(days=REVIEW_INTERVAL_REFRESH)
     subquery = select(OmdbMovie.imdb_id).where(OmdbMovie.last_update_omdb > refresh_interval_date)
-    stmt = select(TitleBasics.tconst).where(TitleBasics.tconst.not_in.subquery)
+    stmt = select(TitleBasics.tconst).where(TitleBasics.tconst.not_in(subquery))
     if excluded_ids:
         stmt = stmt.filter(TitleBasics.tconst.not_in(excluded_ids))
     return conn.execute(stmt)
 
 
-def get_new_imdb_titles_for_tmdb(excluded_ids):
+def get_new_imdb_titles_for_tmdb():
     conn = connect_db()
     refresh_interval_date = datetime.datetime.now() - datetime.timedelta(days=REVIEW_INTERVAL_REFRESH)
-    subquery = select(TmdbMovie.imdb_id).where(TmdbMovie.last_update_omdb > refresh_interval_date)
-    stmt = select(TitleBasics.tconst).where(TitleBasics.tconst.not_in.subquery)
-    if excluded_ids:
-        stmt = stmt.filter(TitleBasics.tconst.not_in(excluded_ids))
+    subquery = select(TmdbMovie.imdb_id).where(TmdbMovie.last_update_tmdb > refresh_interval_date)
+    stmt = select(TitleBasics.tconst).where(TitleBasics.tconst.not_in(subquery))
     return conn.execute(stmt)
 
 
@@ -917,7 +915,15 @@ def parse_torr_name(name):
 if __name__ == '__main__':
     from pprint import pprint
     # check_database()
-    pprint(get_my_imdb_users())
+    print(type(TitleBasics))
+    print(type(User))
+    from sqlalchemy.ext.declarative import DeferredReflection
+    # TODO asa ajungi la declarative meta din alea sau nu, nu stiu ce plm.
+    class Messages(DeferredReflection, Base):
+        __tablename__ = 'title_basics'
+
+    print(type(Messages))
+
 
 
 

@@ -4,12 +4,10 @@ import time
 
 import mysql.connector.errors
 
-from utils import setup_logger, get_omdb, get_omdb_api_limit, get_new_imdb_titles_for_tmdb
-
-logger = setup_logger('TMDB_refresher')
+from utils import get_tmdb
+from utils import logger, get_new_imdb_titles_for_tmdb
 
 REVIEW_INTERVAL_REFRESH = int(os.getenv('REVIEW_INTERVAL_REFRESH'))
-OMDB_API_LIMIT = int(os.getenv('TMDB_API_LIMIT'))
 INSERT_RATE = int(os.getenv('INSERT_RATE'))
 
 
@@ -24,41 +22,35 @@ def get_tmdb_data(session_not_found=[]):
     """
     # New titles
     logger.info("Downloading data for new TMDB titles")
-    # Get how many API calls we have left
-    api_calls = get_omdb_api_limit()
-    new_for_omdb_cursor = get_new_imdb_titles_for_tmdb(session_not_found)
-    while new_for_omdb_cursor.with_rows:
-        if api_calls > INSERT_RATE:
-            calls_to_make = INSERT_RATE
-            stop = False
-        else:
-            calls_to_make = api_calls
-            stop = True
-        if calls_to_make < 0:
-            calls_to_make = 0
+    tmdb_inserted = 0
+
+    new_for_tmdb_cursor = get_new_imdb_titles_for_tmdb()
+    while new_for_tmdb_cursor.with_rows:
         try:
-            batch = new_for_omdb_cursor.fetchmany(calls_to_make)
+            batch = new_for_tmdb_cursor.mappings().fetchmany(INSERT_RATE)
             batch, session_not_found = process_items(batch, session_not_found)
-            update_many(batch, 'tmdb_data')
-            logger.info(f"Inserted {calls_to_make} into TMDB database")
-            api_calls -= calls_to_make
-            if stop:
-                # Sleep 1hr and repeat
-                logger.info('Hit TMDB API limit. Finishing up.')
-                return
+            print(batch)
+            input()
+            # update_many(batch, 'tmdb_data')
+            tmdb_inserted += 1
+            logger.info(f"Inserted {tmdb_inserted * INSERT_RATE} into TMDB database")
         except Exception as e:
+            raise e
             logger.error(f"Some other erorr while pulling IMDB data: {e}")
             return
+    # Sleep 1hr and repeat
+    logger.info('Finishing routine...')
 
 
 def process_items(items, session_not_found):
     new_items = []
     for item in items:
-        item = get_omdb(item['tconst'])
+        item = get_tmdb(item['tconst'])
         if not item['hit_tmdb']:
-            session_not_found.append(item['tconst'])
+            session_not_found.append(item['imdb_id'])
     return new_items, session_not_found
 
 
 if __name__ == '__main__':
     get_tmdb_data()
+

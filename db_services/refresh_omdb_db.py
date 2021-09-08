@@ -37,7 +37,7 @@ def get_omdb_data(session_not_found=[]):
         if calls_to_make < 0:
             calls_to_make = 0
         try:
-            batch = new_for_omdb_cursor.fetchmany(calls_to_make)
+            batch = new_for_omdb_cursor.mappings().fetchmany(INSERT_RATE)
             batch, session_not_found = process_items(batch, session_not_found)
             update_many(batch, 'omdb_data')
             logger.info(f"Inserted {calls_to_make} into OMDB database")
