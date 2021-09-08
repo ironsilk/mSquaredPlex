@@ -229,7 +229,7 @@ def get_omdb_api_limit():
     refresh_interval_date = datetime.datetime.now() - datetime.timedelta(days=1)
     conn = connect_db()
     stmt = select(OmdbMovie).where(OmdbMovie.last_update_omdb > refresh_interval_date)
-    return conn.execute(stmt).fetchall()
+    return conn.execute(stmt).mappings().all()
 
 
 def get_new_imdb_titles_for_omdb(excluded_ids):
@@ -251,6 +251,11 @@ def get_new_imdb_titles_for_tmdb(excluded_ids):
         stmt = stmt.filter(TitleBasics.tconst.not_in(excluded_ids))
     return conn.execute(stmt)
 
+
+def get_my_imdb_users(conn=None):
+    if not conn:
+        conn = connect_db()
+    return conn.execute(select(User)).mappings().all()
 
 
 # Misc tolls
@@ -911,10 +916,8 @@ def parse_torr_name(name):
 
 if __name__ == '__main__':
     from pprint import pprint
-    check_database()
-    conn = connect_db()
-    # stmt = select(OmdbMovie).where(OmdbMovie.last_update_omdb > refresh_interval_date)
-    # return conn.execute(stmt).fetchall()
+    # check_database()
+    pprint(get_my_imdb_users())
 
 
 

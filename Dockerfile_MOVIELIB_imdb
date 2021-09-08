@@ -1,4 +1,4 @@
-# docker build -t mikael6/mad_repo:imdb_update_service . -f Dockerfile_imdb_db_update_service
+# docker build -t download_imdb . -f Dockerfile_MOVIELIB_imdb
 FROM python:3.9.1
 
 LABEL Author="Mikael"

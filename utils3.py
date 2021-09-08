@@ -217,14 +217,6 @@ def send_message_to_bot(chat_id, message):
 
 
 # DB queries
-def get_my_imdb_users(cursor=None):
-    if not cursor:
-        conn, cursor = connect_mysql()
-    q = """SELECT * from users"""
-    cursor.execute(q)
-    return cursor.fetchall()
-
-
 def get_email_by_tgram_id(user, cursor=None):
     if not cursor:
         conn, cursor = connect_mysql()

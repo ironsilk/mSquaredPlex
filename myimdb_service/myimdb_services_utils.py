@@ -1,6 +1,6 @@
 import os
 
-from utils import setup_logger, connect_mysql, connect_plex, get_plex_users
+from utils import setup_logger, connect_plex, get_plex_users
 
 PLEX_ADMIN_EMAILS = os.getenv('PLEX_ADMIN_EMAILS').replace('"', '').replace(' ', '')
 if ',' in PLEX_ADMIN_EMAILS:
