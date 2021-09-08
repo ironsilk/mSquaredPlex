@@ -1,9 +1,35 @@
-version: "2.1"
 services:
+  movielib_db:
+    image: postgres
+    container_name: MOVIELIB_DB
+    env_file:
+      - .env
+    ports:
+      -  ${POSTGRES_PORT}:${POSTGRES_PORT}
+    volumes:
+      - ${POSTGRE_DB_LOCATION}:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  db_service:
+    network_mode: host
+    container_name: MOVIELIB_DBupdater
+    build:
+      context: ./
+      dockerfile: Dockerfile_MOVIELIB_master
+    env_file:
+      - .env
+    restart: on-failure
+    depends_on:
+      movielib_db:
+        condition: service_healthy
 
   plex:
     image: ghcr.io/linuxserver/plex
-    container_name: PLEXSTACK_Plex
+    container_name: MOVIELIB_Plex
     network_mode: host
     environment:
       - PUID=1000
@@ -16,10 +42,10 @@ services:
     restart: unless-stopped
 
   transmission:
-    container_name: PLEXSTACK_Transmission
+    container_name: MOVIELIB_Transmission
     build:
       context: ./
-      dockerfile: Dockerfile_MAINSTACK_transmission
+      dockerfile: Dockerfile_transmission
     env_file:
       - .env
     environment:
@@ -42,70 +68,54 @@ services:
       - 51413:51413/udp
     restart: unless-stopped
 
-  plexbuddy_mysql:
-    image: mysql
-    command: --default-authentication-plugin=mysql_native_password
-    container_name: PLEXSTACK_Mysql
-    network_mode: host
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_PASS}
-      MYSQL_TCP_PORT: ${MYSQL_PORT}
-    volumes:
-    - ${MYSQL_DB_LOCATION}:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", "-P$MYSQL_PORT"]
-      timeout: 20s
-      retries: 50
-
-  imdb_sync_service:
-    container_name: PLEXSTACK_IMDB_sync
+  myimdb_service:
+    container_name: MOVIELIB_myImdb
     network_mode: host
     build:
       context: ./
-      dockerfile: Dockerfile_MAINSTACK_myimdb
+      dockerfile: Dockerfile_myimdb
     env_file:
       - .env
     restart: on-failure
     depends_on:
-      plexbuddy_mysql:
+      movielib_db:
         condition: service_healthy
 
   filelist_service:
-    container_name: PLEXSTACK_Filelist
+    container_name: MOVIELIB_Filelist
     network_mode: host
     build:
       context: ./
-      dockerfile: Dockerfile_MAINSTACK_newsletter
+      dockerfile: Dockerfile_newsletter
     env_file:
       - .env
     restart: on-failure
     depends_on:
-      plexbuddy_mysql:
+      movielib_db:
         condition: service_healthy
 
   torrent_service:
-    container_name: PLEXSTACK_TorrentAPI
+    container_name: MOVIELIB_TorrentAPI
     network_mode: host
     build:
       context: ./
-      dockerfile: Dockerfile_MAINSTACK_torrapi
+      dockerfile: Dockerfile_torrapi
     env_file:
       - .env
     restart: on-failure
     depends_on:
-      plexbuddy_mysql:
+      movielib_db:
         condition: service_healthy
 
   telegram_service:
-    container_name: PLEXSTACK_Telegram
+    container_name: MOVIELIB_Telegram
     network_mode: host
     build:
       context: ./
-      dockerfile: Dockerfile_MAINSTACK_telegram
+      dockerfile: Dockerfile_telegram
     env_file:
       - .env
     restart: on-failure
     depends_on:
-      plexbuddy_mysql:
+      movielib_db:
         condition: service_healthy

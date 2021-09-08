@@ -172,7 +172,6 @@ def import_dir(dir_name, engine):
 
 def run_import(db_uri, dir_name):
     logger.info('Starting imports')
-    print(db_uri)
     engine = sqlalchemy.create_engine(db_uri, encoding='utf-8', echo=False)
     metadata.bind = engine
     import_dir(dir_name, engine)
@@ -181,14 +180,6 @@ def run_import(db_uri, dir_name):
 
 if __name__ == '__main__':
     from dotenv import load_dotenv
-
     load_dotenv()
-
-    DB_URI = "postgresql://{u}:{p}@{hp}/{dbname}?charset=utf8".format(
-        u='mike',
-        p='pass',
-        hp=':'.join(['192.168.1.99', '5432']),
-        dbname='movielib',
-    )
-
+    from utils import DB_URI
     run_import(DB_URI, r"C:\Users\mihai\Downloads\movielib")

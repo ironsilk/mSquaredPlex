@@ -21,9 +21,8 @@ from dotenv import load_dotenv
 from mysql.connector.errors import InterfaceError, DatabaseError, ProgrammingError
 from plexapi.server import PlexServer
 from transmission_rpc import Client
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, ARRAY, \
-    Float, MetaData, create_engine, select
-from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy import Column, Integer, String, DateTime, Boolean
+from sqlalchemy.orm import declarative_base
 
 load_dotenv()
 
@@ -55,13 +54,93 @@ TORR_API_PATH = os.getenv('TORR_API_PATH')
 TORR_SEED_FOLDER = os.getenv('TORR_SEED_FOLDER')
 TORR_DOWNLOAD_FOLDER = os.getenv('TORR_DOWNLOAD_FOLDER')
 
-REVIEW_INTERVAL_REFRESH = int(os.getenv('REVIEW_INTERVAL_REFRESH'))
-
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 
 PASSKEY = os.getenv('PASSKEY')
 
 DB_URI = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
+
+
+table_columns_plexbuddy = {
+    'my_movies': {
+        'imdb_id': 'INT(11)',
+        'my_score': 'float',
+        'seen_date': 'DATETIME',
+        'user': 'VARCHAR(256)',
+        'rating_status': 'VARCHAR(128)',
+    },
+    'my_torrents': {
+        'torr_id': 'INT(11)',
+        'torr_name': 'TEXT',
+        'imdb_id': 'INT(11)',
+        'resolution': 'int(11)',
+        'status': 'CHAR(32)',
+        'requested_by': 'TEXT',
+    },
+    'users': {
+        'telegram_chat_id': 'INT(11)',
+        'telegram_name': 'VARCHAR(256)',
+        'email': 'VARCHAR(256)',
+        'imdb_id': 'int(11)',
+        'scan_watchlist': 'BOOL',
+        'email_newsletters': 'BOOL',
+    },
+    'watchlists': {
+        'id': 'AUTO-INCREMENT',
+        'movie_id': 'int(11)',
+        'imdb_id': 'int(11)',
+        'status': 'VARCHAR(128)',
+        'excluded_torrents': 'TEXT',
+        'is_downloaded': 'VARCHAR(128)',
+    },
+    'tmdb_data': {
+        'imdb_id': 'INT(11)',
+        'country': 'VARCHAR(128)',
+        'lang': 'VARCHAR(128)',
+        'ovrw': 'TEXT',
+        'tmdb_score': 'FLOAT',
+        'trailer_link': 'VARCHAR(256)',
+        'poster': 'VARCHAR(256)',
+        'last_update_tmdb': 'DATETIME',
+        'hit_tmdb': 'BOOL',
+    },
+    'omdb_data': {
+        'imdb_id': 'INT(11)',
+        'awards': 'VARCHAR(256)',
+        'country': 'VARCHAR(128)',
+        'lang': 'VARCHAR(128)',
+        'meta_score': 'FLOAT',
+        'rated': 'FLOAT',
+        'rott_score': 'FLOAT',
+        'omdb_score': 'FLOAT',
+        'last_update_omdb': 'DATETIME',
+        'hit_omdb': 'BOOL',
+    },
+}
+
+# declarative base class
+Base = declarative_base()
+
+# an example mapping using the base
+class my_movie(Base):
+    __tablename__ = 'my_movies'
+
+    telegram_chat_id = Column(Integer, primary_key=True)
+    telegram_name = Column(Integer)
+    email = Column(DateTime)
+    imdb_id = Column(String)
+    scan_watchlist = Column(String)
+    email_newsletters = Column(String)
+
+
+class my_movie(Base):
+    __tablename__ = 'my_movies'
+
+    imdb_id = Column(Integer, primary_key=True)
+    my_score = Column(Integer)
+    seen_date = Column(DateTime)
+    user = Column(String)
+    rating_status = Column(String)
 
 # Logger settings
 def setup_logger(name, log_file=None, level=logging.INFO):
@@ -81,176 +160,6 @@ def setup_logger(name, log_file=None, level=logging.INFO):
 
 # Setup a logger
 logger = setup_logger("PlexUtils")
-
-# declarative base class
-Base = declarative_base()
-
-# DB ENGINE
-engine = create_engine(DB_URI, encoding='utf-8', echo=False)
-
-# MetaData
-META_DATA = MetaData(bind=engine)
-
-# an example mapping using the base
-class User(Base):
-    __tablename__ = 'user'
-
-    telegram_chat_id = Column(Integer, primary_key=True)
-    telegram_name = Column(String)
-    email = Column(String)
-    imdb_id = Column(Integer)
-    scan_watchlist = Column(Boolean)
-    email_newsletters = Column(Boolean)
-    movies = relationship('Movie')
-
-
-class Movie(Base):
-    __tablename__ = 'movie'
-
-    id = Column(Integer, primary_key=True)
-    imdb_id = Column(Integer)
-    my_score = Column(Integer)
-    seen_date = Column(DateTime)
-    user = Column(Integer, ForeignKey('user.telegram_chat_id'))
-    rating_status = Column(String)
-
-
-class Torrent(Base):
-    __tablename__ = 'torrent'
-
-    torr_id = Column(Integer, primary_key=True)
-    torr_name = Column(String)
-    imdb_id = Column(Integer, ForeignKey('movie.id'))
-    resolution = Column(Integer)
-    status = Column(String)
-    requested_by = Column(Integer, ForeignKey('user.telegram_chat_id'))
-
-
-class Watchlist(Base):
-    __tablename__ = 'watchlists'
-
-    id = Column(Integer, primary_key=True)
-    imdb_id = Column(Integer)
-    user = Column(Integer, ForeignKey('user.telegram_chat_id'))
-    status = Column(String)
-    excluded_torrents = Column(ARRAY(Integer))
-    is_downloaded = Column(String)
-
-
-class TmdbMovie(Base):
-    __tablename__ = 'tmdb_data'
-
-    imdb_id = Column(Integer, primary_key=True)
-    country = Column(String)
-    lang = Column(String)
-    ovrw = Column(String)
-    tmdb_score = Column(Float)
-    trailer_link = Column(String)
-    poster = Column(String)
-    last_update_tmdb = Column(DateTime)
-    hit_tmdb = Column(Boolean)
-
-
-class OmdbMovie(Base):
-    __tablename__ = 'omdb_data'
-
-    imdb_id = Column(Integer, primary_key=True)
-    awards = Column(String)
-    country = Column(String)
-    lang = Column(String)
-    meta_score = Column(Float)
-    rated = Column(Float)
-    rott_score = Column(Float)
-    omdb_score = Column(Float)
-    last_update_omdb = Column(DateTime)
-    hit_omdb = Column(Boolean)
-
-
-try:
-    TitleBasics = META_DATA.tables['title_basics']
-except KeyError:
-    logger.warning("TitleBasics table not found.")
-    TitleBasics = None
-
-try:
-    NameBasics = META_DATA.tables['name_basics']
-except KeyError:
-    logger.warning("NameBasics table not found.")
-    NameBasics = None
-
-try:
-    TitleAkas = META_DATA.tables['title_akas']
-except KeyError:
-    logger.warning("TitleAkas table not found.")
-    TitleAkas = None
-
-try:
-    TitleCrew = META_DATA.tables['title_crew']
-except KeyError:
-    logger.warning("TitleCrew table not found.")
-    TitleCrew = None
-
-try:
-    TitleEpisode = META_DATA.tables['title_episode']
-except KeyError:
-    logger.warning("TitleEpisode table not found.")
-    TitleEpisode = None
-
-try:
-    TitlePrincipals = META_DATA.tables['title_principals']
-except KeyError:
-    logger.warning("TitlePrincipals table not found.")
-    TitlePrincipals = None
-
-try:
-    TitleRatings = META_DATA.tables['title_ratings']
-except KeyError:
-    logger.warning("TitleRatings table not found.")
-    TitleRatings = None
-
-
-def connect_db():
-    return engine.connect()
-
-
-def check_database():
-    engine = create_engine(DB_URI, encoding='utf-8', echo=False)
-    metadata = MetaData(engine)
-    metadata.create_all()
-    User.__table__.create(bind=engine, checkfirst=True)
-    Movie.__table__.create(bind=engine, checkfirst=True)
-    Torrent.__table__.create(bind=engine, checkfirst=True)
-    Watchlist.__table__.create(bind=engine, checkfirst=True)
-    TmdbMovie.__table__.create(bind=engine, checkfirst=True)
-    OmdbMovie.__table__.create(bind=engine, checkfirst=True)
-
-
-def get_omdb_api_limit():
-    refresh_interval_date = datetime.datetime.now() - datetime.timedelta(days=1)
-    conn = connect_db()
-    stmt = select(OmdbMovie).where(OmdbMovie.last_update_omdb > refresh_interval_date)
-    return conn.execute(stmt).fetchall()
-
-
-def get_new_imdb_titles_for_omdb(excluded_ids):
-    conn = connect_db()
-    refresh_interval_date = datetime.datetime.now() - datetime.timedelta(days=REVIEW_INTERVAL_REFRESH)
-    subquery = select(OmdbMovie.imdb_id).where(OmdbMovie.last_update_omdb > refresh_interval_date)
-    stmt = select(TitleBasics.tconst).where(TitleBasics.tconst.not_in.subquery)
-    if excluded_ids:
-        stmt = stmt.filter(TitleBasics.tconst.not_in(excluded_ids))
-    return conn.execute(stmt)
-
-
-def get_new_imdb_titles_for_tmdb(excluded_ids):
-    conn = connect_db()
-    refresh_interval_date = datetime.datetime.now() - datetime.timedelta(days=REVIEW_INTERVAL_REFRESH)
-    subquery = select(TmdbMovie.imdb_id).where(TmdbMovie.last_update_omdb > refresh_interval_date)
-    stmt = select(TitleBasics.tconst).where(TitleBasics.tconst.not_in.subquery)
-    if excluded_ids:
-        stmt = stmt.filter(TitleBasics.tconst.not_in(excluded_ids))
-    return conn.execute(stmt)
-
 
 
 # Misc tolls
@@ -307,6 +216,195 @@ def send_message_to_bot(chat_id, message):
     return r.json()['ok']
 
 
+# DB queries
+def get_my_imdb_users(cursor=None):
+    if not cursor:
+        conn, cursor = connect_mysql()
+    q = """SELECT * from users"""
+    cursor.execute(q)
+    return cursor.fetchall()
+
+
+def get_email_by_tgram_id(user, cursor=None):
+    if not cursor:
+        conn, cursor = connect_mysql()
+    q = f"SELECT `email` FROM users where telegram_chat_id = '{user}'"
+    cursor.execute(q)
+    return cursor.fetchone()['email']
+
+
+def get_imdb_id_by_trgram_id(user, cursor=None):
+    if not cursor:
+        conn, cursor = connect_mysql()
+    q = f"SELECT `imdb_id` FROM users where telegram_chat_id = '{user}'"
+    cursor.execute(q)
+    return cursor.fetchone()['imdb_id']
+
+
+def get_watchlist_for_user(user_imdb_id, cursor=None):
+    if not cursor:
+        conn, cursor = connect_mysql()
+    q = f"SELECT * FROM watchlists WHERE imdb_id = {user_imdb_id} and status = 'new'"
+    cursor.execute(q)
+    return cursor.fetchall()
+
+
+def get_requested_torrents_for_tgram_user(user, cursor=None):
+    if not cursor:
+        conn, cursor = connect_mysql()
+    email = get_email_by_tgram_id(user, cursor=cursor)
+    q = f"SELECT * FROM my_torrents WHERE requested_by = '{email}'"
+    cursor.execute(q)
+    return cursor.fetchall()
+
+
+def check_one_in_my_torrents_by_imdb(idd, cursor=None):
+    if not cursor:
+        conn, cursor = connect_mysql()
+    q = f"SELECT * FROM my_torrents WHERE imdb_id = {idd}"
+    cursor.execute(q)
+    return cursor.fetchall()
+
+
+def check_one_in_my_torrents_by_torr_id(idd, cursor=None):
+    if not cursor:
+        conn, cursor = connect_mysql()
+    q = f"SELECT * FROM my_torrents WHERE torr_id = {idd}"
+    cursor.execute(q)
+    return cursor.fetchone()
+
+
+def check_one_in_my_torrents_by_torr_name(name, cursor=None):
+    if not cursor:
+        conn, cursor = connect_mysql()
+    q = f"SELECT * FROM my_torrents WHERE torr_name = '{name}'"
+    cursor.execute(q)
+    return cursor.fetchone()
+
+
+def retrieve_one_from_dbs(item, cursor=None):
+    if not cursor:
+        try:
+            conn, cursor = connect_mysql(myimdb=True)
+        except (mysql.connector.errors.DatabaseError, mysql.connector.errors.InterfaceError):
+            conn, cursor = None, None
+    # ID
+    try:
+        imdb_id_number = deconvert_imdb_id(item['imdb'])
+    except:
+        imdb_id_number = deconvert_imdb_id(item['imdb_id'])
+    # Search in local_db
+    imdb_keys = get_movie_IMDB(imdb_id_number, cursor)
+    # Search online if TMDB, OMDB not found in local DB
+    if not imdb_keys:
+        return None
+    if imdb_keys['hit_tmdb'] != 1:
+        tmdb = get_tmdb(imdb_id_number)
+        if tmdb['hit_tmdb'] == 1:
+            imdb_keys.update(tmdb)
+            # Update db
+            update_many([tmdb], 'tmdb_data')
+    if imdb_keys['hit_omdb'] != 1:
+        omdb = get_omdb(imdb_id_number)
+        if omdb['hit_omdb'] == 1:
+            imdb_keys.update(omdb)
+            # Update db
+            update_many([omdb], 'omdb_data')
+    return {**item, **imdb_keys}
+
+
+def get_movie_IMDB(imdb_id, cursor=None):
+    item = get_movie_from_local_db(imdb_id, cursor)
+    if not item:
+        item = get_movie_from_imdb_online(imdb_id)
+    if item:
+        item['hit_tmdb'] = 0
+        item['hit_omdb'] = 0
+    return item
+
+
+def get_movie_from_local_db(imdb_id, cursor):
+    try:
+        if not cursor:
+            conn, cursor = connect_mysql(myimdb=True)
+        q = f"""SELECT a.*, b.numVotes, b.averageRating, e.title, c.*, d.* FROM title_basics a
+        left join title_ratings b on a.tconst = b.tconst
+        left join tmdb_data c on a.tconst = c.imdb_id
+        left join omdb_data d on a.tconst = d.imdb_id
+        left join title_akas e on a.tconst = e.titleId
+        where a.tconst = {imdb_id} AND e.isOriginalTitle = 1
+
+        """
+        q_crew = f"""SELECT group_concat(primaryName) as 'cast' 
+        FROM name_basics WHERE nconst in 
+        (SELECT nconst FROM title_principals where tconst = {imdb_id} and category = 'actor')
+        """
+
+        q_director = f"""SELECT primaryName as 'director' FROM name_basics 
+        WHERE nconst = (SELECT directors FROM title_crew  where tconst = {imdb_id})
+        """
+
+        cursor.execute(q)
+        item = cursor.fetchone()
+        if not item:
+            return None
+        # Add crew
+        cursor.execute((q_crew))
+        item.update(cursor.fetchone())
+
+        # Add director
+        cursor.execute((q_director))
+        item.update(**cursor.fetchone())
+    except (DatabaseError, ProgrammingError, InterfaceError) as e:
+        logger.warning(f"IMDB db is down or programming error: {e}")
+        return None
+    return item
+
+
+def get_movie_from_imdb_online(imdb_id):
+    ia = imdb.IMDb()
+    try:
+        movie = ia.get_movie(imdb_id)
+        if 'rating' not in movie.data.keys():
+            movie.data['rating'] = None
+        if 'director' not in movie.data.keys():
+            movie.data['director'] = None
+
+        item = {
+            'cast': ', '.join([x['name'] for x in movie.data['cast'][:5]]),
+            'genres': ', '.join(movie.data['genres']),
+            'imdbID': movie.data['imdbID'],
+            'titleType': movie.data['kind'],
+            'averageRating': movie.data['rating'],
+            'title': movie.data['title'],
+            'originalTitle': movie.data['localized title'],
+            'startYear': movie.data['year'],
+            'numVotes': movie.data['votes'],
+            'runtimeMinutes': movie.data['runtimes'][0]
+        }
+
+    except Exception as e:
+        logger.error(f"IMDB online error: {e}")
+        item = None
+    return item
+
+
+def get_tgram_user_by_email(email, cursor=None):
+    if not cursor:
+        conn, cursor = connect_mysql()
+    q = f"SELECT `telegram_chat_id` FROM users where email = '{email}'"
+    cursor.execute(q)
+    return cursor.fetchone()['telegram_chat_id']
+
+
+def get_my_movies(email, cursor=None):
+    if not cursor:
+        conn, cursor = connect_mysql()
+    q = f"SELECT * FROM my_movies where user = '{email}'"
+    cursor.execute(q)
+    return cursor.fetchall()
+
+
 # PLEX utils
 def connect_plex():
     # Server
@@ -323,7 +421,7 @@ def get_plex_users(account=None, plex=None):
 
 
 # TMDB OMDB classes
-class GenericMovie:
+class Movie:
 
     def __init__(self, id_imdb):
         self.id_list = []
@@ -344,10 +442,10 @@ class GenericMovie:
             logger.debug('get_movie_dblist err')
 
 
-class OMDB(GenericMovie):
+class OMDB(Movie):
 
     def __init__(self, id_imdb):
-        GenericMovie.__init__(self, id_imdb)
+        Movie.__init__(self, id_imdb)
         self.genre = None
         self.lang = None
         self.imdb_score = None
@@ -426,10 +524,10 @@ class OMDB(GenericMovie):
             logger.debug('no "actors" in omdb json')
 
 
-class TMDB(GenericMovie):
+class TMDB(Movie):
 
     def __init__(self, id_imdb, type_tmdb, id_tmdb, search_title=None, search_year=None):
-        GenericMovie.__init__(self, id_imdb)
+        Movie.__init__(self, id_imdb)
         self.genre = None
         self.url = None
         self.lang = None
@@ -911,18 +1009,5 @@ def parse_torr_name(name):
 
 if __name__ == '__main__':
     from pprint import pprint
-    check_database()
-    conn = connect_db()
-    # stmt = select(OmdbMovie).where(OmdbMovie.last_update_omdb > refresh_interval_date)
-    # return conn.execute(stmt).fetchall()
-
-
-
-
-
-
-
-
-
-
+    pprint(get_requested_torrents_for_tgram_user(1700079840))
 

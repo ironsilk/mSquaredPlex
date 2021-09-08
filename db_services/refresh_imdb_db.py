@@ -4,7 +4,7 @@ import requests
 from lxml import html
 
 from imdb_dump_import import run_import
-from utils import setup_logger, check_db_myimdb
+from utils import setup_logger, check_database, DB_URI
 
 # Alternatives, maybe:
 # https://stackoverflow.com/questions/1231900/mysql-load-data-local-infile-example-in-python
@@ -13,13 +13,6 @@ from utils import setup_logger, check_db_myimdb
 IMDB_DB_REFRESH_INTERVAL = int(os.getenv('IMDB_DB_REFRESH_INTERVAL'))
 DUMPS_URL = os.getenv('DUMPS_URL')
 DUMPS_PATH = os.getenv('DUMPS_PATH')
-DB_URI = "postgresql+psycopg2://{u}:{p}@{hp}/{dbname}".format(
-    u='mike',
-    p='pass',
-    hp=':'.join(['192.168.1.99', '5432']),
-    dbname='movielib',
-)
-DB_URI = "postgresql://mike:pass@192.168.1.99/movielib"
 
 logger = setup_logger("IMDB_db_updater")
 
@@ -48,6 +41,6 @@ def update_imdb_db():
 
 
 if __name__ == '__main__':
-    # check_db_myimdb()
-    print(DB_URI)
+    check_database()
+    fetch_database_dumps()
     update_imdb_db()

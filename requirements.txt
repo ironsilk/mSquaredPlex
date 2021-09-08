@@ -23,6 +23,7 @@ PyMySQL==1.0.2
 python-dateutil
 python-telegram-bot==13.7
 pytz
+psycopg2
 requests
 python-dotenv
 six

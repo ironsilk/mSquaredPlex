@@ -8,19 +8,13 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 from refresh_imdb_db import update_imdb_db
 from refresh_omdb_db import get_omdb_data
 from refresh_tmdb_db import get_tmdb_data
-from utils import setup_logger, check_db_myimdb
+from utils import setup_logger, DB_URI, check_database
 
 # ENV variables
 TZ = os.getenv('TZ')
 IMDB_DB_REFRESH_INTERVAL = int(os.getenv('IMDB_DB_REFRESH_INTERVAL'))
-MY_IMDB_REFRESH_INTERVAL = int(os.getenv('MY_IMDB_REFRESH_INTERVAL'))
+MYIMDB_REFRESH_INTERVAL = int(os.getenv('MY_IMDB_REFRESH_INTERVAL'))
 
-DB_URI = "mysql://{u}:{p}@{hp}/{dbname}?charset=utf8".format(
-    u=os.getenv('MYSQL_MYIMDB_USER'),
-    p=os.getenv('MYSQL_MYIMDB_PASS'),
-    hp=':'.join([os.getenv('MYSQL_MYIMDB_HOST'), os.getenv('MYSQL_MYIMDB_PORT')]),
-    dbname=os.getenv('MYSQL_MYIMDB_DB_NAME'),
-)
 
 logger = setup_logger("MasterScheduler_MOVIELIB")
 
@@ -97,5 +91,5 @@ if __name__ == '__main__':
         scheduler = BlockingScheduler(jobstores=jobstores, timezone=TZ)
         scheduler.add_listener(at_job_start, EVENT_JOB_SUBMITTED)
         scheduler.add_listener(at_execution_finish, EVENT_JOB_EXECUTED)
-    check_db_myimdb()
+    check_database()
     scheduler.start()
