@@ -24,6 +24,8 @@ from transmission_rpc import Client
 from sqlalchemy import Column, Integer, String, DateTime, Boolean
 from sqlalchemy.orm import declarative_base
 
+from utils import get_movie_tmdb_omdb
+
 load_dotenv()
 
 # ENV variables
@@ -272,113 +274,6 @@ def check_one_in_my_torrents_by_torr_name(name, cursor=None):
     q = f"SELECT * FROM my_torrents WHERE torr_name = '{name}'"
     cursor.execute(q)
     return cursor.fetchone()
-
-
-def retrieve_one_from_dbs(item, cursor=None):
-    if not cursor:
-        try:
-            conn, cursor = connect_mysql(myimdb=True)
-        except (mysql.connector.errors.DatabaseError, mysql.connector.errors.InterfaceError):
-            conn, cursor = None, None
-    # ID
-    try:
-        imdb_id_number = deconvert_imdb_id(item['imdb'])
-    except:
-        imdb_id_number = deconvert_imdb_id(item['imdb_id'])
-    # Search in local_db
-    imdb_keys = get_movie_IMDB(imdb_id_number, cursor)
-    # Search online if TMDB, OMDB not found in local DB
-    if not imdb_keys:
-        return None
-    if imdb_keys['hit_tmdb'] != 1:
-        tmdb = get_tmdb(imdb_id_number)
-        if tmdb['hit_tmdb'] == 1:
-            imdb_keys.update(tmdb)
-            # Update db
-            update_many([tmdb], 'tmdb_data')
-    if imdb_keys['hit_omdb'] != 1:
-        omdb = get_omdb(imdb_id_number)
-        if omdb['hit_omdb'] == 1:
-            imdb_keys.update(omdb)
-            # Update db
-            update_many([omdb], 'omdb_data')
-    return {**item, **imdb_keys}
-
-
-def get_movie_IMDB(imdb_id, cursor=None):
-    item = get_movie_from_local_db(imdb_id, cursor)
-    if not item:
-        item = get_movie_from_imdb_online(imdb_id)
-    if item:
-        item['hit_tmdb'] = 0
-        item['hit_omdb'] = 0
-    return item
-
-
-def get_movie_from_local_db(imdb_id, cursor):
-    try:
-        if not cursor:
-            conn, cursor = connect_mysql(myimdb=True)
-        q = f"""SELECT a.*, b.numVotes, b.averageRating, e.title, c.*, d.* FROM title_basics a
-        left join title_ratings b on a.tconst = b.tconst
-        left join tmdb_data c on a.tconst = c.imdb_id
-        left join omdb_data d on a.tconst = d.imdb_id
-        left join title_akas e on a.tconst = e.titleId
-        where a.tconst = {imdb_id} AND e.isOriginalTitle = 1
-
-        """
-        q_crew = f"""SELECT group_concat(primaryName) as 'cast' 
-        FROM name_basics WHERE nconst in 
-        (SELECT nconst FROM title_principals where tconst = {imdb_id} and category = 'actor')
-        """
-
-        q_director = f"""SELECT primaryName as 'director' FROM name_basics 
-        WHERE nconst = (SELECT directors FROM title_crew  where tconst = {imdb_id})
-        """
-
-        cursor.execute(q)
-        item = cursor.fetchone()
-        if not item:
-            return None
-        # Add crew
-        cursor.execute((q_crew))
-        item.update(cursor.fetchone())
-
-        # Add director
-        cursor.execute((q_director))
-        item.update(**cursor.fetchone())
-    except (DatabaseError, ProgrammingError, InterfaceError) as e:
-        logger.warning(f"IMDB db is down or programming error: {e}")
-        return None
-    return item
-
-
-def get_movie_from_imdb_online(imdb_id):
-    ia = imdb.IMDb()
-    try:
-        movie = ia.get_movie(imdb_id)
-        if 'rating' not in movie.data.keys():
-            movie.data['rating'] = None
-        if 'director' not in movie.data.keys():
-            movie.data['director'] = None
-
-        item = {
-            'cast': ', '.join([x['name'] for x in movie.data['cast'][:5]]),
-            'genres': ', '.join(movie.data['genres']),
-            'imdbID': movie.data['imdbID'],
-            'titleType': movie.data['kind'],
-            'averageRating': movie.data['rating'],
-            'title': movie.data['title'],
-            'originalTitle': movie.data['localized title'],
-            'startYear': movie.data['year'],
-            'numVotes': movie.data['votes'],
-            'runtimeMinutes': movie.data['runtimes'][0]
-        }
-
-    except Exception as e:
-        logger.error(f"IMDB online error: {e}")
-        item = None
-    return item
 
 
 def get_tgram_user_by_email(email, cursor=None):

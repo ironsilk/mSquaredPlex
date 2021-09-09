@@ -23,10 +23,9 @@ from plexapi.server import PlexServer
 from sqlalchemy.ext.automap import automap_base
 from transmission_rpc import Client
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, ARRAY, \
-    Float, MetaData, create_engine, select, inspect, Table
+    Float, MetaData, create_engine, select, inspect, Table, desc
 from sqlalchemy.orm import declarative_base, relationship
-from sqlalchemy.ext.declarative import DeferredReflection
-
+from sqlalchemy.dialects.postgresql import insert
 load_dotenv()
 
 # ENV variables
@@ -110,7 +109,7 @@ class User(Base):
     imdb_id = Column(Integer)
     scan_watchlist = Column(Boolean)
     email_newsletters = Column(Boolean)
-    movies = relationship('Movie')
+    movies = relationship("Movie", back_populates="user")
 
 
 class Movie(Base):
@@ -120,7 +119,8 @@ class Movie(Base):
     imdb_id = Column(Integer)
     my_score = Column(Integer)
     seen_date = Column(DateTime)
-    user = Column(Integer, ForeignKey('user.telegram_chat_id'))
+    user_id = Column(Integer, ForeignKey('user.telegram_chat_id'))
+    user = relationship("User", back_populates="movies")
     rating_status = Column(String)
 
 
@@ -284,6 +284,7 @@ def get_new_imdb_titles_for_omdb(excluded_ids):
     stmt = select(TitleBasics.tconst).where(TitleBasics.tconst.not_in(subquery))
     if excluded_ids:
         stmt = stmt.filter(TitleBasics.tconst.not_in(excluded_ids))
+    stmt = stmt.order_by(desc(TitleBasics.tconst))
     return conn.execute(stmt)
 
 
@@ -293,13 +294,127 @@ def get_new_imdb_titles_for_tmdb():
     subquery = select(TmdbMovie.imdb_id).where(TmdbMovie.last_update_tmdb > refresh_interval_date)
 
     stmt = select(TitleBasics.tconst).where(TitleBasics.tconst.not_in(subquery))
+    stmt = stmt.order_by(desc(TitleBasics.tconst))
     return conn.execute(stmt)
+
+
+def check_against_my_torrents(torrents):
+    """
+    Checks if passed torrents from filelist API are aready in my_torrents db.
+    :param torrents:
+    :return:
+    """
+    with engine.connect() as conn:
+        stmt = select(Torrent.torr_id).where(Torrent.torr_id.in_([x['id'] for x in torrents]))
+        result = conn.execute(stmt).fetchall()
+    if result:
+        return [x[0] for x in result]
+
+
+def check_against_user_movies(movies, email):
+    """
+    Checks if passed torrents from filelist API are aready in my_torrents db.
+    :param torrents:
+    :return:
+    """
+    with engine.connect() as conn:
+        stmt = select(Movie).where(Movie.imdb_id.in_([x['imdb_id'] for x in movies]))\
+            .where(Movie.user.has(User.email == email))
+        result = conn.execute(stmt).mappings().fetchall()
+    return result
+
+
+def get_movie_details(item, cursor=None):
+    # ID
+    try:
+        imdb_id_number = deconvert_imdb_id(item['imdb'])
+    except:
+        imdb_id_number = deconvert_imdb_id(item['imdb_id'])
+    # Search in local_db
+    new_keys = get_movie_imdb(imdb_id_number, cursor)
+    # Search online if TMDB, OMDB not found in local DB
+    if not new_keys:
+        return None
+    tmdb_omdb = get_movie_tmdb_omdb(imdb_id_number)
+    if tmdb_omdb:
+        new_keys.update(tmdb_omdb)
+    return {**item, **new_keys}
+
+
+def get_movie_imdb(imdb_id):
+    ia = imdb.IMDb('s3', DB_URI)
+    try:
+        movie = ia.get_movie(imdb_id)
+        if 'rating' not in movie.data.keys():
+            movie.data['rating'] = None
+        if 'director' not in movie.data.keys():
+            movie.data['director'] = None
+        # if 'localized title'
+        item = {
+            'cast': ', '.join([x['name'] for x in movie.data['cast'][:5]]),
+            'genres': ', '.join(movie.data['genres']),
+            'imdbID': movie.movieID,
+            'titleType': movie.data['kind'],
+            'averageRating': movie.data['rating'],
+            'title': movie.data['title'],
+            'originalTitle': movie.data['original title'],
+            'startYear': movie.data['year'],
+            'numVotes': movie.data['votes'],
+            'runtimeMinutes': movie.data['runtimes'][0]
+        }
+
+    except Exception as e:
+        logger.error(f"IMDB fetch error: {e}")
+        return None
+    return item
+
+
+def get_movie_tmdb_local(imdb_id):
+    with engine.connect() as conn:
+        stmt = select(TmdbMovie).where(TmdbMovie.imdb_id == imdb_id)
+        result = conn.execute(stmt)
+    if result:
+        return result.mappings().fetchone()
+
+
+def get_movie_omdb_local(imdb_id):
+    with engine.connect() as conn:
+        stmt = select(OmdbMovie).where(OmdbMovie.imdb_id == imdb_id)
+        result = conn.execute(stmt)
+    if result:
+        return result.mappings().fetchone()
+
+
+def get_movie_tmdb_omdb(imdb_id):
+    tmdb = get_movie_tmdb_local(imdb_id)
+    if not tmdb:
+        tmdb = get_tmdb(imdb_id)
+        if tmdb['hit_tmdb']:
+            update_many([tmdb], TmdbMovie, TmdbMovie.imdb_id)
+    omdb = get_movie_omdb_local(imdb_id)
+    if not omdb:
+        omdb = get_omdb(imdb_id)
+        if omdb['hit_omdb']:
+            update_many([omdb], OmdbMovie, OmdbMovie.imdb_id)
+    return {**tmdb, **omdb}
 
 
 def get_my_imdb_users(conn=None):
     if not conn:
         conn = connect_db()
     return conn.execute(select(User)).mappings().all()
+
+
+def update_many(items, table, primary_key):
+    with engine.connect() as conn:
+        insert_statement = insert(table).values(items)
+        update_columns = {col.name: col for col in insert_statement.excluded if col.name != primary_key.name}
+        update_stmt = insert_statement.on_conflict_do_update(
+            index_elements=[primary_key],
+            set_=update_columns
+        )
+        result = conn.execute(update_stmt)
+    return result
 
 
 # Misc tolls
@@ -958,18 +1073,20 @@ def parse_torr_name(name):
     return PTN.parse(name)
 
 
+# SQL examples and other notes:
+"""
+# left join example
+stmt = select(TmdbMovie, OmdbMovie).join(OmdbMovie, TmdbMovie.imdb_id == OmdbMovie.imdb_id).\
+    where(TmdbMovie.imdb_id == imdb_id)
+"""
+
+
 if __name__ == '__main__':
     from pprint import pprint
-
-    # check_database()
-    print(type(TitleBasics))
-    print(type(User))
-    from sqlalchemy.ext.declarative import DeferredReflection
+    # pprint(get_movie_tmdb(15380158))
+    # pprint(get_movie_tmdb_omdb(15380158))
+    check_database()
 
 
-    # TODO asa ajungi la declarative meta din alea sau nu, nu stiu ce plm.
-    class Messages(DeferredReflection, Base):
-        __tablename__ = 'title_basics'
 
 
-    print(type(Messages))

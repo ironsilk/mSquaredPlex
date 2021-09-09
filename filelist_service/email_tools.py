@@ -8,10 +8,10 @@ from xml.etree.ElementTree import SubElement
 
 import PTN
 
-from utils import OMDB
+from utils import OMDB, check_against_user_movies
 from utils import TMDB
 from utils import get_my_imdb_users
-from utils import get_torr_quality, connect_mysql
+from utils import get_torr_quality
 from utils import setup_logger
 
 XML_TRNT_PATH = os.getenv('XML_TRNT_PATH')
@@ -635,12 +635,7 @@ def check_in_my_movies(new_movies, email):
             lst.append({**new_m, **d})
         return lst
 
-    conn, cursor = connect_mysql()
-    values = "','".join([str(x['imdb_id']) for x in new_movies])
-    q = f"SELECT * FROM my_movies WHERE imdb_id IN ('{values}') AND " \
-        f"user = '{email}'"
-    cursor.execute(q)
-    already_in_db = cursor.fetchall()
+    already_in_db = check_against_user_movies(new_movies, email)
     new = get_intersections(new_movies, already_in_db)
     # Filter out new movies already in database and where quality is the same or poorer
     new = [x for x in new if x['already_in_db'] is False or x['better_quality'] is True]

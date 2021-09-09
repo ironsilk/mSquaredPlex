@@ -1,11 +1,10 @@
 import os
 import time
 import PTN
-import mysql.connector.errors
 import requests
 
-from utils import torr_cypher, connect_mysql, retrieve_one_from_dbs, update_many, setup_logger, timing, \
-    check_db_plexbuddy
+from utils import torr_cypher, get_movie_details, update_many, setup_logger, timing, check_against_my_torrents, \
+    check_database
 from email_tools import send_email
 
 API_URL = os.getenv('API_URL')
@@ -21,31 +20,19 @@ logger = setup_logger("FilelistRoutine")
 
 # https://filelist.io/forums.php?action=viewtopic&topicid=120435
 
-def check_in_my_torrents(new_movies, cursor=None):
-    if not cursor:
-        conn, cursor = connect_mysql()
-    q = "SELECT * FROM {table} WHERE torr_id IN ('{values}')".format(
-        table='my_torrents',
-        values="','".join([str(x['id']) for x in new_movies])
-    )
-    cursor.execute(q)
-    already_in_db = [x['torr_id'] for x in cursor.fetchall()]
-    for movie in new_movies:
-        if movie['id'] in already_in_db:
-            movie['torr_already_processed'] = True
+def check_in_my_torrents(torrents, cursor=None):
+    already_in_db = check_against_my_torrents(torrents)
+    for torrents in torrents:
+        if torrents['id'] in already_in_db:
+            torrents['torr_already_processed'] = True
         else:
-            movie['torr_already_processed'] = False
-    return new_movies
+            torrents['torr_already_processed'] = False
+    return torrents
 
 
 def retrieve_bulk_from_dbs(items):
     logger.info("Getting IMDB TMDB and OMDB metadata...")
-    # Connections
-    try:
-        conn, cursor = connect_mysql(myimdb=True)
-    except mysql.connector.errors.DatabaseError:
-        conn, cursor = None, None
-    return [retrieve_one_from_dbs(item, cursor) for item in items]
+    return [get_movie_details(item) for item in items]
 
 
 def update_my_torrents_db(items):
@@ -124,5 +111,5 @@ def run_forever(cypher=torr_cypher, sleep_time=60*60*FLIST_ROUTINE_SLEEP_TIME):
 
 
 if __name__ == '__main__':
-    check_db_plexbuddy()
+    check_database()
     run_forever()
