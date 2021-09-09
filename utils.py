@@ -20,6 +20,7 @@ from Crypto.Cipher import ChaCha20
 from dotenv import load_dotenv
 from mysql.connector.errors import InterfaceError, DatabaseError, ProgrammingError
 from plexapi.server import PlexServer
+from sqlalchemy.ext.automap import automap_base
 from transmission_rpc import Client
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, ARRAY, \
     Float, MetaData, create_engine, select, inspect, Table
@@ -64,6 +65,7 @@ PASSKEY = os.getenv('PASSKEY')
 
 DB_URI = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
 
+
 # Logger settings
 def setup_logger(name, log_file=None, level=logging.INFO):
     """Function to setup as many loggers as you want"""
@@ -91,7 +93,11 @@ Base = declarative_base()
 
 # MetaData
 META_DATA = MetaData(engine)
-META_DATA.reflect()
+META_DATA.reflect(engine)
+
+
+# Base = declarative_base(metadata=META_DATA)
+# Base.prepare()
 
 
 # an example mapping using the base
@@ -169,44 +175,83 @@ class OmdbMovie(Base):
     hit_omdb = Column(Boolean)
 
 
-class TitleBasics(DeferredReflection, Base):
+class TitleBasics(Base):
     __tablename__ = 'title_basics'
 
-try:
-    NameBasics = META_DATA.tables['name_basics']
-except KeyError:
-    logger.warning("NameBasics table not found.")
-    NameBasics = None
+    tconst = Column(Integer, primary_key=True)
+    runtimeMinutes = Column(Integer)
+    titleType = Column(String)
+    primaryTitle = Column(String)
+    originalTitle = Column(String)
+    isAdult = Column(Boolean)
+    startYear = Column(Integer)
+    endYear = Column(Integer)
+    runtimeMinutes = Column(Integer)
+    t_soundex = Column(String)
 
-try:
-    TitleAkas = META_DATA.tables['title_akas']
-except KeyError:
-    logger.warning("TitleAkas table not found.")
-    TitleAkas = None
 
-try:
-    TitleCrew = META_DATA.tables['title_crew']
-except KeyError:
-    logger.warning("TitleCrew table not found.")
-    TitleCrew = None
+class NameBasics(Base):
+    __tablename__ = 'name_basics'
 
-try:
-    TitleEpisode = META_DATA.tables['title_episode']
-except KeyError:
-    logger.warning("TitleEpisode table not found.")
-    TitleEpisode = None
+    nconst = Column(Integer, primary_key=True)
+    primaryName = Column(String)
+    birthYear = Column(Integer)
+    deathYear = Column(Integer)
+    primaryProfession = Column(String)
+    knownForTitles = Column(String)
+    ns_soundex = Column(String)
+    sn_soundex = Column(String)
+    s_soundex = Column(String)
 
-try:
-    TitlePrincipals = META_DATA.tables['title_principals']
-except KeyError:
-    logger.warning("TitlePrincipals table not found.")
-    TitlePrincipals = None
 
-try:
-    TitleRatings = META_DATA.tables['title_ratings']
-except KeyError:
-    logger.warning("TitleRatings table not found.")
-    TitleRatings = None
+class TitleAkas(Base):
+    __tablename__ = 'title_akas'
+
+    titleId = Column(Integer, primary_key=True)
+    ordering = Column(Integer)
+    title = Column(String)
+    region = Column(String)
+    language = Column(String)
+    types = Column(String)
+    attributes = Column(String)
+    isOriginalTitle = Column(String)
+    t_soundex = Column(String)
+
+
+class TitleCrew(Base):
+    __tablename__ = 'title_crew'
+
+    tconst = Column(Integer, primary_key=True)
+    directors = Column(Integer)
+    writers = Column(String)
+
+
+class TitleEpisode(Base):
+    __tablename__ = 'title_episode'
+
+    tconst = Column(Integer, primary_key=True)
+    parentTconst = Column(Integer)
+    seasonNumber = Column(Integer)
+    episodeNumber = Column(Integer)
+
+
+class TitlePrincipals(Base):
+    __tablename__ = 'title_principals'
+
+    tconst = Column(Integer, primary_key=True)
+    ordering = Column(Integer)
+    nconst = Column(Integer)
+    category = Column(String)
+    job = Column(String)
+    characters = Column(String)
+
+
+class TitleRatings(Base):
+    __tablename__ = 'title_ratings'
+
+    tconst = Column(Integer, primary_key=True)
+    averageRating = Column(Float)
+    numVotes = Column(Integer)
 
 
 def connect_db():
@@ -246,6 +291,7 @@ def get_new_imdb_titles_for_tmdb():
     conn = connect_db()
     refresh_interval_date = datetime.datetime.now() - datetime.timedelta(days=REVIEW_INTERVAL_REFRESH)
     subquery = select(TmdbMovie.imdb_id).where(TmdbMovie.last_update_tmdb > refresh_interval_date)
+
     stmt = select(TitleBasics.tconst).where(TitleBasics.tconst.not_in(subquery))
     return conn.execute(stmt)
 
@@ -914,24 +960,16 @@ def parse_torr_name(name):
 
 if __name__ == '__main__':
     from pprint import pprint
+
     # check_database()
     print(type(TitleBasics))
     print(type(User))
     from sqlalchemy.ext.declarative import DeferredReflection
+
+
     # TODO asa ajungi la declarative meta din alea sau nu, nu stiu ce plm.
     class Messages(DeferredReflection, Base):
         __tablename__ = 'title_basics'
 
+
     print(type(Messages))
-
-
-
-
-
-
-
-
-
-
-
-

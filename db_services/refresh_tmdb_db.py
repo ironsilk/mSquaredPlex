@@ -25,9 +25,10 @@ def get_tmdb_data(session_not_found=[]):
     tmdb_inserted = 0
 
     new_for_tmdb_cursor = get_new_imdb_titles_for_tmdb()
-    while new_for_tmdb_cursor.with_rows:
+    while new_for_tmdb_cursor.returns_rows:
         try:
             batch = new_for_tmdb_cursor.mappings().fetchmany(INSERT_RATE)
+            print(batch)
             batch, session_not_found = process_items(batch, session_not_found)
             print(batch)
             input()
