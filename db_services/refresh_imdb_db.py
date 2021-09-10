@@ -35,7 +35,7 @@ def fetch_database_dumps():
 
 def update_imdb_db():
     # Download latest dumps
-    # fetch_database_dumps()
+    fetch_database_dumps()
     # Update database with 'em
     run_import(DB_URI, DUMPS_PATH)
 
