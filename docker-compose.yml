@@ -41,6 +41,7 @@ services:
       - ${PLEX_MOVIES_LIBRARY_FOLDER}:/movies
     restart: unless-stopped
 
+# Docker mod should be in .env
   transmission:
     container_name: MOVIELIB_Transmission
     build:
