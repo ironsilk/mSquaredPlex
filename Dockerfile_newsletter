@@ -6,8 +6,7 @@ LABEL Author="Mikael"
 RUN mkdir /app
 WORKDIR /app
 
-COPY filelist_service/filelist_routine.py ./
-COPY filelist_service/email_tools.py ./
+COPY filelist_service/ ./
 COPY utils.py ./
 COPY views ./views
 

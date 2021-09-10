@@ -6,8 +6,7 @@ LABEL Author="Mikael"
 RUN mkdir /app
 WORKDIR /app
 
-COPY torr_service/server.py ./
-COPY torr_service/torr_service_utils.py ./
+COPY torr_service/ ./
 COPY utils.py ./
 
 
