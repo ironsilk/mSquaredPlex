@@ -107,8 +107,7 @@ def make_trailer_shorten_url(link):
                 # Do, nothing, return the link as it is
                 pass
         except Exception as e:
-            print(e)
-        return f"🎥: {link}"
+         return f"🎥: {link}"
     return None
 
 

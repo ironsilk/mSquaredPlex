@@ -765,7 +765,7 @@ class TMDB(GenericMovie):
                 elif 'tv' in self.type_tmdb:
                     self.tmdb_tv()
                 else:
-                    print('err tmdb - could not detemine tmdb id (movie or tv) for: {0}'.format(self.id_tmdb))
+                    logger.error('err tmdb - could not detemine tmdb id (movie or tv) for: {0}'.format(self.id_tmdb))
             elif self.search_title is not None:
                 self.tmdb_search()
                 logger.debug('to search')

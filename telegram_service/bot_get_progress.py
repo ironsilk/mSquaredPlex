@@ -71,8 +71,6 @@ def df_as_image(df, path=False, selected_cols=None, remove_index=True):
 
     df_styled = df.style.background_gradient()  # adding a gradient based on values in cell
     df_styled = df.style.hide_index()
-    print(df)
-    print(df.index)
     if not path:
         # Create an in-memory file
         f = io.BytesIO()
