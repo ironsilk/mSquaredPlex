@@ -1,8 +1,4 @@
-import datetime
 import os
-import time
-
-import mysql.connector.errors
 
 from utils import setup_logger, get_omdb, get_omdb_api_limit, get_new_imdb_titles_for_omdb, OmdbMovie, update_many
 

@@ -12,7 +12,6 @@ COPY telegram_service/images ./images
 COPY utils.py ./
 
 
-COPY requirements.txt ./
 RUN pip install -r requirements.txt
 
 EXPOSE 9092

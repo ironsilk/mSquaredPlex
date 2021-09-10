@@ -24,14 +24,12 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import glob
 import gzip
-import logging
 import os
 
 import sqlalchemy
+from imdb.parser.s3.utils import DB_TRANSFORM, title_soundex, name_soundexes
 
 from utils import setup_logger
-
-from imdb.parser.s3.utils import DB_TRANSFORM, title_soundex, name_soundexes
 
 TSV_EXT = '.tsv.gz'
 # how many entries to write to the database at a time.

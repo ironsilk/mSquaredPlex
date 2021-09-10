@@ -10,7 +10,6 @@ COPY filelist_service/ ./
 COPY utils.py ./
 COPY views ./views
 
-COPY requirements.txt ./
 RUN pip install -r requirements.txt
 
 

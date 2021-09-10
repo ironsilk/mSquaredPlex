@@ -16,6 +16,7 @@ python-dotenv==0.19.0
 pytz==2021.1
 requests==2.26.0
 six==1.16.0
+falcon
 SQLAlchemy==1.4.23
 tmdbsimple==2.8.0
 transmission-rpc==3.2.7

@@ -11,19 +11,15 @@ from time import time
 
 import PTN
 import imdb
-import mysql.connector as cnt
-import mysql.connector.errors
 import omdb.api as omdb_api
 import requests
 import tmdbsimple as tmdb_api
 from Crypto.Cipher import ChaCha20
 from dotenv import load_dotenv
-from mysql.connector.errors import InterfaceError, DatabaseError, ProgrammingError
 from plexapi.server import PlexServer
-from sqlalchemy.ext.automap import automap_base
 from transmission_rpc import Client
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, ARRAY, \
-    Float, MetaData, create_engine, select, inspect, Table, desc, delete
+    Float, MetaData, create_engine, select, desc, delete
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.dialects.postgresql import insert
 load_dotenv()

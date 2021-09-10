@@ -22,3 +22,6 @@ transmission-rpc==3.2.7
 typing-extensions==3.10.0.2
 urllib3==1.26.6
 wincertstore==0.2
+python-telegram-bot==13.7
+dataframe_image
+tabulate
