@@ -127,7 +127,7 @@ class Torrent(Base):
 
     torr_id = Column(Integer, primary_key=True)
     torr_name = Column(String)
-    imdb_id = Column(Integer, ForeignKey('movie.id'))
+    imdb_id = Column(Integer)
     resolution = Column(Integer)
     status = Column(String)
     requested_by_id = Column(Integer, ForeignKey('user.telegram_chat_id'))
