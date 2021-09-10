@@ -8,12 +8,12 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 from refresh_imdb_db import update_imdb_db
 from refresh_omdb_db import get_omdb_data
 from refresh_tmdb_db import get_tmdb_data
-from utils import setup_logger, DB_URI, check_database
+from utils import setup_logger, DB_URI, check_movielib_database
 
 # ENV variables
 TZ = os.getenv('TZ')
 IMDB_DB_REFRESH_INTERVAL = int(os.getenv('IMDB_DB_REFRESH_INTERVAL'))
-MYIMDB_REFRESH_INTERVAL = int(os.getenv('MY_IMDB_REFRESH_INTERVAL'))
+MYIMDB_REFRESH_INTERVAL = int(os.getenv('MYIMDB_REFRESH_INTERVAL'))
 
 
 logger = setup_logger("MasterScheduler_MOVIELIB")
@@ -91,5 +91,9 @@ if __name__ == '__main__':
         scheduler = BlockingScheduler(jobstores=jobstores, timezone=TZ)
         scheduler.add_listener(at_job_start, EVENT_JOB_SUBMITTED)
         scheduler.add_listener(at_execution_finish, EVENT_JOB_EXECUTED)
-    check_database()
+
+    if not check_movielib_database():
+        update_db_job = scheduler.get_job(job_id='update_imdb_db')
+        update_db_job.modify(next_run_time=datetime.now())
+
     scheduler.start()

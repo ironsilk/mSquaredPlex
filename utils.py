@@ -19,7 +19,7 @@ from dotenv import load_dotenv
 from plexapi.server import PlexServer
 from transmission_rpc import Client
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, ARRAY, \
-    Float, MetaData, create_engine, select, desc, delete
+    Float, MetaData, create_engine, select, desc, delete, inspect
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.dialects.postgresql import insert
 load_dotenv()
@@ -268,6 +268,21 @@ def check_database():
     Watchlist.__table__.create(bind=engine, checkfirst=True)
     TmdbMovie.__table__.create(bind=engine, checkfirst=True)
     OmdbMovie.__table__.create(bind=engine, checkfirst=True)
+
+
+def check_movielib_database():
+    if all([inspect(engine).has_table("title_basics"),
+            inspect(engine).has_table("name_basics"),
+            inspect(engine).has_table("title_akas"),
+            inspect(engine).has_table("title_crew"),
+            inspect(engine).has_table("title_episode"),
+            inspect(engine).has_table("title_principals"),
+            inspect(engine).has_table("title_ratings"),
+
+            ]):
+        return True
+    else:
+        return False
 
 
 def get_omdb_api_limit():
@@ -1213,6 +1228,7 @@ if __name__ == '__main__':
     from pprint import pprint
     # pprint(get_movie_tmdb(15380158))
     # pprint(get_movie_tmdb_omdb(15380158))
+    print(check_movielib_database())
 
 
 

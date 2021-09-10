@@ -199,7 +199,6 @@ def refresher_routine():
     refresher = TORR_REFRESHER(logger=logger)
     refresher.update_statuses()
     logger.info("Routine done, closing connections.")
-    refresher.close()
     return
 
 

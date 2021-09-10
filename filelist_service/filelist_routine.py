@@ -75,7 +75,6 @@ def filter_results(new_movies):
     # Check against my_torrents_database
     filtered = check_in_my_torrents(new_movies)
     # Remove already seen torrents - can be removed for testing purposes
-    print(filtered)
     filtered = [x for x in filtered if not x['torr_already_processed']]
 
     return filtered
