@@ -20,13 +20,15 @@ logger = setup_logger("FilelistRoutine")
 
 # https://filelist.io/forums.php?action=viewtopic&topicid=120435
 
-def check_in_my_torrents(torrents, cursor=None):
+def check_in_my_torrents(torrents):
     already_in_db = check_against_my_torrents(torrents)
-    for torrents in torrents:
-        if torrents['id'] in already_in_db:
-            torrents['torr_already_processed'] = True
+    if not already_in_db:
+        already_in_db = []
+    for torrent in torrents:
+        if torrent['id'] in already_in_db:
+            torrent['torr_already_processed'] = True
         else:
-            torrents['torr_already_processed'] = False
+            torrent['torr_already_processed'] = False
     return torrents
 
 
@@ -73,6 +75,7 @@ def filter_results(new_movies):
     # Check against my_torrents_database
     filtered = check_in_my_torrents(new_movies)
     # Remove already seen torrents - can be removed for testing purposes
+    print(filtered)
     filtered = [x for x in filtered if not x['torr_already_processed']]
 
     return filtered

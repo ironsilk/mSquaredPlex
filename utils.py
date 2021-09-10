@@ -380,7 +380,7 @@ def get_movie_imdb(imdb_id):
                 movie.data[key] = None
         item = {
             'cast': ', '.join([x['name'] for x in movie.data['cast'][:5]]) if movie.data['cast'] else None,
-            'genres': ', '.join(movie.data['genres']),
+            'genres': ', '.join(movie.data['genres']) if movie.data['genres'] else None,
             'imdbID': movie.movieID,
             'titleType': movie.data['kind'],
             'averageRating': movie.data['rating'],

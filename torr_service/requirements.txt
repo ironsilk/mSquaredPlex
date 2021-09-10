@@ -23,3 +23,4 @@ transmission-rpc==3.2.7
 typing-extensions==3.10.0.2
 urllib3==1.26.6
 wincertstore==0.2
+APScheduler
