@@ -1,5 +1,4 @@
 import io
-import os
 import re
 
 import imdb
@@ -7,17 +6,10 @@ import pandas as pd
 import sqlalchemy
 from telegram.ext import CallbackContext
 
-from utils import get_email_by_tgram_id, deconvert_imdb_id, update_many, get_my_movies, retrieve_one_from_dbs
-from bot_utils import check_one_in_my_movies
+from utils import get_user_by_tgram_id, deconvert_imdb_id, update_many, get_movie_details, get_my_movie_by_imdb, \
+    get_user_movies, DB_URI, Movie
 
 soap_pattern = re.compile(": Season \d+:")
-
-DB_URI = "mysql://{u}:{p}@{hp}/{dbname}?charset=utf8".format(
-    u=os.getenv('MYSQL_MYIMDB_USER'),
-    p=os.getenv('MYSQL_MYIMDB_PASS'),
-    hp=':'.join([os.getenv('MYSQL_MYIMDB_HOST'), os.getenv('MYSQL_MYIMDB_PORT')]),
-    dbname=os.getenv('MYSQL_MYIMDB_DB_NAME'),
-)
 
 
 def csv_upload_handler(context: CallbackContext):
@@ -51,8 +43,7 @@ def csv_upload_handler(context: CallbackContext):
 
     identified_movies = []
     soap_or_unidentified = 0
-    user = get_email_by_tgram_id(tgram_user)
-
+    user = get_user_by_tgram_id(tgram_user)
     for movie in df:
         if soap_pattern.search(movie['Title']):
             soap_or_unidentified += 1
@@ -61,16 +52,18 @@ def csv_upload_handler(context: CallbackContext):
                 movies = ia.search_movie(movie['Title'], _episodes=False)
                 res = []
                 for x in movies:
-                    if x.data['kind'] == 'movie':
-                        x.data['id'] = x.movieID
-                        res.append(x.data)
+                    if 'kind' in x.data.keys():
+                        if x.data['kind'] == 'movie':
+                            x.data['id'] = x.movieID
+                            res.append(x.data)
+                            break
                 if res:
-                    my_movie = check_one_in_my_movies(deconvert_imdb_id(res[0]['id']))
+                    my_movie = get_my_movie_by_imdb(deconvert_imdb_id(res[0]['id']))
                     if not my_movie:
                         item = {
                             'seen_date': movie['Date'].to_pydatetime(),
                             'imdb_id': deconvert_imdb_id(res[0]['id']),
-                            'user': user,
+                            'user_id': user['telegram_chat_id'],
                         }
                         if has_ratings:
                             item['rating_status'] = 'rated externally'
@@ -83,8 +76,9 @@ def csv_upload_handler(context: CallbackContext):
                 else:
                     soap_or_unidentified += 1
             except Exception as e:
+                raise e
                 pass
-    update_many(identified_movies, 'my_movies')
+    update_many(identified_movies, Movie, Movie.id)
     context.bot.send_message(text=f"CSV update successful!\n"
                                   f"Out of {len(df)} entries in your CSV file, "
                                   f"{len(identified_movies)} were movies while the "
@@ -96,13 +90,13 @@ def csv_upload_handler(context: CallbackContext):
 
 def csv_download_handler(context: CallbackContext):
     tgram_user = context.job.context['user']
-    email = get_email_by_tgram_id(tgram_user)
+    user = get_user_by_tgram_id(tgram_user)
     # Get movies from my_movies:
-    my_movies = get_my_movies(email)
+    my_movies = get_user_movies(user)
     enhanced = []
     # Get titles for each movie :)
     for movie in my_movies[:2]:
-        enhanced.append(retrieve_one_from_dbs(movie))
+        enhanced.append(get_movie_details(movie))
     df = pd.DataFrame(enhanced)
     # Create an in-memory file
     f = io.BytesIO()

@@ -23,7 +23,7 @@ from plexapi.server import PlexServer
 from sqlalchemy.ext.automap import automap_base
 from transmission_rpc import Client
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, ARRAY, \
-    Float, MetaData, create_engine, select, inspect, Table, desc
+    Float, MetaData, create_engine, select, inspect, Table, desc, delete
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.dialects.postgresql import insert
 load_dotenv()
@@ -110,6 +110,8 @@ class User(Base):
     scan_watchlist = Column(Boolean)
     email_newsletters = Column(Boolean)
     movies = relationship("Movie", back_populates="user")
+    watchlist_items = relationship("Watchlist", back_populates="user")
+    requested_torrents = relationship("Torrent", back_populates="requested_by")
 
 
 class Movie(Base):
@@ -132,7 +134,8 @@ class Torrent(Base):
     imdb_id = Column(Integer, ForeignKey('movie.id'))
     resolution = Column(Integer)
     status = Column(String)
-    requested_by = Column(Integer, ForeignKey('user.telegram_chat_id'))
+    requested_by_id = Column(Integer, ForeignKey('user.telegram_chat_id'))
+    requested_by = relationship("User", back_populates="requested_torrents")
 
 
 class Watchlist(Base):
@@ -140,7 +143,8 @@ class Watchlist(Base):
 
     id = Column(Integer, primary_key=True)
     imdb_id = Column(Integer)
-    user = Column(Integer, ForeignKey('user.telegram_chat_id'))
+    user_id = Column(Integer, ForeignKey('user.telegram_chat_id'))
+    user = relationship("User", back_populates="watchlist_items")
     status = Column(String)
     excluded_torrents = Column(ARRAY(Integer))
     is_downloaded = Column(String)
@@ -306,9 +310,9 @@ def check_against_my_torrents(torrents):
     """
     with engine.connect() as conn:
         stmt = select(Torrent.torr_id).where(Torrent.torr_id.in_([x['id'] for x in torrents]))
-        result = conn.execute(stmt).fetchall()
+        result = conn.execute(stmt).mappings().fetchall()
     if result:
-        return [x[0] for x in result]
+        return [object_as_dict(x) for x in result]
 
 
 def check_against_user_movies(movies, email):
@@ -321,17 +325,46 @@ def check_against_user_movies(movies, email):
         stmt = select(Movie).where(Movie.imdb_id.in_([x['imdb_id'] for x in movies]))\
             .where(Movie.user.has(User.email == email))
         result = conn.execute(stmt).mappings().fetchall()
-    return result
+    return [object_as_dict(x) for x in result]
 
 
-def get_movie_details(item, cursor=None):
+def check_against_user_watchlist(movies, user_imdb_id):
+    with engine.connect() as conn:
+        stmt = select(Watchlist).where(Watchlist.imdb_id.in_(movies))\
+            .where(Movie.user.has(User.imdb_id == user_imdb_id))
+        result = conn.execute(stmt).mappings().fetchall()
+    return [object_as_dict(x) for x in result]
+
+
+def check_one_against_torrents_by_imdb(idd):
+    with engine.connect() as conn:
+        stmt = select(Torrent).where(Torrent.imdb_id == idd)
+        result = conn.execute(stmt).mappings().fetchall()
+    return [object_as_dict(x) for x in result]
+
+
+def check_one_against_torrents_by_torr_id(idd):
+    with engine.connect() as conn:
+        stmt = select(Torrent).where(Torrent.torr_id == idd)
+        result = conn.execute(stmt).mappings().fetchall()
+    return [object_as_dict(x) for x in result]
+
+
+def check_one_against_torrents_by_torr_name(name):
+    with engine.connect() as conn:
+        stmt = select(Torrent).where(Torrent.torr_name == name)
+        result = conn.execute(stmt).mappings().fetchall()
+    return [object_as_dict(x) for x in result]
+
+
+def get_movie_details(item):
     # ID
     try:
         imdb_id_number = deconvert_imdb_id(item['imdb'])
     except:
         imdb_id_number = deconvert_imdb_id(item['imdb_id'])
     # Search in local_db
-    new_keys = get_movie_imdb(imdb_id_number, cursor)
+    new_keys = get_movie_imdb(imdb_id_number)
     # Search online if TMDB, OMDB not found in local DB
     if not new_keys:
         return None
@@ -345,13 +378,12 @@ def get_movie_imdb(imdb_id):
     ia = imdb.IMDb('s3', DB_URI)
     try:
         movie = ia.get_movie(imdb_id)
-        if 'rating' not in movie.data.keys():
-            movie.data['rating'] = None
-        if 'director' not in movie.data.keys():
-            movie.data['director'] = None
-        # if 'localized title'
+        for key in ['cast', 'genres', 'kind', 'rating', 'title', 'original title', 'year',
+                    'votes', 'runtimes', 'rating', 'director']:
+            if key not in movie.data.keys():
+                movie.data[key] = None
         item = {
-            'cast': ', '.join([x['name'] for x in movie.data['cast'][:5]]),
+            'cast': ', '.join([x['name'] for x in movie.data['cast'][:5]]) if movie.data['cast'] else None,
             'genres': ', '.join(movie.data['genres']),
             'imdbID': movie.movieID,
             'titleType': movie.data['kind'],
@@ -360,10 +392,11 @@ def get_movie_imdb(imdb_id):
             'originalTitle': movie.data['original title'],
             'startYear': movie.data['year'],
             'numVotes': movie.data['votes'],
-            'runtimeMinutes': movie.data['runtimes'][0]
+            'runtimeMinutes': movie.data['runtimes'][0] if movie.data['runtimes'] else None
         }
 
     except Exception as e:
+        raise e
         logger.error(f"IMDB fetch error: {e}")
         return None
     return item
@@ -374,7 +407,7 @@ def get_movie_tmdb_local(imdb_id):
         stmt = select(TmdbMovie).where(TmdbMovie.imdb_id == imdb_id)
         result = conn.execute(stmt)
     if result:
-        return result.mappings().fetchone()
+        return object_as_dict(result.mappings().fetchone())
 
 
 def get_movie_omdb_local(imdb_id):
@@ -382,7 +415,7 @@ def get_movie_omdb_local(imdb_id):
         stmt = select(OmdbMovie).where(OmdbMovie.imdb_id == imdb_id)
         result = conn.execute(stmt)
     if result:
-        return result.mappings().fetchone()
+        return object_as_dict(result.mappings().fetchone())
 
 
 def get_movie_tmdb_omdb(imdb_id):
@@ -399,21 +432,115 @@ def get_movie_tmdb_omdb(imdb_id):
     return {**tmdb, **omdb}
 
 
-def get_my_imdb_users(conn=None):
-    if not conn:
-        conn = connect_db()
-    return conn.execute(select(User)).mappings().all()
+def get_my_movie_by_imdb(idd):
+    with engine.connect() as conn:
+        stmt = select(Movie).where(Movie.imdb_id == idd)
+        result = conn.execute(stmt)
+    if result:
+        return object_as_dict(result.mappings().fetchone())
+
+
+def get_unrated_movies():
+    with engine.connect() as conn:
+        stmt = select(Movie).where(Movie.my_score.is_(None)).where(Movie.rating_status.is_(None))
+        result = conn.execute(stmt)
+    if result:
+        return [object_as_dict(x) for x in result.mappings().fetchall()]
+
+
+def get_my_imdb_users():
+    with engine.connect() as conn:
+        return conn.execute(select(User)).mappings().all()
+
+
+def get_torrents():
+    with engine.connect() as conn:
+        return conn.execute(select(Torrent).where(Torrent.status != 'removed')).mappings().all()
+
+
+def get_requested_torrents_for_tgram_user(tgram_id):
+    with engine.connect() as conn:
+        stmt = select(Torrent).where(Torrent.requested_by.has(User.telegram_chat_id == tgram_id))
+        result = conn.execute(stmt).mappings().fetchall()
+    if result:
+        return [object_as_dict(x) for x in result]
+
+
+def get_tgram_user_by_email(email):
+    with engine.connect() as conn:
+        stmt = select(User.telegram_chat_id).where(User.email == email)
+        result = conn.execute(stmt)
+    if result:
+        return object_as_dict(result.mappings().fetchone())
+
+
+def get_user_by_tgram_id(telegram_chat_id):
+    with engine.connect() as conn:
+        stmt = select(User).where(User.telegram_chat_id == telegram_chat_id)
+        result = conn.execute(stmt)
+    if result:
+        return object_as_dict(result.mappings().fetchone())
+
+
+def get_user_movies(user):
+    with engine.connect() as conn:
+        stmt = select(Movie).where(Movie.user.has(User.telegram_chat_id == user['telegram_chat_id']))
+        result = conn.execute(stmt).mappings().fetchall()
+    if result:
+        return [object_as_dict(x) for x in result]
+
+
+def get_user_watchlist(user_imdb_id):
+    with engine.connect() as conn:
+        stmt = select(Watchlist).where(Watchlist.user.has(User.imdb_id == user_imdb_id))
+        result = conn.execute(stmt).mappings().fetchall()
+    if result:
+        return [object_as_dict(x) for x in result]
+
+
+def get_from_watchlist_by_user_and_imdb(user_imdb_id, imdb_id):
+    with engine.connect() as conn:
+        stmt = select(Watchlist).where(Watchlist.user.has(User.imdb_id == user_imdb_id))\
+            .where(Watchlist.imdb_id == imdb_id)
+        result = conn.execute(stmt)
+    if result:
+        return object_as_dict(result.mappings().fetchone())
+
+
+def get_from_watchlist_by_user_telegram_id_and_imdb(imdb_id, telegram_chat_id):
+    with engine.connect() as conn:
+        stmt = select(Watchlist).where(Watchlist.user.has(User.telegram_chat_id == telegram_chat_id))\
+            .where(Watchlist.imdb_id == imdb_id)
+        result = conn.execute(stmt)
+    return object_as_dict(result.mappings().fetchone())
+
+
+def get_new_watchlist_items():
+    with engine.connect() as conn:
+        stmt = select(Watchlist).where(Watchlist.status == 'new')
+        result = conn.execute(stmt).mappings().fetchall()
+    if result:
+        return [object_as_dict(x) for x in result]
 
 
 def update_many(items, table, primary_key):
+    if items:
+        with engine.connect() as conn:
+            insert_statement = insert(table).values(items)
+            update_columns = {col.name: col for col in insert_statement.excluded if col.name != primary_key.name}
+            update_stmt = insert_statement.on_conflict_do_update(
+                index_elements=[primary_key],
+                set_=update_columns
+            )
+            result = conn.execute(update_stmt)
+        return result
+
+
+def remove_from_watchlist_except(except_items, user_imdb_id):
     with engine.connect() as conn:
-        insert_statement = insert(table).values(items)
-        update_columns = {col.name: col for col in insert_statement.excluded if col.name != primary_key.name}
-        update_stmt = insert_statement.on_conflict_do_update(
-            index_elements=[primary_key],
-            set_=update_columns
-        )
-        result = conn.execute(update_stmt)
+        stmt = delete(Watchlist).where(Watchlist.user.has(User.imdb_id == user_imdb_id))\
+            .where(Watchlist.imdb_id.notin_(except_items))
+        result = conn.execute(stmt)
     return result
 
 
@@ -469,6 +596,11 @@ def send_message_to_bot(chat_id, message):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage?chat_id={chat_id}&text={message}"
     r = requests.get(url)
     return r.json()['ok']
+
+
+def object_as_dict(obj):
+    if obj:
+        return dict(obj)
 
 
 # PLEX utils
@@ -1085,7 +1217,7 @@ if __name__ == '__main__':
     from pprint import pprint
     # pprint(get_movie_tmdb(15380158))
     # pprint(get_movie_tmdb_omdb(15380158))
-    check_database()
+
 
 
 

@@ -3,9 +3,11 @@ import os
 import imdb
 import requests
 
-from utils import check_one_in_my_torrents_by_imdb, retrieve_one_from_dbs, get_email_by_tgram_id
-from utils import connect_mysql, update_many, connect_plex
-from utils import deconvert_imdb_id, check_one_in_my_torrents_by_torr_id
+from utils import check_one_against_torrents_by_imdb, get_movie_details, get_user_by_tgram_id, get_my_imdb_users, \
+    Torrent, Watchlist, get_user_watchlist, get_from_watchlist_by_user_and_imdb, get_my_movie_by_imdb, \
+    get_from_watchlist_by_user_telegram_id_and_imdb
+from utils import update_many, connect_plex
+from utils import deconvert_imdb_id, check_one_against_torrents_by_torr_id
 from utils import setup_logger
 
 NO_POSTER_PATH = os.getenv('NO_POSTER_PATH')
@@ -111,11 +113,7 @@ def make_trailer_shorten_url(link):
 
 
 def get_telegram_users():
-    conn, cursor = connect_mysql()
-    q = """SELECT * FROM users
-    """
-    cursor.execute(q)
-    users = cursor.fetchall()
+    users = get_my_imdb_users()
     return {
         x['telegram_chat_id']:
             {
@@ -130,13 +128,13 @@ def get_telegram_users():
 
 def update_torr_db(pkg, torr_response, tgram_id):
     # Check if torrent is already requested
-    torr = check_one_in_my_torrents_by_torr_id(pkg['id'])
+    torr = check_one_against_torrents_by_torr_id(pkg['id'])
     if torr:
         requesters = torr['requested_by'].split(',')
-        requesters.append(get_email_by_tgram_id(tgram_id))
+        requesters.append(get_user_by_tgram_id(tgram_id)['telegram_chat_id'])
         requesters = ','.join(list(set(requesters)))
     else:
-        requesters = get_email_by_tgram_id(tgram_id)
+        requesters = get_user_by_tgram_id(tgram_id)['telegram_chat_id']
 
     update_many([{
         'torr_id': pkg['id'],
@@ -146,35 +144,27 @@ def update_torr_db(pkg, torr_response, tgram_id):
         'status': 'requested download',
         'requested_by': requesters
     }],
-        'my_torrents')
-
-
-def get_watchlist_item(movie_id, tg_id):
-    conn, cursor = connect_mysql()
-    q = f"SELECT * FROM watchlists WHERE movie_id = {movie_id} " \
-        f"AND imdb_id = (SELECT imdb_id FROM users where telegram_chat_id = {tg_id})"
-    cursor.execute(q)
-    return cursor.fetchone()
+        Torrent, Torrent.torr_id)
 
 
 def exclude_torrents_from_watchlist(movie_id, tg_id, torr_ids):
     new = ', '.join([str(x) for x in torr_ids])
-    watchlist_item = get_watchlist_item(movie_id, tg_id)
+    watchlist_item = get_from_watchlist_by_user_telegram_id_and_imdb(movie_id, tg_id)
     if watchlist_item['excluded_torrents']:
         old = watchlist_item['excluded_torrents'].split(', ')
         new = ', '.join([str(x) for x in torr_ids if x not in old])
     update_many([{
         'id': watchlist_item['id'],
-        'movie_id': movie_id,
-        'imdb_id': watchlist_item['imdb_id'],
+        'imdb_id': movie_id,
+        'user_id': watchlist_item['imdb_id'], # TODO what?
         'excluded_torrents': new,
         'status': 'new',
     }],
-        'watchlists')
+        Watchlist, Watchlist.id)
 
 
 def get_excluded_resolutions(movie_id, tg_id):
-    excluded = get_watchlist_item(movie_id, tg_id)['excluded_torrents']
+    excluded = get_from_watchlist_by_user_telegram_id_and_imdb(movie_id, tg_id)['excluded_torrents']
     if excluded:
         return [int(x) for x in excluded.split(', ')]
     else:
@@ -194,14 +184,13 @@ def invite_friend(email, account=None, plex=None):
 
 def get_movie_from_all_databases(imdb_id):
     new_movie = False
-    conn, cursor = connect_mysql()
     # Check if it's in my_movies:
-    my_item = check_one_in_my_movies(imdb_id, cursor)
+    my_item = get_my_movie_by_imdb(imdb_id)
     if not my_item:
         my_item = dict()
         new_movie = True
     # Check if it's in my_torrents
-    torr_results = check_one_in_my_torrents_by_imdb(imdb_id, cursor)
+    torr_results = check_one_against_torrents_by_imdb(imdb_id)
     if torr_results:
         max_res_item = max(torr_results, key=lambda x: x['resolution'])
         my_item['torr_result'] = True
@@ -210,7 +199,7 @@ def get_movie_from_all_databases(imdb_id):
     else:
         my_item['torr_result'] = False
     # Get rest of the data
-    pkg = retrieve_one_from_dbs({'imdb': imdb_id}, cursor)
+    pkg = get_movie_details({'imdb': imdb_id})
     if not pkg:
         return None
     if not new_movie:
@@ -243,25 +232,13 @@ def search_imdb_title(item, ia=None):
         return 'IMDB library error'
 
 
-def check_one_in_my_movies(idd, cursor=None):
-    if not cursor:
-        conn, cursor = connect_mysql()
-    q = f"SELECT * FROM my_movies WHERE imdb_id = {idd}"
-    cursor.execute(q)
-    return cursor.fetchone()
-
-
-def add_to_watchlist(movie_id, imdb_id, status, excluded_torrents=None):
+def add_to_watchlist(imdb_id, user, status, excluded_torrents=None):
 
     # See if movie already there
-    conn, cursor = connect_mysql()
-    q = f"SELECT * FROM watchlists WHERE movie_id = {movie_id} " \
-        f"AND imdb_id = {imdb_id}"
-    cursor.execute(q)
-    in_watchlist = cursor.fetchone()
+    in_watchlist = get_from_watchlist_by_user_and_imdb(user['imdb_id'], imdb_id)
     to_update = {
-        'movie_id': movie_id,
         'imdb_id': imdb_id,
+        'user_id': user['telegram_chat_id'],
         'status': status,
         'excluded_torrents': None
     }
@@ -277,7 +254,7 @@ def add_to_watchlist(movie_id, imdb_id, status, excluded_torrents=None):
             else:
                 to_update['excluded_torrents'] = in_watchlist['excluded_torrents']
 
-    update_many([to_update], 'watchlists')
+    update_many([to_update], Watchlist, Watchlist.id)
 
 
 if __name__ == '__main__':

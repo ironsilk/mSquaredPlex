@@ -566,12 +566,10 @@ def send_email(items, cypher):
 
 def prepare_item_for_email(item, email, mtls, cypher):
     # Add seen type keys
-    if item['hit_tmdb'] == 0:
-        item['seen_type'] = 0
-    else:
-        item['seen_type'] = 1
     if item['already_in_db']:
-        item['seen_type'] = 2
+        item['seen_type'] = 0  # new movie
+    else:
+        item['seen_type'] = 1  # we have this movie but here's a new torrent for it
 
     # Convert some keys
     item['size'] = "%.1f" % (item['size'] / 1000000000)

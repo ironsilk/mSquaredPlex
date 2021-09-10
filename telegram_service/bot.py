@@ -1,30 +1,27 @@
-import io
+import logging
 import logging
 import os
 import re
 from functools import wraps
-import pandas as pd
 
 from telegram import (
     ReplyKeyboardMarkup,
     InlineKeyboardMarkup,
     InlineKeyboardButton,
-    Update, ParseMode,
-)
+    Update, )
 from telegram.ext import Updater, MessageHandler, Filters, CallbackContext, ConversationHandler, CallbackQueryHandler, \
     CommandHandler
 from transmission_rpc.error import TransmissionError
 
+from bot_csv import csv_upload_handler, csv_download_handler
+from bot_get_progress import get_progress
+from bot_rate_title import bot_rate_titles
 from bot_utils import make_movie_reply, get_telegram_users, update_torr_db, \
     exclude_torrents_from_watchlist, get_excluded_resolutions, \
-    invite_friend, get_movie_from_all_databases, search_imdb_title, check_one_in_my_movies, \
-    add_to_watchlist
+    invite_friend, get_movie_from_all_databases, search_imdb_title, add_to_watchlist
 from bot_watchlist import bot_watchlist_routine, update_watchlist_item_status, get_torrents_for_imdb_id
-from bot_rate_title import bot_rate_titles
-from utils import update_many, deconvert_imdb_id, send_torrent, compose_link, check_db_plexbuddy, convert_imdb_id, \
-    get_imdb_id_by_trgram_id
-from bot_get_progress import get_progress
-from bot_csv import csv_upload_handler, csv_download_handler
+from utils import update_many, deconvert_imdb_id, send_torrent, compose_link, check_database, convert_imdb_id, \
+    get_my_movie_by_imdb, Movie, User, get_user_by_tgram_id
 
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 TELEGRAM_AUTH_TEST_PATH = os.getenv('TELEGRAM_AUTH_TEST_PATH')
@@ -79,7 +76,7 @@ rate_keyboard = [
 ]
 
 # Get users from db
-USERS = get_telegram_users()
+USERS = []
 
 
 def auth_wrap(f):
@@ -171,7 +168,7 @@ def check_imdb(update: Update, context: CallbackContext):
 def register_user(update: Update, context: CallbackContext):
     global USERS
     # Update user to database
-    update_many([context.user_data['new_user']], 'users')
+    update_many([context.user_data['new_user']], User, User.telegram_chat_id)
     USERS = get_telegram_users()
     update.effective_message.reply_text("Ok, that's it. I'll take care of the rest, from now on "
                                         "anytime you type something i'll be here to help you out. Enjoy!\n"
@@ -311,7 +308,8 @@ def choose_multiple(update: Update, context: CallbackContext) -> int:
         # context.user_data['pkg'] = pkg
         if pkg:
             context.user_data['pkg'] = pkg
-
+            # TODO fix here, captions too long, change to something else
+            # https://stackoverflow.com/questions/39571474/send-long-message-with-photo-on-telegram-with-php-bot#:~:text=I%20need%20send%20to%20telegram,caption%20has%20200%20character%20limit.
             message, image = make_movie_reply(pkg)
             update.effective_message.reply_photo(
                 photo=image,
@@ -425,15 +423,15 @@ def add_to_watchlist_no_torrent(update: Update, context: CallbackContext) -> int
     if update.message.text == 'Yes':
         # Try to get user's IMDB id if he has any
         try:
-            imdb_id = get_imdb_id_by_trgram_id(update.effective_user['id'])
+            user = get_user_by_tgram_id(update.effective_user['id'])
         except Exception as e:
             logger.warning(f"Error upon retrieving IMDB id for user with tgram_id {update.effective_user['id']} "
                            f"might not have any. Error: {e}")
-            imdb_id = None
+            user = None
         if 'torrents' not in context.user_data['pkg'].keys():
-            add_to_watchlist(deconvert_imdb_id(context.user_data['pkg']['imdb']), imdb_id, 'new')
+            add_to_watchlist(deconvert_imdb_id(context.user_data['pkg']['imdb']), user, 'new')
         else:
-            add_to_watchlist(deconvert_imdb_id(context.user_data['pkg']['imdb']), imdb_id, 'new',
+            add_to_watchlist(deconvert_imdb_id(context.user_data['pkg']['imdb']), user, 'new',
                              [x['id'] for x in context.user_data['pkg']['torrents']])
         message = "Added to watchlist! What's next?"
     else:
@@ -567,7 +565,7 @@ def change_watchlist_command(update: Update, context: CallbackContext) -> None:
         pkg['scan_watchlist'] = 1
     else:
         pkg['scan_watchlist'] = 0
-    update_many([pkg], 'users')
+    update_many([pkg], User, User.telegram_chat_id)
     update.message.reply_text("Updated your watchlist preferences.")
 
 
@@ -578,7 +576,7 @@ def change_newsletter_command(update: Update, context: CallbackContext) -> None:
         pkg['email_newsletters'] = 1
     else:
         pkg['email_newsletters'] = 0
-    update_many([pkg], 'users')
+    update_many([pkg], User, User.telegram_chat_id)
     update.message.reply_text("Updated your newsletter preferences.")
 
 
@@ -634,19 +632,19 @@ def rate_title_entry(update: Update, context: CallbackContext) -> int:
 def submit_rating(update: Update, context: CallbackContext) -> int:
     if update.message.text in [str(x) for x in list(range(1, 11))]:
         # Got rating
-        item = check_one_in_my_movies(context.user_data['pkg']['imdb'])
+        item = get_my_movie_by_imdb(context.user_data['pkg']['imdb'])
         item['rating_status'] = 'rated in telegram'
         item['my_score'] = int(update.message.text)
-        update_many([item], 'my_movies')
+        update_many([item], Movie, Movie.id)
         update.effective_message.reply_text(f"Ok, great! Here's a link if you also want to rate it on IMDB:\n"
                                             f"https://www.imdb.com/title/"
                                             f"{convert_imdb_id(context.user_data['pkg']['imdb'])}/")
         return ConversationHandler.END
 
     elif update.message.text == "I've changed my mind":
-        item = check_one_in_my_movies(context.user_data['pkg']['imdb'])
+        item = get_my_movie_by_imdb(context.user_data['pkg']['imdb'])
         item['rating_status'] = 'refused to rate'
-        update_many([item], 'my_movies')
+        update_many([item], Movie, Movie.id)
         update.effective_message.reply_text("Ok, no worries! I won't bother you about this title anymore.\n"
                                             "Have a great day!")
         return ConversationHandler.END
@@ -712,7 +710,9 @@ def end(update, context, message):
 
 
 def main() -> None:
-    check_db_plexbuddy()
+    global USERS
+    check_database()
+    USERS = get_telegram_users()
     """Start the bot."""
     # Create the Updater and pass it your bot's token.
     updater = Updater(TELEGRAM_TOKEN)

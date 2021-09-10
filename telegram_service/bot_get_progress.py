@@ -1,10 +1,11 @@
 import io
 import os
 
-from utils import get_requested_torrents_for_tgram_user, make_client, setup_logger, get_torr_name
-import tabulate
 import dataframe_image as dfi
 import pandas as pd
+import tabulate
+
+from utils import make_client, setup_logger, get_torr_name, get_requested_torrents_for_tgram_user
 
 header = ['Movie Name', 'Resolution', 'DW Status', 'DW Progress', 'ETA']
 HCTI_API_USER_ID = os.getenv('HTML_API_ID')
@@ -112,8 +113,6 @@ def get_progress(user, get_next=0, logger=setup_logger("botUtils")):
 
 
 if __name__ == '__main__':
-    from pprint import pprint
-
     t = get_torrents_for_user(1700079840)
     dff = pd.DataFrame(t)
     print(t)

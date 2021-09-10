@@ -5,9 +5,9 @@ from urllib.parse import unquote
 
 import falcon
 
-from utils import timing, setup_logger, send_torrent, compose_link, update_many, \
-    connect_mysql, close_mysql, make_client, check_one_in_my_torrents_by_torr_id, \
-    check_one_in_my_torrents_by_torr_name, send_message_to_bot, get_tgram_user_by_email
+from utils import timing, setup_logger, send_torrent, compose_link, update_many, make_client, \
+    check_one_against_torrents_by_torr_id, check_one_against_torrents_by_torr_name, send_message_to_bot, \
+    get_tgram_user_by_email, get_torrents, Torrent
 
 TORR_KEEP_TIME = int(os.getenv('TORR_KEEP_TIME'))
 
@@ -55,7 +55,7 @@ class TORRAPI:
             return
 
         # Check if torrent is already requested
-        torr = check_one_in_my_torrents_by_torr_id(pkg['id'])
+        torr = check_one_against_torrents_by_torr_id(pkg['id'])
         if torr:
             requesters = torr['requested_by'].split(',')
             requesters.append(pkg['requested_by'])
@@ -71,7 +71,7 @@ class TORRAPI:
             'status': 'requested download',
             'requested_by': requesters
         }],
-            'my_torrents')
+            Torrent, Torrent.torr_id)
 
         # Give response
         resp.media = 'Torrent successfully queued for download.'
@@ -97,13 +97,13 @@ class TORR_FINISHED:
         torr_id, torr_name, torr_labels = pkg.split('&&&')
         torr_name = torr_name.replace('^', ' ')
         # Get users who requested this torrent
-        torr = check_one_in_my_torrents_by_torr_name(torr_name)
+        torr = check_one_against_torrents_by_torr_name(torr_name)
         users = torr['requested_by'].split(',')
         message = f"Your requested torrent,\n" \
                   f"{torr_name}\n" \
                   f"has been downloaded. 🏁"
         for user in users:
-            resp = send_message_to_bot(get_tgram_user_by_email(user), message)
+            resp = send_message_to_bot(get_tgram_user_by_email(user)['telegram_chat_id'], message)
             if not resp:
                 self.logger.erro(f"Failed to send message: {torr_name}, {user}")
         return
@@ -113,26 +113,19 @@ class TORR_REFRESHER:
     def __init__(self, logger):
         self.logger = logger
         self.torr_client = make_client()
-        self.conn, self.cursor = connect_mysql()
-
-    def close(self):
-        close_mysql(self.conn, self.cursor)
 
     def get_torrents(self):
         # Get DB torrents
-        q = "SELECT * FROM my_torrents WHERE status != 'removed'"
-        self.cursor.execute(q)
-        results = self.cursor.fetchall()
-        results = [x for x in results if x['torr_name']]
+        db_torrents = get_torrents()
         # Match them with client torrents
         client_torrents = self.torr_client.get_torrents()
         client_torrents = {x.name: x for x in client_torrents}
-        for torr in results:
+        for torr in db_torrents:
             if torr['torr_name'] in client_torrents.keys():
                 torr['torr_obj'] = client_torrents[torr['torr_name']]
             else:
                 torr['id'] = None
-        return results
+        return db_torrents
 
     def update_statuses(self):
         self.logger.info("Updating torrent statuses...")
@@ -149,21 +142,21 @@ class TORR_REFRESHER:
                     if self.check_seeding_status(torr_response):
                         if torr['status'] == 'requested download':
                             torr['status'] = 'seeding'
-                            update_many([torr], 'my_torrents')
+                            update_many([torr], Torrent, Torrent.torr_id)
                     else:
                         # remove torrent and data
                         self.remove_torrent_and_files(torr['torr_id'])
                         # change status
                         torr['status'] = 'removed'
-                        update_many([torr], 'my_torrents')
+                        update_many([torr], Torrent, Torrent.torr_id)
                 elif torr_response.status == 'downloading' and torr['status'] == 'requested download':
                     torr['status'] = 'downloading'
-                    update_many([torr], 'my_torrents')
+                    update_many([torr], Torrent, Torrent.torr_id)
             else:
                 self.logger.warning("Torrent no longer in torrent client, removing from DB as well.")
                 torr['status'] = 'removed'
                 del torr['id']
-                update_many([torr], 'my_torrents')
+                update_many([torr], Torrent, Torrent.torr_id)
 
     def remove_low_res(self, torrents):
         to_remove = []
@@ -179,7 +172,7 @@ class TORR_REFRESHER:
         for x in to_remove:
             self.remove_torrent_and_files(x['torr_id'])
             x['status'] = 'removed'
-        update_many(to_remove, 'my_torrents')
+        update_many(to_remove, Torrent, Torrent.torr_id)
         if to_remove:
             self.logger.info(f"Removed {len(to_remove)} lower res movies")
         else:
@@ -195,8 +188,6 @@ class TORR_REFRESHER:
 
     def remove_torrent(self, id):
         self.torr_client.remove_torrent(id)
-        print('here')
-        pass
 
     def remove_torrent_and_files(self, id):
         self.torr_client.remove_torrent(id, delete_data=True)

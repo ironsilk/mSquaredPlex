@@ -1,6 +1,7 @@
 import os
 
-from utils import setup_logger, connect_plex, get_plex_users
+from utils import setup_logger, connect_plex, get_plex_users, get_user_movies, check_against_user_watchlist, \
+    get_user_watchlist, deconvert_imdb_id
 
 PLEX_ADMIN_EMAILS = os.getenv('PLEX_ADMIN_EMAILS').replace('"', '').replace(' ', '')
 if ',' in PLEX_ADMIN_EMAILS:
@@ -11,35 +12,18 @@ else:
 logger = setup_logger("DbServicesUtils")
 
 
-def get_my_movies(email, cursor=None):
-    if not cursor:
-        conn, cursor = connect_mysql()
-    q = f"SELECT `imdb_id` FROM my_movies where user = '{email}'"
-    cursor.execute(q)
-    return [x['imdb_id'] for x in cursor.fetchall()]
+def get_my_movies(email):
+    movies = get_user_movies(email)
+    if movies:
+        return [x['imdb_id'] for x in movies]
 
 
-def get_watchlist_intersections(user_imdb_id, watchlist, cursor=None):
-    if not cursor:
-        conn, cursor = connect_mysql()
-    values = "','".join([str(x) for x in watchlist])
-    q = f"SELECT movie_id FROM watchlists WHERE movie_id IN ('{values}') AND imdb_id = {user_imdb_id}"
-    cursor.execute(q)
-    return [x['movie_id'] for x in cursor.fetchall()]
-
-
-def remove_from_watchlist(except_these_movie_ids, user_imdb_id, cursor=None):
-    if not cursor:
-        conn, cursor = connect_mysql()
-    values = "', '".join([str(x) for x in except_these_movie_ids])
-    q = f"SELECT id FROM watchlists WHERE movie_id NOT IN ('{values}') AND imdb_id = {user_imdb_id}"
-    cursor.execute(q)
-    to_delete = [x['id'] for x in cursor.fetchall()]
-    if to_delete:
-        values = "', '".join([str(x) for x in to_delete])
-        q = f"DELETE FROM watchlists where id IN ('{values}')"
-        cursor.execute(q)
-    return
+def get_watchlist_intersections_ids(user_imdb_id, movies):
+    user_watchlist = get_user_watchlist(user_imdb_id)
+    if user_watchlist:
+        intersections = [x['imdb_id'] for x in user_watchlist if x['imdb_id'] in movies]
+        if intersections:
+            return intersections
 
 
 def get_user_watched_movies(email, account=None, plex=None):
@@ -47,7 +31,7 @@ def get_user_watched_movies(email, account=None, plex=None):
         guids = [x.id for x in movie.guids]
         for idd in guids:
             if 'imdb' in idd:
-                return {'imdb_id': idd.split('//tt')[-1], 'seen_date': movie.lastViewedAt}
+                return {'imdb_id': int(deconvert_imdb_id(idd.split('//tt')[-1])), 'seen_date': movie.lastViewedAt}
         return None
 
     if not account:

@@ -8,11 +8,11 @@ import requests
 from bs4 import BeautifulSoup
 from plexapi.exceptions import Unauthorized
 
-from myimdb_services_utils import get_my_movies, get_watchlist_intersections, remove_from_watchlist, get_user_watched_movies
-from utils import deconvert_imdb_id, update_many, setup_logger, check_db_plexbuddy
-from utils import get_my_imdb_users, get_watchlist_for_user, check_one_in_my_torrents_by_imdb
+from myimdb_services_utils import get_my_movies, get_watchlist_intersections_ids, get_user_watched_movies
+from utils import deconvert_imdb_id, update_many, setup_logger, check_database, remove_from_watchlist_except, Movie
+from utils import get_my_imdb_users, Watchlist, get_user_watchlist, check_one_against_torrents_by_imdb
 
-MY_IMDB_REFRESH_INTERVAL = int(os.getenv('MY_IMDB_REFRESH_INTERVAL'))
+MYIMDB_REFRESH_INTERVAL = int(os.getenv('MYIMDB_REFRESH_INTERVAL'))
 
 logger = setup_logger("MyIMDBsync")
 
@@ -23,15 +23,17 @@ def sync_my_imdb():
     for user in users:
         logger.info(f"Syncing data for {user['email']}")
         # Get movies already in DB
-        already_in_my_movies = get_my_movies(user['email'])
+        already_in_my_movies = get_my_movies(user)
+        if not already_in_my_movies:
+            already_in_my_movies = []
         # Sync IMDB data
         if user['imdb_id']:
             imdb_data = get_my_imdb(user['imdb_id'])
             imdb_data = [{'imdb_id': deconvert_imdb_id(key), 'my_score': val['rating'], 'seen_date': val['date'],
-                          'user': user['email'], 'rating_status': 'IMDB rated'} for key, val in imdb_data.items() if key not in already_in_my_movies]
-            update_many(imdb_data, 'my_movies')
+                          'user_id': user['telegram_chat_id'], 'rating_status': 'IMDB rated'} for key, val in imdb_data.items() if int(deconvert_imdb_id(key)) not in already_in_my_movies]
+            update_many(imdb_data, Movie, Movie.id)
 
-        already_in_my_movies = get_my_movies(user['email'])
+        already_in_my_movies = get_my_movies(user)
         # Sync PLEX data
         try:
             plex_data = get_user_watched_movies(user['email'])
@@ -41,11 +43,11 @@ def sync_my_imdb():
         if plex_data:
             plex_data = [x for x in plex_data if x['imdb_id'] not in already_in_my_movies]
             for item in plex_data:
-                item['user'] = user['email']
-            update_many(plex_data, 'my_movies')
+                item['user_id'] = user['telegram_chat_id']
+            update_many(plex_data, Movie, Movie.id)
         # Sync IMDB Watchlist
         if user['scan_watchlist'] == 1:
-            sync_watchlist(user['imdb_id'])
+            sync_watchlist(user)
         logger.info("Done.")
 
 
@@ -57,8 +59,8 @@ def run_imdb_sync():
     """
     while True:
         sync_my_imdb()
-        logger.info(f"Sleeping {MY_IMDB_REFRESH_INTERVAL} minutes...")
-        time.sleep(MY_IMDB_REFRESH_INTERVAL * 60)
+        logger.info(f"Sleeping {MYIMDB_REFRESH_INTERVAL} minutes...")
+        time.sleep(MYIMDB_REFRESH_INTERVAL * 60)
 
 
 def get_my_imdb(profile_id):
@@ -116,38 +118,43 @@ def get_my_watchlist(profile_id):
         return None
 
 
-def sync_watchlist(profile_id):
-    logger.info(f"Syncing watchlist for user {profile_id}")
+def sync_watchlist(user):
+    logger.info(f"Syncing watchlist for user {user['email']}")
     try:
         # IMDB watchlist
-        imdb_watchlist = get_my_watchlist(profile_id)
+        imdb_watchlist = get_my_watchlist(user['imdb_id'])
         imdb_watchlist = [int(deconvert_imdb_id(x)) for x in imdb_watchlist]
         # My DB watchlist which are also in IMDB
-        already_processed = get_watchlist_intersections(profile_id, imdb_watchlist)
+        already_processed = get_watchlist_intersections_ids(user['imdb_id'], imdb_watchlist)
         # Add new items added to IMDB watchlist
+        if already_processed:
+            new_watchlist = [x for x in imdb_watchlist if x not in already_processed]
+        else:
+            new_watchlist = imdb_watchlist
         to_upload = [{
-            'movie_id': x,
-            'imdb_id': profile_id,
+            'imdb_id': x,
+            'user_id': user['telegram_chat_id'],
             'status': 'new',
-        } for x in imdb_watchlist if x not in already_processed]
+        } for x in new_watchlist]
         if to_upload:
-            update_many(to_upload, 'watchlists')
-
+            update_many(to_upload, Watchlist, Watchlist.id)
         # Remove from DB watchlist those movies which are no longer in IMDB watchlist
-        remove_from_watchlist(imdb_watchlist, profile_id)
+        remove_from_watchlist_except(imdb_watchlist, user['imdb_id'])
 
         # Update watchlist item status if we find a torrent already downloaded
-        watchlist = get_watchlist_for_user(profile_id)
-        for item in watchlist:
-            is_in_my_torrents = check_one_in_my_torrents_by_imdb(item['movie_id'])
-            if is_in_my_torrents:
-                item['is_downloaded'] = is_in_my_torrents[0]['resolution']
-                update_many([item], 'watchlists')
+        watchlist = get_user_watchlist(user['imdb_id'])
+        if watchlist:
+            for item in watchlist:
+                is_in_my_torrents = check_one_against_torrents_by_imdb(item['imdb_id'])
+                if is_in_my_torrents:
+                    item['is_downloaded'] = is_in_my_torrents[0]['resolution']
+                    update_many([item], Watchlist, Watchlist.id)
     except Exception as e:
+        raise e
         logger.error(f"Watchlist sync for user {profile_id} failed. Error: {e}")
     logger.info("Done.")
 
 
 if __name__ == '__main__':
-    check_db_plexbuddy()
+    check_database()
     run_imdb_sync()

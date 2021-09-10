@@ -4,7 +4,7 @@ import PTN
 import requests
 
 from utils import torr_cypher, get_movie_details, update_many, setup_logger, timing, check_against_my_torrents, \
-    check_database
+    check_database, Torrent
 from email_tools import send_email
 
 API_URL = os.getenv('API_URL')
@@ -42,7 +42,7 @@ def update_my_torrents_db(items):
               'resolution': int(PTN.parse(x['name'])['resolution'][:-1]),
               }
              for x in items]
-    update_many(items, 'my_torrents')
+    update_many(items, Torrent, Torrent.torr_id)
 
 
 def get_latest_torrents(n=100, category=MOVIE_HDRO):
