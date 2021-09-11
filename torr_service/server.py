@@ -5,7 +5,7 @@ from wsgiref.simple_server import make_server
 import falcon
 from apscheduler.schedulers.background import BackgroundScheduler
 
-from utils import torr_cypher, setup_logger, check_database
+from utils import setup_logger, check_database
 from torr_service_utils import TORRAPI, TORR_FINISHED, refresher_routine
 
 TZ = os.getenv('TZ')
@@ -25,7 +25,7 @@ scheduler.start()
 atexit.register(lambda: scheduler.shutdown())
 
 api = falcon.App()
-api.add_route('/' + TORR_API_PATH.split('/')[-1], TORRAPI(torr_cypher, logger))
+api.add_route('/' + TORR_API_PATH.split('/')[-1], TORRAPI(logger))
 api.add_route('/' + TORR_FINISHED_PATH.split('/')[-1], TORR_FINISHED(logger))
 
 if __name__ == '__main__':

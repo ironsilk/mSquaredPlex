@@ -6,7 +6,7 @@ from urllib.parse import unquote
 import falcon
 
 from utils import timing, setup_logger, send_torrent, compose_link, update_many, make_client, \
-    check_one_against_torrents_by_torr_id, check_one_against_torrents_by_torr_name, send_message_to_bot, \
+    torr_cypher, check_one_against_torrents_by_torr_name, send_message_to_bot, \
     get_tgram_user_by_email, get_torrents, Torrent
 
 TORR_KEEP_TIME = int(os.getenv('TORR_KEEP_TIME'))
@@ -25,8 +25,7 @@ def gtfo(resp):
 
 class TORRAPI:
 
-    def __init__(self, cypher, logger):
-        self.cy = cypher
+    def __init__(self, logger):
         self.logger = logger
 
     @classmethod
@@ -41,11 +40,15 @@ class TORRAPI:
 
         # Try to decrypt
         try:
-            print(pkg)
-            print(unquote(pkg))
-            pkg = self.cy.decrypt(unquote(pkg))
-        except Exception as e:
-            raise e
+            self.logger.info(str(pkg))
+            self.logger.info(str(unquote(pkg)))
+            pkg = torr_cypher.decrypt(pkg)
+        except UnicodeDecodeError as e:
+            try:
+                pkg = torr_cypher.decrypt(unquote(pkg))
+            except Exception as e:
+                self.logger.error('In unquote, boss.')
+                raise e
             self.logger.error(e)
             return gtfo(resp)
         try:
@@ -91,6 +94,7 @@ class TORR_FINISHED:
         torr_id, torr_name, torr_labels = pkg.split('&&&')
         torr_name = torr_name.replace('^', ' ')
         # Get users who requested this torrent
+        # TODO too many notified here
         torr = check_one_against_torrents_by_torr_name(torr_name)
         users = torr['requested_by'].split(',')
         message = f"Your requested torrent,\n" \
