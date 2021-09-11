@@ -80,7 +80,7 @@ internet so no functions will be affected.
 
 3. Recreate one service
 
-`sudo docker-compose -f docker-compose_MAINSTACK.yml up --build --force-recreate --no-deps -d imdb_sync_service`
+`sudo docker-compose up --build --force-recreate --no-deps -d db_service`
 
 
 ## Known bugs:

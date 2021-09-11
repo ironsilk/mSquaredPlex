@@ -74,11 +74,11 @@ if __name__ == '__main__':
 
     try:
         scheduler.add_job(update_imdb_db, 'cron', day=1, hour=1, id='update_imdb_db', coalesce=True,
-                          misfire_grace_time=3000000, replace_existing=True, next_run_time=datetime.now())
+                          misfire_grace_time=3000000, replace_existing=True)
         scheduler.add_job(get_tmdb_data, 'interval', hours=1, id='get_tmdb_data', coalesce=True,
-                          misfire_grace_time=3000000, replace_existing=True)
+                          misfire_grace_time=3000000, replace_existing=True, next_run_time=datetime.now())
         scheduler.add_job(get_omdb_data, 'interval', hours=1, id='get_omdb_data', coalesce=True,
-                          misfire_grace_time=3000000, replace_existing=True)
+                          misfire_grace_time=3000000, replace_existing=True, next_run_time=datetime.now())
         scheduler.add_job(info_jobs, 'interval', minutes=30, id='info', coalesce=True, next_run_time=datetime.now(),
                           misfire_grace_time=3000000, replace_existing=True)
 
