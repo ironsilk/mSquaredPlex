@@ -8,7 +8,6 @@ WORKDIR /app
 
 COPY filelist_service/ ./
 COPY utils.py ./
-COPY views ./views
 
 RUN pip install -r requirements.txt
 

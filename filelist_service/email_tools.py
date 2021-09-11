@@ -567,9 +567,9 @@ def send_email(items, cypher):
 def prepare_item_for_email(item, email, mtls, cypher):
     # Add seen type keys
     if item['already_in_db']:
-        item['seen_type'] = 0  # new movie
+        item['seen_type'] = 1  # new movie
     else:
-        item['seen_type'] = 1  # we have this movie but here's a new torrent for it
+        item['seen_type'] = 0  # we have this movie but here's a new torrent for it
 
     # Convert some keys
     item['size'] = "%.1f" % (item['size'] / 1000000000)
@@ -578,8 +578,8 @@ def prepare_item_for_email(item, email, mtls, cypher):
     item['runtime'] = item['runtimeMinutes']
     item['imdb_score'] = item['averageRating']  # TODO asta nu iese momentan
     item['score'] = item['tmdb_score']
-    item['my_imdb_score'] = item['my_score']
-    item['seen_date'] = item['seen_date']
+    item['my_imdb_score'] = item['my_score'] if 'my_score' in item.keys() else None
+    item['seen_date'] = item['seen_date'] if 'seen_date' in item.keys() else None
     item['resolution'] = str(get_torr_quality(item['name'])) + 'p'
     item['trend'] = ''  # TODO asta nu stiu de unde sa-l iau
     item['id'] = str(item['id'])

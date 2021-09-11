@@ -1,19 +1,22 @@
 import os
-import time
+
 import PTN
 import requests
-
-from utils import torr_cypher, get_movie_details, update_many, setup_logger, timing, check_against_my_torrents, \
-    check_database, Torrent
+from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
+from apscheduler.schedulers.blocking import BlockingScheduler
+from datetime import datetime
 from email_tools import send_email
+from utils import torr_cypher, get_movie_details, update_many, setup_logger, timing, check_against_my_torrents, \
+    check_database, Torrent, DB_URI
 
+TZ = os.getenv('TZ')
 API_URL = os.getenv('API_URL')
 USER = os.getenv('USER')
 PASSKEY = os.getenv('PASSKEY')
 MOVIE_HDRO = os.getenv('MOVIE_HDRO')
 MOVIE_4K = os.getenv('MOVIE_4K')
-FLIST_ROUTINE_SLEEP_TIME = int(os.getenv('FLIST_ROUTINE_SLEEP_TIME'))
-
+FILELIST_ROUTINE_TIMES = os.getenv('FILELIST_ROUTINE_TIMES')
+FILELIST_ROUTINE_TIMES = FILELIST_ROUTINE_TIMES.split(',')
 
 logger = setup_logger("FilelistRoutine")
 
@@ -22,8 +25,7 @@ logger = setup_logger("FilelistRoutine")
 
 def check_in_my_torrents(torrents):
     already_in_db = check_against_my_torrents(torrents)
-    if not already_in_db:
-        already_in_db = []
+    already_in_db = [x['torr_id'] for x in already_in_db] if already_in_db else []
     for torrent in torrents:
         if torrent['id'] in already_in_db:
             torrent['torr_already_processed'] = True
@@ -81,7 +83,7 @@ def filter_results(new_movies):
 
 
 @timing
-def feed_routine(cypher):
+def feed_routine(cypher=torr_cypher):
     # fetch latest movies
     new_movies = get_latest_torrents()
 
@@ -99,19 +101,30 @@ def feed_routine(cypher):
     update_my_torrents_db(new_movies)
 
 
-def run_forever(cypher=torr_cypher, sleep_time=60*60*FLIST_ROUTINE_SLEEP_TIME):
-    """
-    Run routine - run time is negligible, will sleep for full time provided in settings.
-    :param cypher: AES cypher for torrent API hashes
-    :param sleep_time: default at 12 hrs
-    :return: happiness
-    """
-    while True:
-        feed_routine(cypher)
-        logger.info(f"Finished routine, sleeping for {FLIST_ROUTINE_SLEEP_TIME} hours")
-        time.sleep(sleep_time)
+def info_jobs():
+    jobs = scheduler.get_jobs()
+    logger.info(f"Found {len(jobs)} in this scheduler.")
+    for job in scheduler.get_jobs():
+        message = f"Job {job.name} with the general trigger {job.trigger}"
+        if job.pending:
+            message += f" is yet to be added to the jobstore, no next run time yet."
+        else:
+            message += f" will run next on {job.next_run_time}"
+        logger.info(message)
 
 
 if __name__ == '__main__':
     check_database()
-    run_forever()
+    feed_routine()
+    exit()
+
+    scheduler = BlockingScheduler(timezone=TZ)
+
+    for hour in FILELIST_ROUTINE_TIMES:
+        scheduler.add_job(feed_routine, 'cron', hour=int(hour), id=f"Filelist Routine {hour} o'clock",
+                          coalesce=True, misfire_grace_time=3000000, replace_existing=True)
+
+    scheduler.add_job(info_jobs, 'interval', minutes=30, id='Filelist RoutineInfo', coalesce=True,
+                      next_run_time=datetime.now(), misfire_grace_time=3000000, replace_existing=True)
+
+    scheduler.start()

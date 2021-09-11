@@ -302,6 +302,7 @@ def get_new_imdb_titles_for_omdb():
 
 
 def get_new_imdb_titles_for_tmdb():
+    # TODO speed up this query, think of min/max id instead of anything else.
     conn = connect_db()
     refresh_interval_date = datetime.datetime.now() - datetime.timedelta(days=REVIEW_INTERVAL_REFRESH)
     subquery = select(TmdbMovie.imdb_id).where(TmdbMovie.last_update_tmdb > refresh_interval_date)
@@ -464,7 +465,8 @@ def get_my_imdb_users():
 
 def get_torrents():
     with engine.connect() as conn:
-        return conn.execute(select(Torrent).where(Torrent.status != 'removed')).mappings().all()
+        result = conn.execute(select(Torrent).where(Torrent.status != 'removed')).mappings().all()
+    return [object_as_dict(x) for x in result]
 
 
 def get_requested_torrents_for_tgram_user(tgram_id):
@@ -1226,7 +1228,8 @@ if __name__ == '__main__':
     from pprint import pprint
     # pprint(get_movie_tmdb(15380158))
     # pprint(get_movie_tmdb_omdb(15380158))
-    print(check_movielib_database())
+    # print(check_movielib_database())
+    pprint(get_tmdb(15012054))
 
 
 
