@@ -661,7 +661,6 @@ def generate_torr_links(item, user_telegram_id, cypher):
         'folder': TORR_DOWNLOAD_FOLDER,
         'requested_by': user_telegram_id,
     }
-    print(download)
     return compose_link(seed), compose_link(download)
 
 
