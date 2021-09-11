@@ -132,7 +132,7 @@ def update_torr_db(pkg, torr_response, tgram_id):
         'imdb_id': deconvert_imdb_id(pkg['imdb']),
         'resolution': pkg['resolution'],
         'status': 'requested download',
-        'requested_by': tgram_id
+        'requested_by_id': tgram_id
     }],
         Torrent, Torrent.id)
 
