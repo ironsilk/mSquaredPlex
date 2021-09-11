@@ -134,7 +134,7 @@ def update_torr_db(pkg, torr_response, tgram_id):
         'status': 'requested download',
         'requested_by': tgram_id
     }],
-        Torrent, Torrent.torr_id)
+        Torrent, Torrent.id)
 
 
 def exclude_torrents_from_watchlist(movie_id, tg_id, torr_ids):

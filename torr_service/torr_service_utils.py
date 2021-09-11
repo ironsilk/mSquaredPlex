@@ -62,7 +62,7 @@ class TORRAPI:
             'status': 'requested download',
             'requested_by': pkg['requested_by']
         }],
-            Torrent, Torrent.torr_id)
+            Torrent, Torrent.id)
 
         # Give response
         resp.media = 'Torrent successfully queued for download.'
@@ -133,21 +133,21 @@ class TORR_REFRESHER:
                     if self.check_seeding_status(torr_response):
                         if torr['status'] == 'requested download':
                             torr['status'] = 'seeding'
-                            update_many([torr], Torrent, Torrent.torr_id)
+                            update_many([torr], Torrent, Torrent.id)
                     else:
                         # remove torrent and data
                         self.remove_torrent_and_files(torr['torr_id'])
                         # change status
                         torr['status'] = 'removed'
-                        update_many([torr], Torrent, Torrent.torr_id)
+                        update_many([torr], Torrent, Torrent.id)
                 elif torr_response.status == 'downloading' and torr['status'] == 'requested download':
                     torr['status'] = 'downloading'
-                    update_many([torr], Torrent, Torrent.torr_id)
+                    update_many([torr], Torrent, Torrent.id)
             else:
                 self.logger.warning("Torrent no longer in torrent client, removing from DB as well.")
                 torr['status'] = 'removed'
                 del torr['id']
-                update_many([torr], Torrent, Torrent.torr_id)
+                update_many([torr], Torrent, Torrent.id)
 
     def remove_low_res(self, torrents):
         to_remove = []
@@ -163,7 +163,7 @@ class TORR_REFRESHER:
         for x in to_remove:
             self.remove_torrent_and_files(x['torr_id'])
             x['status'] = 'removed'
-        update_many(to_remove, Torrent, Torrent.torr_id)
+        update_many(to_remove, Torrent, Torrent.id)
         if to_remove:
             self.logger.info(f"Removed {len(to_remove)} lower res movies")
         else:

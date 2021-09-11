@@ -46,10 +46,10 @@ def update_my_torrents_db(items):
               'resolution': int(PTN.parse(x['name'])['resolution'][:-1]),
               }
              for x in items]
-    update_many(items, Torrent, Torrent.torr_id)
+    update_many(items, Torrent, Torrent.id)
 
 
-def get_latest_torrents(n=100, category=MOVIE_HDRO):
+def get_latest_torrents(n=5, category=MOVIE_HDRO):
     """
     returns last n movies from filelist API.
     n default 100

@@ -1,3 +1,551 @@
-<?xml version="1.0" encoding="utf-8"?>
-<movies>
-	</movies>
+<?xml version="1.0" encoding="utf-8"?><movies>
+	<movie id_imdb="tt1345883">
+		<id>751053</id>
+		<name>Die.dunkle.Seite.des.Lichts.2009.1080p.NF.WEB-DL.DDP2.0.x264-playWEB</name>
+		<imdb>tt1345883</imdb>
+		<freeleech>True</freeleech>
+		<doubleup>0</doubleup>
+		<upload_date>2021-09-11 08:50:39</upload_date>
+		<download_link>https://filelist.io/download.php?id=751053&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
+		<size>1.7</size>
+		<internal>1</internal>
+		<moderated>0</moderated>
+		<category>Filme HD-RO</category>
+		<seeders>42</seeders>
+		<leechers>1</leechers>
+		<times_completed>46</times_completed>
+		<comments>0</comments>
+		<files>1</files>
+		<small_description>Documentary</small_description>
+		<torr_already_processed>False</torr_already_processed>
+		<cast>None</cast>
+		<genres>documentary</genres>
+		<imdbID>1345883</imdbID>
+		<titleType>tvMovie</titleType>
+		<averageRating>6.4</averageRating>
+		<title>Dark Side of Light</title>
+		<originalTitle>Die dunkle Seite des Lichts</originalTitle>
+		<startYear>2009</startYear>
+		<numVotes>13</numVotes>
+		<runtimeMinutes>52</runtimeMinutes>
+		<imdb_id>1345883</imdb_id>
+		<country>None</country>
+		<lang>None</lang>
+		<ovrw>None</ovrw>
+		<tmdb_score>None</tmdb_score>
+		<trailer_link>None</trailer_link>
+		<poster>None</poster>
+		<last_update_tmdb>2021-09-11 08:14:07.592777</last_update_tmdb>
+		<hit_tmdb>False</hit_tmdb>
+		<awards>None</awards>
+		<meta_score>None</meta_score>
+		<rated>None</rated>
+		<rott_score>None</rott_score>
+		<omdb_score>None</omdb_score>
+		<last_update_omdb>2021-09-11 08:14:07.656479</last_update_omdb>
+		<hit_omdb>False</hit_omdb>
+		<already_in_db>False</already_in_db>
+		<better_quality>False</better_quality>
+		<seen_type>0</seen_type>
+		<year>2009</year>
+		<genre>documentary</genre>
+		<runtime>52</runtime>
+		<imdb_score>6.4</imdb_score>
+		<score>None</score>
+		<my_imdb_score>None</my_imdb_score>
+		<seen_date>None</seen_date>
+		<resolution>1080p</resolution>
+		<trend/>
+		<trailer>None</trailer>
+		<torr_link_seed>http://192.168.1.99:9092/torr_api?BzNFKOwGt+OGziasVfaStnaAHvwf/2GaIbKSJHQ7f7Glg7E56NfdS97Q4/L9QHpLLqSrsu7Pt7KBGRSUv+0pTgtpPcG2zwqq+ScUp81MODbHL/yfxvPYDSRntUoVvkxA0jahmMAMVTGNEQI=</torr_link_seed>
+		<torr_link_download>http://192.168.1.99:9092/torr_api?BzNFKOwGt+OGziasVfaStnaAHvwf/2GaIbKSJHQ7f7Glg7E56NfdS97Q4/L9QHpLLqSrsu7Pt7KBGRSUv+0pTgtpPcG2zwqq+ScUp81MODbHL/yfxvPYDSRntUoVvkxA0jahmMAMVTGNEQI=</torr_link_download>
+		<trnt id="751053">
+			<id>751053</id>
+			<name>Die.dunkle.Seite.des.Lichts.2009.1080p.NF.WEB-DL.DDP2.0.x264-playWEB</name>
+			<imdb>tt1345883</imdb>
+			<freeleech>True</freeleech>
+			<doubleup>0</doubleup>
+			<upload_date>2021-09-11 08:50:39</upload_date>
+			<download_link>https://filelist.io/download.php?id=751053&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
+			<size>1.7</size>
+			<internal>1</internal>
+			<moderated>0</moderated>
+			<category>Filme HD-RO</category>
+			<seeders>42</seeders>
+			<leechers>1</leechers>
+			<times_completed>46</times_completed>
+			<comments>0</comments>
+			<files>1</files>
+			<small_description>Documentary</small_description>
+			<torr_already_processed>False</torr_already_processed>
+			<cast>None</cast>
+			<genres>documentary</genres>
+			<imdbID>1345883</imdbID>
+			<titleType>tvMovie</titleType>
+			<averageRating>6.4</averageRating>
+			<title>Dark Side of Light</title>
+			<originalTitle>Die dunkle Seite des Lichts</originalTitle>
+			<startYear>2009</startYear>
+			<numVotes>13</numVotes>
+			<runtimeMinutes>52</runtimeMinutes>
+			<imdb_id>1345883</imdb_id>
+			<country>None</country>
+			<lang>None</lang>
+			<ovrw>None</ovrw>
+			<tmdb_score>None</tmdb_score>
+			<trailer_link>None</trailer_link>
+			<poster>None</poster>
+			<last_update_tmdb>2021-09-11 08:14:07.592777</last_update_tmdb>
+			<hit_tmdb>False</hit_tmdb>
+			<awards>None</awards>
+			<meta_score>None</meta_score>
+			<rated>None</rated>
+			<rott_score>None</rott_score>
+			<omdb_score>None</omdb_score>
+			<last_update_omdb>2021-09-11 08:14:07.656479</last_update_omdb>
+			<hit_omdb>False</hit_omdb>
+			<already_in_db>False</already_in_db>
+			<better_quality>False</better_quality>
+			<seen_type>0</seen_type>
+			<year>2009</year>
+			<genre>documentary</genre>
+			<runtime>52</runtime>
+			<imdb_score>6.4</imdb_score>
+			<score>None</score>
+			<my_imdb_score>None</my_imdb_score>
+			<seen_date>None</seen_date>
+			<resolution>1080p</resolution>
+			<trend/>
+			<trailer>None</trailer>
+			<torr_link_seed>http://192.168.1.99:9092/torr_api?BzNFKOwGt+OGziasVfaStnaAHvwf/2GaIbKSJHQ7f7Glg7E56NfdS97Q4/L9QHpLLqSrsu7Pt7KBGRSUv+0pTgtpPcG2zwqq+ScUp81MODbHL/yfxvPYDSRntUoVvkxA0jahmMAMVTGNEQI=</torr_link_seed>
+			<torr_link_download>http://192.168.1.99:9092/torr_api?BzNFKOwGt+OGziasVfaStnaAHvwf/2GaIbKSJHQ7f7Glg7E56NfdS97Q4/L9QHpLLqSrsu7Pt7KBGRSUv+0pTgtpPcG2zwqq+ScUp81MODbHL/yfxvPYDSRntUoVvkxA0jahmMAMVTGNEQI=</torr_link_download>
+		</trnt>
+	</movie>
+	<movie id_imdb="tt11258824">
+		<id>751044</id>
+		<name>Konferentsiya.2020.1080p.HBO.WEB-DL.AAC2.0.H.264-playWEB</name>
+		<imdb>tt11258824</imdb>
+		<freeleech>True</freeleech>
+		<doubleup>0</doubleup>
+		<upload_date>2021-09-11 00:46:52</upload_date>
+		<download_link>https://filelist.io/download.php?id=751044&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
+		<size>7.1</size>
+		<internal>1</internal>
+		<moderated>0</moderated>
+		<category>Filme HD-RO</category>
+		<seeders>41</seeders>
+		<leechers>2</leechers>
+		<times_completed>64</times_completed>
+		<comments>0</comments>
+		<files>1</files>
+		<small_description>Drama</small_description>
+		<torr_already_processed>False</torr_already_processed>
+		<cast>Filipp Avdeev, Natalya Tsvetkova, Natalya Pavlenkova, Kseniya Zueva</cast>
+		<genres>drama</genres>
+		<imdbID>11258824</imdbID>
+		<titleType>movie</titleType>
+		<averageRating>6.8</averageRating>
+		<title>Conference</title>
+		<originalTitle>Konferentsiya</originalTitle>
+		<startYear>2020</startYear>
+		<numVotes>306</numVotes>
+		<runtimeMinutes>135</runtimeMinutes>
+		<imdb_id>11258824</imdb_id>
+		<country>None</country>
+		<lang>None</lang>
+		<ovrw>Nearly 18 years after the events at the Dubrovka Theatre Centre, Natalia comes to Moscow from her quiet monastic life. Having received a blessing, she brings together the former hostages of the musical show “Nord-Ost” to hold a memorial evening of the tragedy, whose victims they became on 23-26 October 2002. Recreating the details and chronology of events, Natalia plunges into terrible details of her personal story, her fatal mistake, which crossed out her life. Together with other participants of the event and overcoming a post-traumatic syndrome, she must go again through this emotional experience.</ovrw>
+		<tmdb_score>7.0</tmdb_score>
+		<trailer_link>https://www.youtube.com/watch?v=qFc3rhleW3I</trailer_link>
+		<poster>https://image.tmdb.org/t/p/w300_and_h450_bestv2/h3JzGzfqN46dZ9yZIElsZ8gOZGa.jpg</poster>
+		<last_update_tmdb>2021-09-11 06:47:37.138038</last_update_tmdb>
+		<hit_tmdb>True</hit_tmdb>
+		<awards>None</awards>
+		<meta_score>None</meta_score>
+		<rated>None</rated>
+		<rott_score>None</rott_score>
+		<omdb_score>None</omdb_score>
+		<last_update_omdb>2021-09-11 08:14:07.791898</last_update_omdb>
+		<hit_omdb>False</hit_omdb>
+		<already_in_db>False</already_in_db>
+		<better_quality>False</better_quality>
+		<seen_type>0</seen_type>
+		<year>2020</year>
+		<genre>drama</genre>
+		<runtime>135</runtime>
+		<imdb_score>6.8</imdb_score>
+		<score>7.0</score>
+		<my_imdb_score>None</my_imdb_score>
+		<seen_date>None</seen_date>
+		<resolution>1080p</resolution>
+		<trend/>
+		<trailer>https://www.youtube.com/watch?v=qFc3rhleW3I</trailer>
+		<torr_link_seed>http://192.168.1.99:9092/torr_api?BzNFKOwGt+OGziasVPGStnaAHvwf/2GaIbKSJHQ7fbelg7E4/tnRSY7H9e7+WXtWKKXnqvTetrqJBRiW++QqRgp+bdmszQfo+z4Lq9sdNjrFf+uLwuPOCjVmjncO5VRawzCmmMALWzCBFU+1</torr_link_seed>
+		<torr_link_download>http://192.168.1.99:9092/torr_api?BzNFKOwGt+OGziasVPGStnaAHvwf/2GaIbKSJHQ7fbelg7E4/tnRSY7H9e7+WXtWKKXnqvTetrqJBRiW++QqRgp+bdmszQfo+z4Lq9sdNjrFf+uLwuPOCjVmjncO5VRawzCmmMALWzCBFU+1</torr_link_download>
+		<trnt id="751044">
+			<id>751044</id>
+			<name>Konferentsiya.2020.1080p.HBO.WEB-DL.AAC2.0.H.264-playWEB</name>
+			<imdb>tt11258824</imdb>
+			<freeleech>True</freeleech>
+			<doubleup>0</doubleup>
+			<upload_date>2021-09-11 00:46:52</upload_date>
+			<download_link>https://filelist.io/download.php?id=751044&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
+			<size>7.1</size>
+			<internal>1</internal>
+			<moderated>0</moderated>
+			<category>Filme HD-RO</category>
+			<seeders>41</seeders>
+			<leechers>2</leechers>
+			<times_completed>64</times_completed>
+			<comments>0</comments>
+			<files>1</files>
+			<small_description>Drama</small_description>
+			<torr_already_processed>False</torr_already_processed>
+			<cast>Filipp Avdeev, Natalya Tsvetkova, Natalya Pavlenkova, Kseniya Zueva</cast>
+			<genres>drama</genres>
+			<imdbID>11258824</imdbID>
+			<titleType>movie</titleType>
+			<averageRating>6.8</averageRating>
+			<title>Conference</title>
+			<originalTitle>Konferentsiya</originalTitle>
+			<startYear>2020</startYear>
+			<numVotes>306</numVotes>
+			<runtimeMinutes>135</runtimeMinutes>
+			<imdb_id>11258824</imdb_id>
+			<country>None</country>
+			<lang>None</lang>
+			<ovrw>Nearly 18 years after the events at the Dubrovka Theatre Centre, Natalia comes to Moscow from her quiet monastic life. Having received a blessing, she brings together the former hostages of the musical show “Nord-Ost” to hold a memorial evening of the tragedy, whose victims they became on 23-26 October 2002. Recreating the details and chronology of events, Natalia plunges into terrible details of her personal story, her fatal mistake, which crossed out her life. Together with other participants of the event and overcoming a post-traumatic syndrome, she must go again through this emotional experience.</ovrw>
+			<tmdb_score>7.0</tmdb_score>
+			<trailer_link>https://www.youtube.com/watch?v=qFc3rhleW3I</trailer_link>
+			<poster>https://image.tmdb.org/t/p/w300_and_h450_bestv2/h3JzGzfqN46dZ9yZIElsZ8gOZGa.jpg</poster>
+			<last_update_tmdb>2021-09-11 06:47:37.138038</last_update_tmdb>
+			<hit_tmdb>True</hit_tmdb>
+			<awards>None</awards>
+			<meta_score>None</meta_score>
+			<rated>None</rated>
+			<rott_score>None</rott_score>
+			<omdb_score>None</omdb_score>
+			<last_update_omdb>2021-09-11 08:14:07.791898</last_update_omdb>
+			<hit_omdb>False</hit_omdb>
+			<already_in_db>False</already_in_db>
+			<better_quality>False</better_quality>
+			<seen_type>0</seen_type>
+			<year>2020</year>
+			<genre>drama</genre>
+			<runtime>135</runtime>
+			<imdb_score>6.8</imdb_score>
+			<score>7.0</score>
+			<my_imdb_score>None</my_imdb_score>
+			<seen_date>None</seen_date>
+			<resolution>1080p</resolution>
+			<trend/>
+			<trailer>https://www.youtube.com/watch?v=qFc3rhleW3I</trailer>
+			<torr_link_seed>http://192.168.1.99:9092/torr_api?BzNFKOwGt+OGziasVPGStnaAHvwf/2GaIbKSJHQ7fbelg7E4/tnRSY7H9e7+WXtWKKXnqvTetrqJBRiW++QqRgp+bdmszQfo+z4Lq9sdNjrFf+uLwuPOCjVmjncO5VRawzCmmMALWzCBFU+1</torr_link_seed>
+			<torr_link_download>http://192.168.1.99:9092/torr_api?BzNFKOwGt+OGziasVPGStnaAHvwf/2GaIbKSJHQ7fbelg7E4/tnRSY7H9e7+WXtWKKXnqvTetrqJBRiW++QqRgp+bdmszQfo+z4Lq9sdNjrFf+uLwuPOCjVmjncO5VRawzCmmMALWzCBFU+1</torr_link_download>
+		</trnt>
+	</movie>
+	<movie id_imdb="tt0493464">
+		<id>751015</id>
+		<name>Wanted.2008.720p.BluRay.DD5.1.x264-playHD</name>
+		<imdb>tt0493464</imdb>
+		<freeleech>True</freeleech>
+		<doubleup>0</doubleup>
+		<upload_date>2021-09-10 19:48:10</upload_date>
+		<download_link>https://filelist.io/download.php?id=751015&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
+		<size>7.7</size>
+		<internal>1</internal>
+		<moderated>1</moderated>
+		<category>Filme HD-RO</category>
+		<seeders>87</seeders>
+		<leechers>5</leechers>
+		<times_completed>181</times_completed>
+		<comments>0</comments>
+		<files>1</files>
+		<small_description>Action, Crime, Thriller</small_description>
+		<torr_already_processed>False</torr_already_processed>
+		<cast>Angelina Jolie, James McAvoy, Morgan Freeman, Terence Stamp</cast>
+		<genres>action, crime, thriller</genres>
+		<imdbID>493464</imdbID>
+		<titleType>movie</titleType>
+		<averageRating>6.7</averageRating>
+		<title>Wanted</title>
+		<originalTitle>Wanted</originalTitle>
+		<startYear>2008</startYear>
+		<numVotes>373033</numVotes>
+		<runtimeMinutes>110</runtimeMinutes>
+		<imdb_id>493464</imdb_id>
+		<country>United States, Germany</country>
+		<lang>English</lang>
+		<ovrw>Doormat Wesley Gibson discovers that his recently murdered father - who Wesley never knew - belonged to a secret guild of assassins. After a leather-clad sexpot drafts Wesley into the society, he hones his innate killing skills and turns avenger.</ovrw>
+		<tmdb_score>6.5</tmdb_score>
+		<trailer_link>https://www.youtube.com/watch?v=q9Mr-iYZRZk</trailer_link>
+		<poster>https://image.tmdb.org/t/p/w300_and_h450_bestv2/rTvUr2ESdZ1Ht5zNbgUNmNEHyUT.jpg</poster>
+		<last_update_tmdb>2021-09-10 21:32:35.966834</last_update_tmdb>
+		<hit_tmdb>True</hit_tmdb>
+		<awards>Nominated for 2 Oscars. 4 wins &amp; 25 nominations total</awards>
+		<meta_score>64.0</meta_score>
+		<rated>None</rated>
+		<rott_score>None</rott_score>
+		<omdb_score>None</omdb_score>
+		<last_update_omdb>2021-09-10 21:32:36.323804</last_update_omdb>
+		<hit_omdb>True</hit_omdb>
+		<already_in_db>False</already_in_db>
+		<better_quality>False</better_quality>
+		<seen_type>0</seen_type>
+		<year>2008</year>
+		<genre>action, crime, thriller</genre>
+		<runtime>110</runtime>
+		<imdb_score>6.7</imdb_score>
+		<score>6.5</score>
+		<my_imdb_score>None</my_imdb_score>
+		<seen_date>None</seen_date>
+		<resolution>720p</resolution>
+		<trend/>
+		<trailer>https://www.youtube.com/watch?v=q9Mr-iYZRZk</trailer>
+		<torr_link_seed>http://192.168.1.99:9092/torr_api?BzNFKOwGt+OGziasUfCStnaAHvwf/2GaIbKSJGIzf7Gmj6Uq6ImYGsPZ5en4WmAAe+q+uv7Sp6jXWljSvPBnEE45MJb5m0yi5XNR4pwccWeQOOqa1vL0Gzgh0Ahdq0ZQ0zaokMQLEQ==</torr_link_seed>
+		<torr_link_download>http://192.168.1.99:9092/torr_api?BzNFKOwGt+OGziasUfCStnaAHvwf/2GaIbKSJGIzf7Gmj6Uq6ImYGsPZ5en4WmAAe+q+uv7Sp6jXWljSvPBnEE45MJb5m0yi5XNR4pwccWeQOOqa1vL0Gzgh0Ahdq0ZQ0zaokMQLEQ==</torr_link_download>
+		<trnt id="751015">
+			<id>751015</id>
+			<name>Wanted.2008.720p.BluRay.DD5.1.x264-playHD</name>
+			<imdb>tt0493464</imdb>
+			<freeleech>True</freeleech>
+			<doubleup>0</doubleup>
+			<upload_date>2021-09-10 19:48:10</upload_date>
+			<download_link>https://filelist.io/download.php?id=751015&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
+			<size>7.7</size>
+			<internal>1</internal>
+			<moderated>1</moderated>
+			<category>Filme HD-RO</category>
+			<seeders>87</seeders>
+			<leechers>5</leechers>
+			<times_completed>181</times_completed>
+			<comments>0</comments>
+			<files>1</files>
+			<small_description>Action, Crime, Thriller</small_description>
+			<torr_already_processed>False</torr_already_processed>
+			<cast>Angelina Jolie, James McAvoy, Morgan Freeman, Terence Stamp</cast>
+			<genres>action, crime, thriller</genres>
+			<imdbID>493464</imdbID>
+			<titleType>movie</titleType>
+			<averageRating>6.7</averageRating>
+			<title>Wanted</title>
+			<originalTitle>Wanted</originalTitle>
+			<startYear>2008</startYear>
+			<numVotes>373033</numVotes>
+			<runtimeMinutes>110</runtimeMinutes>
+			<imdb_id>493464</imdb_id>
+			<country>United States, Germany</country>
+			<lang>English</lang>
+			<ovrw>Doormat Wesley Gibson discovers that his recently murdered father - who Wesley never knew - belonged to a secret guild of assassins. After a leather-clad sexpot drafts Wesley into the society, he hones his innate killing skills and turns avenger.</ovrw>
+			<tmdb_score>6.5</tmdb_score>
+			<trailer_link>https://www.youtube.com/watch?v=q9Mr-iYZRZk</trailer_link>
+			<poster>https://image.tmdb.org/t/p/w300_and_h450_bestv2/rTvUr2ESdZ1Ht5zNbgUNmNEHyUT.jpg</poster>
+			<last_update_tmdb>2021-09-10 21:32:35.966834</last_update_tmdb>
+			<hit_tmdb>True</hit_tmdb>
+			<awards>Nominated for 2 Oscars. 4 wins &amp; 25 nominations total</awards>
+			<meta_score>64.0</meta_score>
+			<rated>None</rated>
+			<rott_score>None</rott_score>
+			<omdb_score>None</omdb_score>
+			<last_update_omdb>2021-09-10 21:32:36.323804</last_update_omdb>
+			<hit_omdb>True</hit_omdb>
+			<already_in_db>False</already_in_db>
+			<better_quality>False</better_quality>
+			<seen_type>0</seen_type>
+			<year>2008</year>
+			<genre>action, crime, thriller</genre>
+			<runtime>110</runtime>
+			<imdb_score>6.7</imdb_score>
+			<score>6.5</score>
+			<my_imdb_score>None</my_imdb_score>
+			<seen_date>None</seen_date>
+			<resolution>720p</resolution>
+			<trend/>
+			<trailer>https://www.youtube.com/watch?v=q9Mr-iYZRZk</trailer>
+			<torr_link_seed>http://192.168.1.99:9092/torr_api?BzNFKOwGt+OGziasUfCStnaAHvwf/2GaIbKSJGIzf7Gmj6Uq6ImYGsPZ5en4WmAAe+q+uv7Sp6jXWljSvPBnEE45MJb5m0yi5XNR4pwccWeQOOqa1vL0Gzgh0Ahdq0ZQ0zaokMQLEQ==</torr_link_seed>
+			<torr_link_download>http://192.168.1.99:9092/torr_api?BzNFKOwGt+OGziasUfCStnaAHvwf/2GaIbKSJGIzf7Gmj6Uq6ImYGsPZ5en4WmAAe+q+uv7Sp6jXWljSvPBnEE45MJb5m0yi5XNR4pwccWeQOOqa1vL0Gzgh0Ahdq0ZQ0zaokMQLEQ==</torr_link_download>
+		</trnt>
+		<trnt id="751014">
+			<id>751014</id>
+			<name>Wanted.2008.1080p.BluRay.DD5.1.x264-playHD</name>
+			<imdb>tt0493464</imdb>
+			<freeleech>True</freeleech>
+			<doubleup>0</doubleup>
+			<upload_date>2021-09-10 19:47:48</upload_date>
+			<download_link>https://filelist.io/download.php?id=751014&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
+			<size>14.1</size>
+			<internal>1</internal>
+			<moderated>1</moderated>
+			<category>Filme HD-RO</category>
+			<seeders>121</seeders>
+			<leechers>6</leechers>
+			<times_completed>177</times_completed>
+			<comments>2</comments>
+			<files>1</files>
+			<small_description>Action, Crime, Fantasy</small_description>
+			<torr_already_processed>False</torr_already_processed>
+			<cast>Angelina Jolie, James McAvoy, Morgan Freeman, Terence Stamp</cast>
+			<genres>action, crime, thriller</genres>
+			<imdbID>493464</imdbID>
+			<titleType>movie</titleType>
+			<averageRating>6.7</averageRating>
+			<title>Wanted</title>
+			<originalTitle>Wanted</originalTitle>
+			<startYear>2008</startYear>
+			<numVotes>373033</numVotes>
+			<runtimeMinutes>110</runtimeMinutes>
+			<imdb_id>493464</imdb_id>
+			<country>United States, Germany</country>
+			<lang>English</lang>
+			<ovrw>Doormat Wesley Gibson discovers that his recently murdered father - who Wesley never knew - belonged to a secret guild of assassins. After a leather-clad sexpot drafts Wesley into the society, he hones his innate killing skills and turns avenger.</ovrw>
+			<tmdb_score>6.5</tmdb_score>
+			<trailer_link>https://www.youtube.com/watch?v=q9Mr-iYZRZk</trailer_link>
+			<poster>https://image.tmdb.org/t/p/w300_and_h450_bestv2/rTvUr2ESdZ1Ht5zNbgUNmNEHyUT.jpg</poster>
+			<last_update_tmdb>2021-09-10 21:32:35.966834</last_update_tmdb>
+			<hit_tmdb>True</hit_tmdb>
+			<awards>Nominated for 2 Oscars. 4 wins &amp; 25 nominations total</awards>
+			<meta_score>64.0</meta_score>
+			<rated>None</rated>
+			<rott_score>None</rott_score>
+			<omdb_score>None</omdb_score>
+			<last_update_omdb>2021-09-10 21:32:36.323804</last_update_omdb>
+			<hit_omdb>True</hit_omdb>
+			<already_in_db>False</already_in_db>
+			<better_quality>False</better_quality>
+			<seen_type>0</seen_type>
+			<year>2008</year>
+			<genre>action, crime, thriller</genre>
+			<runtime>110</runtime>
+			<imdb_score>6.7</imdb_score>
+			<score>6.5</score>
+			<my_imdb_score>None</my_imdb_score>
+			<seen_date>None</seen_date>
+			<resolution>1080p</resolution>
+			<trend/>
+			<trailer>https://www.youtube.com/watch?v=q9Mr-iYZRZk</trailer>
+			<torr_link_seed>http://192.168.1.99:9092/torr_api?BzNFKOwGt+OGziasUfGStnaAHvwf/2GaIbKSJGIzf7Gmj6Uq6ImYGsPZ5en4WmAAe+q4uPbOq6qTU1vavec3CFQ7PdT7glOu8yJf7p5MZnOUKPydx/PPJiN6yBJMrUFQ0zGmkcgPXHQ=</torr_link_seed>
+			<torr_link_download>http://192.168.1.99:9092/torr_api?BzNFKOwGt+OGziasUfGStnaAHvwf/2GaIbKSJGIzf7Gmj6Uq6ImYGsPZ5en4WmAAe+q4uPbOq6qTU1vavec3CFQ7PdT7glOu8yJf7p5MZnOUKPydx/PPJiN6yBJMrUFQ0zGmkcgPXHQ=</torr_link_download>
+		</trnt>
+	</movie>
+	<movie id_imdb="tt3766424">
+		<id>751009</id>
+		<name>Jackass.Presents.Bad.Grandpa.5.2014.1080p.BluRay.DTS.x264-VietHD</name>
+		<imdb>tt3766424</imdb>
+		<freeleech>True</freeleech>
+		<doubleup>0</doubleup>
+		<upload_date>2021-09-10 17:34:36</upload_date>
+		<download_link>https://filelist.io/download.php?id=751009&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
+		<size>14.0</size>
+		<internal>0</internal>
+		<moderated>1</moderated>
+		<category>Filme HD-RO</category>
+		<seeders>45</seeders>
+		<leechers>1</leechers>
+		<times_completed>87</times_completed>
+		<comments>2</comments>
+		<files>2</files>
+		<small_description>Comedy</small_description>
+		<torr_already_processed>False</torr_already_processed>
+		<cast>Marilynn Allain, Georgina Cates, Madison Davis, George Faughnan</cast>
+		<genres>comedy</genres>
+		<imdbID>3766424</imdbID>
+		<titleType>video</titleType>
+		<averageRating>6.3</averageRating>
+		<title>Bad Grandpa .5</title>
+		<originalTitle>Bad Grandpa .5</originalTitle>
+		<startYear>2014</startYear>
+		<numVotes>4631</numVotes>
+		<runtimeMinutes>76</runtimeMinutes>
+		<imdb_id>3766424</imdb_id>
+		<country>USA</country>
+		<lang>English</lang>
+		<ovrw>Bad Grandpa .5 gives you a whole new perspective on the world of Irving Zisman with bonus scenes and pranks also featuring Spike Jonze as 'Gloria' and Catherine Keener as Irving's wife 'Ellie', plus a look at the evolution of Johnny Knoxville's naughty alter-ego, the makeup effects, and a behind-the-scenes peek at the idiocy it takes to make a hidden camera movie in public.</ovrw>
+		<tmdb_score>5.9</tmdb_score>
+		<trailer_link>https://www.youtube.com/watch?v=62p48GiJ_rY</trailer_link>
+		<poster>https://image.tmdb.org/t/p/w300_and_h450_bestv2/48HKtHMiQJYQFjFWULnlCEqkELG.jpg</poster>
+		<last_update_tmdb>2021-09-10 21:32:36.508231</last_update_tmdb>
+		<hit_tmdb>True</hit_tmdb>
+		<awards>N/A</awards>
+		<meta_score>None</meta_score>
+		<rated>None</rated>
+		<rott_score>None</rott_score>
+		<omdb_score>None</omdb_score>
+		<last_update_omdb>2021-09-10 21:32:36.933470</last_update_omdb>
+		<hit_omdb>True</hit_omdb>
+		<already_in_db>False</already_in_db>
+		<better_quality>False</better_quality>
+		<seen_type>0</seen_type>
+		<year>2014</year>
+		<genre>comedy</genre>
+		<runtime>76</runtime>
+		<imdb_score>6.3</imdb_score>
+		<score>5.9</score>
+		<my_imdb_score>None</my_imdb_score>
+		<seen_date>None</seen_date>
+		<resolution>1080p</resolution>
+		<trend/>
+		<trailer>https://www.youtube.com/watch?v=62p48GiJ_rY</trailer>
+		<torr_link_seed>http://192.168.1.99:9092/torr_api?BzNFKOwGt+OGziasUPyStnaAHvwf/2GaIbKSJGU9erOkib0m6tmPDN/a/OjlXGFMY/Cpuf7Gt6aRF1LZteYgWEwhP9m5gEqx/zQO4JJONmSALOyLwOLOHR5hkwpWvEdX0zGhn8kDWDnE</torr_link_seed>
+		<torr_link_download>http://192.168.1.99:9092/torr_api?BzNFKOwGt+OGziasUPyStnaAHvwf/2GaIbKSJGU9erOkib0m6tmPDN/a/OjlXGFMY/Cpuf7Gt6aRF1LZteYgWEwhP9m5gEqx/zQO4JJONmSALOyLwOLOHR5hkwpWvEdX0zGhn8kDWDnE</torr_link_download>
+		<trnt id="751009">
+			<id>751009</id>
+			<name>Jackass.Presents.Bad.Grandpa.5.2014.1080p.BluRay.DTS.x264-VietHD</name>
+			<imdb>tt3766424</imdb>
+			<freeleech>True</freeleech>
+			<doubleup>0</doubleup>
+			<upload_date>2021-09-10 17:34:36</upload_date>
+			<download_link>https://filelist.io/download.php?id=751009&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
+			<size>14.0</size>
+			<internal>0</internal>
+			<moderated>1</moderated>
+			<category>Filme HD-RO</category>
+			<seeders>45</seeders>
+			<leechers>1</leechers>
+			<times_completed>87</times_completed>
+			<comments>2</comments>
+			<files>2</files>
+			<small_description>Comedy</small_description>
+			<torr_already_processed>False</torr_already_processed>
+			<cast>Marilynn Allain, Georgina Cates, Madison Davis, George Faughnan</cast>
+			<genres>comedy</genres>
+			<imdbID>3766424</imdbID>
+			<titleType>video</titleType>
+			<averageRating>6.3</averageRating>
+			<title>Bad Grandpa .5</title>
+			<originalTitle>Bad Grandpa .5</originalTitle>
+			<startYear>2014</startYear>
+			<numVotes>4631</numVotes>
+			<runtimeMinutes>76</runtimeMinutes>
+			<imdb_id>3766424</imdb_id>
+			<country>USA</country>
+			<lang>English</lang>
+			<ovrw>Bad Grandpa .5 gives you a whole new perspective on the world of Irving Zisman with bonus scenes and pranks also featuring Spike Jonze as 'Gloria' and Catherine Keener as Irving's wife 'Ellie', plus a look at the evolution of Johnny Knoxville's naughty alter-ego, the makeup effects, and a behind-the-scenes peek at the idiocy it takes to make a hidden camera movie in public.</ovrw>
+			<tmdb_score>5.9</tmdb_score>
+			<trailer_link>https://www.youtube.com/watch?v=62p48GiJ_rY</trailer_link>
+			<poster>https://image.tmdb.org/t/p/w300_and_h450_bestv2/48HKtHMiQJYQFjFWULnlCEqkELG.jpg</poster>
+			<last_update_tmdb>2021-09-10 21:32:36.508231</last_update_tmdb>
+			<hit_tmdb>True</hit_tmdb>
+			<awards>N/A</awards>
+			<meta_score>None</meta_score>
+			<rated>None</rated>
+			<rott_score>None</rott_score>
+			<omdb_score>None</omdb_score>
+			<last_update_omdb>2021-09-10 21:32:36.933470</last_update_omdb>
+			<hit_omdb>True</hit_omdb>
+			<already_in_db>False</already_in_db>
+			<better_quality>False</better_quality>
+			<seen_type>0</seen_type>
+			<year>2014</year>
+			<genre>comedy</genre>
+			<runtime>76</runtime>
+			<imdb_score>6.3</imdb_score>
+			<score>5.9</score>
+			<my_imdb_score>None</my_imdb_score>
+			<seen_date>None</seen_date>
+			<resolution>1080p</resolution>
+			<trend/>
+			<trailer>https://www.youtube.com/watch?v=62p48GiJ_rY</trailer>
+			<torr_link_seed>http://192.168.1.99:9092/torr_api?BzNFKOwGt+OGziasUPyStnaAHvwf/2GaIbKSJGU9erOkib0m6tmPDN/a/OjlXGFMY/Cpuf7Gt6aRF1LZteYgWEwhP9m5gEqx/zQO4JJONmSALOyLwOLOHR5hkwpWvEdX0zGhn8kDWDnE</torr_link_seed>
+			<torr_link_download>http://192.168.1.99:9092/torr_api?BzNFKOwGt+OGziasUPyStnaAHvwf/2GaIbKSJGU9erOkib0m6tmPDN/a/OjlXGFMY/Cpuf7Gt6aRF1LZteYgWEwhP9m5gEqx/zQO4JJONmSALOyLwOLOHR5hkwpWvEdX0zGhn8kDWDnE</torr_link_download>
+		</trnt>
+	</movie>
+</movies>
