@@ -45,6 +45,7 @@ class TORRAPI:
             print(unquote(pkg))
             pkg = self.cy.decrypt(unquote(pkg))
         except Exception as e:
+            raise e
             self.logger.error(e)
             return gtfo(resp)
         try:
