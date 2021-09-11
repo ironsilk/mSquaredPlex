@@ -41,6 +41,8 @@ class TORRAPI:
 
         # Try to decrypt
         try:
+            print(pkg)
+            print(unquote(pkg))
             pkg = self.cy.decrypt(unquote(pkg))
         except Exception as e:
             self.logger.error(e)
