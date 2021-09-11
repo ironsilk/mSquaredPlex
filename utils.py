@@ -125,7 +125,8 @@ class Movie(Base):
 class Torrent(Base):
     __tablename__ = 'torrent'
 
-    torr_id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True)
+    torr_id = Column(Integer)
     torr_name = Column(String)
     imdb_id = Column(Integer)
     resolution = Column(Integer)
@@ -1229,7 +1230,8 @@ if __name__ == '__main__':
     # pprint(get_movie_tmdb(15380158))
     # pprint(get_movie_tmdb_omdb(15380158))
     # print(check_movielib_database())
-    pprint(get_tmdb(15012054))
+    # pprint(get_tmdb(15012054))
+    check_database()
 
 
 

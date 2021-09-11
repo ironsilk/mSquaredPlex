@@ -45,7 +45,6 @@ class TORRAPI:
         except Exception as e:
             self.logger.error(e)
             return gtfo(resp)
-
         try:
             torr_response = send_torrent(compose_link(pkg['id']))
         except Exception as e:
@@ -54,14 +53,6 @@ class TORRAPI:
             resp.status = falcon.HTTP_500
             return
 
-        # Check if torrent is already requested
-        torr = check_one_against_torrents_by_torr_id(pkg['id'])
-        if torr:
-            requesters = torr['requested_by'].split(',')
-            requesters.append(pkg['requested_by'])
-            requesters = ','.join(list(set(requesters)))
-        else:
-            requesters = pkg['requested_by']
         # Update in torrents DB
         update_many([{
             'torr_id': pkg['id'],
@@ -69,7 +60,7 @@ class TORRAPI:
             'imdb_id': pkg['imdb_id'],
             'resolution': pkg['resolution'],
             'status': 'requested download',
-            'requested_by': requesters
+            'requested_by': pkg['requested_by']
         }],
             Torrent, Torrent.torr_id)
 

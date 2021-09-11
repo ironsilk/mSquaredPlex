@@ -5,9 +5,10 @@ from wsgiref.simple_server import make_server
 import falcon
 from apscheduler.schedulers.background import BackgroundScheduler
 
-from utils import torr_cypher, setup_logger, make_client, check_database
+from utils import torr_cypher, setup_logger, check_database
 from torr_service_utils import TORRAPI, TORR_FINISHED, refresher_routine
 
+TZ = os.getenv('TZ')
 TORR_API_PORT = int(os.getenv('TORR_API_PORT'))
 TORR_API_PATH = os.getenv('TORR_API_PATH')
 TORR_FINISHED_PATH = os.getenv('TORR_FINISHED_PATH')
@@ -16,7 +17,7 @@ TORR_CLEAN_ROUTINE_INTERVAL = int(os.getenv('TORR_CLEAN_ROUTINE_INTERVAL'))
 logger = setup_logger('TORR_API_SERVICE')
 
 # Create scheduler for refresher routine
-scheduler = BackgroundScheduler()
+scheduler = BackgroundScheduler(timezone=TZ)
 scheduler.add_job(func=refresher_routine, trigger="interval", seconds=60 * TORR_CLEAN_ROUTINE_INTERVAL)
 scheduler.start()
 

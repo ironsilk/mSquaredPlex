@@ -126,22 +126,13 @@ def get_telegram_users():
 
 
 def update_torr_db(pkg, torr_response, tgram_id):
-    # Check if torrent is already requested
-    torr = check_one_against_torrents_by_torr_id(pkg['id'])
-    if torr:
-        requesters = torr['requested_by'].split(',')
-        requesters.append(get_user_by_tgram_id(tgram_id)['telegram_chat_id'])
-        requesters = ','.join(list(set(requesters)))
-    else:
-        requesters = get_user_by_tgram_id(tgram_id)['telegram_chat_id']
-
     update_many([{
         'torr_id': pkg['id'],
         'torr_name': torr_response.name,
         'imdb_id': deconvert_imdb_id(pkg['imdb']),
         'resolution': pkg['resolution'],
         'status': 'requested download',
-        'requested_by': requesters
+        'requested_by': tgram_id
     }],
         Torrent, Torrent.torr_id)
 
