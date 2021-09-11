@@ -6,8 +6,8 @@ from urllib.parse import unquote
 import falcon
 
 from utils import timing, setup_logger, send_torrent, compose_link, update_many, make_client, \
-    torr_cypher, check_one_against_torrents_by_torr_name, send_message_to_bot, \
-    get_tgram_user_by_email, get_torrents, Torrent
+    check_one_against_torrents_by_torr_id, check_one_against_torrents_by_torr_name, send_message_to_bot, \
+    get_tgram_user_by_email, get_torrents, Torrent, torr_cypher
 
 TORR_KEEP_TIME = int(os.getenv('TORR_KEEP_TIME'))
 
@@ -40,15 +40,8 @@ class TORRAPI:
 
         # Try to decrypt
         try:
-            self.logger.info(str(pkg))
-            self.logger.info(str(unquote(pkg)))
-            pkg = torr_cypher.decrypt(pkg)
-        except UnicodeDecodeError as e:
-            try:
-                pkg = torr_cypher.decrypt(unquote(pkg))
-            except Exception as e:
-                self.logger.error('In unquote, boss.')
-                raise e
+            pkg = torr_cypher.decrypt(unquote(pkg))
+        except Exception as e:
             self.logger.error(e)
             return gtfo(resp)
         try:

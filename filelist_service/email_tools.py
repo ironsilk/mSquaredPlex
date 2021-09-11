@@ -671,4 +671,4 @@ if __name__ == '__main__':
     x = torr_cypher
     item = "BzNFKOwGt+OGziasVPGStnaAHvwf/2GaIbKSJHQ7fbelg7E4/tnRSY7H9e7+WXtWKKXnqvTetrqJBRiW++QqRgp+bdmszQfo+z4Lq9sdNjrFf+uLwuPOCjVmjncO5VRawzCmmMALWzCBFU+1"
     print(x.decrypt(item))
-    print(item)
+
