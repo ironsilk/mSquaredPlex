@@ -2,7 +2,6 @@
 FROM python:3.9.1
 
 LABEL Author="Mikael"
-ENV LANG C.UTF-8
 
 RUN mkdir /app
 WORKDIR /app
