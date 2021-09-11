@@ -292,13 +292,11 @@ def get_omdb_api_limit():
     return conn.execute(stmt).mappings().all()
 
 
-def get_new_imdb_titles_for_omdb(excluded_ids):
+def get_new_imdb_titles_for_omdb():
     conn = connect_db()
     refresh_interval_date = datetime.datetime.now() - datetime.timedelta(days=REVIEW_INTERVAL_REFRESH)
     subquery = select(OmdbMovie.imdb_id).where(OmdbMovie.last_update_omdb > refresh_interval_date)
     stmt = select(TitleBasics.tconst).where(TitleBasics.tconst.not_in(subquery))
-    if excluded_ids:
-        stmt = stmt.filter(TitleBasics.tconst.not_in(excluded_ids))
     stmt = stmt.order_by(desc(TitleBasics.tconst))
     return conn.execute(stmt)
 

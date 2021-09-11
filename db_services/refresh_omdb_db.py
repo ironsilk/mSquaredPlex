@@ -9,11 +9,9 @@ OMDB_API_LIMIT = int(os.getenv('OMDB_API_LIMIT'))
 INSERT_RATE = int(os.getenv('INSERT_RATE'))
 
 
-def get_omdb_data(session_not_found=[]):
+def get_omdb_data():
     """
-    populates the database with data from TMDB
-    session_not_found are the IDs searched for and not found which can be passed to this function
-    in order not to search for them again.
+    populates the database with data from OMDB
     Extra keys:
     Poze, Country, Lang, Ovrw(short descr), score, trailer_link,
     :return:
@@ -27,7 +25,8 @@ def get_omdb_data(session_not_found=[]):
         return
     else:
         calls_to_make = OMDB_API_LIMIT - executed_calls
-    new_for_omdb_cursor = get_new_imdb_titles_for_omdb(session_not_found)
+    logger.info(f"We have {calls_to_make} API calls left.")
+    new_for_omdb_cursor = get_new_imdb_titles_for_omdb()
     while new_for_omdb_cursor.returns_rows:
         try:
             if (calls_to_make - INSERT_RATE) < 0:
@@ -35,24 +34,26 @@ def get_omdb_data(session_not_found=[]):
             else:
                 go = INSERT_RATE
             batch = new_for_omdb_cursor.mappings().fetchmany(go)
-            batch, session_not_found = process_items(batch, session_not_found)
+            batch = process_items(batch)
             update_many(batch, OmdbMovie, OmdbMovie.imdb_id)
-            logger.info(f"Inserted {go} into OMDB database")
+            logger.info(f"Inserted {len(batch)} into OMDB database out of {go} searches.")
             calls_to_make -= go
+            logger.info(f"We have {calls_to_make} API calls left.")
         except Exception as e:
+            raise e
             logger.error(f"Some other erorr while pulling IMDB data: {e}")
             return
 
 
-def process_items(items, session_not_found):
+def process_items(items):
     new_items = []
     for item in items:
         item = get_omdb(item['tconst'])
         if not item['hit_omdb']:
-            session_not_found.append(item['tconst'])
+            new_items.append(item)
         else:
             new_items.append(item)
-    return new_items, session_not_found
+    return new_items
 
 
 if __name__ == '__main__':
