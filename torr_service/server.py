@@ -25,8 +25,8 @@ scheduler.start()
 atexit.register(lambda: scheduler.shutdown())
 
 api = falcon.App()
-api.add_route('/' + TORR_API_PATH.split('/')[-1], TORRAPI(logger))
-api.add_route('/' + TORR_FINISHED_PATH.split('/')[-1], TORR_FINISHED(logger))
+api.add_route('/' + TORR_API_PATH.split('/')[-1], TORRAPI)
+api.add_route('/' + TORR_FINISHED_PATH.split('/')[-1], TORR_FINISHED)
 
 if __name__ == '__main__':
     check_database()

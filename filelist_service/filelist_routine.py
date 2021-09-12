@@ -37,7 +37,7 @@ def retrieve_bulk_from_dbs(items):
     return [get_movie_details(item) for item in items]
 
 
-def get_latest_torrents(n=10, category=MOVIE_HDRO):
+def get_latest_torrents(n=100, category=MOVIE_HDRO):
     """
     returns last n movies from filelist API.
     n default 100
@@ -89,8 +89,6 @@ def info_jobs():
 
 
 if __name__ == '__main__':
-    feed_routine()
-    exit()
     check_database()
 
     scheduler = BlockingScheduler(timezone=TZ)

@@ -1,7 +1,6 @@
 import datetime
 import os
 from itertools import groupby
-from pprint import pprint
 
 import falcon
 
@@ -10,6 +9,8 @@ from utils import timing, setup_logger, send_torrent, compose_link, update_many,
     get_tgram_user_by_email, get_torrents, Torrent, get_torrent_by_torr_id_user
 
 TORR_KEEP_TIME = int(os.getenv('TORR_KEEP_TIME'))
+
+logger = setup_logger('TorrUtils')
 
 
 def gtfo(resp):
@@ -25,7 +26,7 @@ def gtfo(resp):
 
 class TORRAPI:
 
-    def __init__(self, logger):
+    def __init__(self):
         self.logger = logger
 
     @classmethod
@@ -69,7 +70,7 @@ class TORRAPI:
 
 class TORR_FINISHED:
 
-    def __init__(self, logger):
+    def __init__(self):
         self.logger = logger
 
     @classmethod
@@ -98,7 +99,7 @@ class TORR_FINISHED:
 
 
 class TORR_REFRESHER:
-    def __init__(self, logger):
+    def __init__(self):
         self.logger = logger
         self.torr_client = make_client()
 
@@ -128,8 +129,6 @@ class TORR_REFRESHER:
         for torr in torrents:
             torr_response = torr.pop('torr_obj', None)
             if torr_response:
-                print(torr_response.name)
-                print(torr_response.status)
                 if torr_response.status == 'seeding':
                     # Decide whether to remove it or keep it
                     if self.check_seeding_status(torr_response):
@@ -189,7 +188,7 @@ class TORR_REFRESHER:
 @timing
 def refresher_routine():
     logger = setup_logger('TorrRefresher')
-    refresher = TORR_REFRESHER(logger=logger)
+    refresher = TORR_REFRESHER()
     refresher.update_statuses()
     logger.info("Routine done, closing connections.")
     return
