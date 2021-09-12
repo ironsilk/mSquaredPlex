@@ -6,7 +6,7 @@ from pprint import pprint
 import falcon
 
 from utils import timing, setup_logger, send_torrent, compose_link, update_many, make_client, \
-    check_one_against_torrents_by_torr_name, send_message_to_bot, \
+    check_one_against_torrents_by_torr_hash, send_message_to_bot, \
     get_tgram_user_by_email, get_torrents, Torrent, get_torrent_by_torr_id_user
 
 TORR_KEEP_TIME = int(os.getenv('TORR_KEEP_TIME'))
@@ -57,6 +57,7 @@ class TORRAPI:
         # Update in torrents DB
         db_torrent = get_torrent_by_torr_id_user(pkg['torr_id'], int(pkg['requested_by']))
         db_torrent['status'] = 'requested_download'
+        db_torrent['torr_hash'] = torr_response.hashString
         update_many([db_torrent], Torrent, Torrent.id)
 
         # Give response
@@ -80,11 +81,11 @@ class TORR_FINISHED:
         pkg = req.query_string
         if not pkg:
             return gtfo(resp)
-        torr_id, torr_name, torr_labels = pkg.split('&&&')
+        torr_name, torr_hash = pkg.split('&&&')
         torr_name = torr_name.replace('^', ' ')
-        torr_name = make_torr_id(torr_name)
+
         # Get users who requested this torrent
-        torr = check_one_against_torrents_by_torr_name(torr_name)
+        torr = check_one_against_torrents_by_torr_hash(torr_hash)
         users = [x['requested_by_id'] for x in torr]
         message = f"Your requested torrent,\n" \
                   f"{torr_name}\n" \
@@ -106,12 +107,11 @@ class TORR_REFRESHER:
         db_torrents = get_torrents()
         # Match them with client torrents
         client_torrents = self.torr_client.get_torrents()
-        # TODO fix this fucking shit. torrent name in combustion wont fking work.
+
         client_torrents = {x.hashString: x for x in client_torrents}
-        print(client_torrents)
         for torr in db_torrents:
             if torr['torr_hash'] in client_torrents.keys():
-                torr['torr_obj'] = client_torrents[torr['torr_name']]
+                torr['torr_obj'] = client_torrents[torr['torr_hash']]
             else:
                 torr['torr_obj'] = None
         return db_torrents
@@ -197,6 +197,6 @@ def refresher_routine():
 
 if __name__ == '__main__':
     x = TORR_REFRESHER(setup_logger('cacat'))
-    #x.get_torrents()
+    x.get_torrents()
     #x.update_statuses()
-    refresher_routine()
+    # refresher_routine()

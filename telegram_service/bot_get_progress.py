@@ -3,7 +3,7 @@ import os
 
 import dataframe_image as dfi
 import pandas as pd
-import tabulate
+# import tabulate
 
 from utils import make_client, setup_logger, get_torr_name, get_requested_torrents_for_tgram_user
 
@@ -22,16 +22,17 @@ def get_torrents_for_user(user, get_next=0, logger=setup_logger("botUtils")):
     if torrents:
         # Get client torrents
         torr_client = make_client()
-        client_torrents = torr_client.get_torrents()  #  TODO careful here we have status flags
-        client_torrents = {x.name: x for x in client_torrents}
+        client_torrents_raw = torr_client.get_torrents()
+        client_torrents = {x.hashString: x for x in client_torrents_raw}
+        client_torrents_names = {x.hashString: x.name for x in client_torrents}
 
         for torrent in torrents:
             if torrent['status'] != 'seeding':
                 torrent['progress'] = 'Unknown'
                 torrent['date_started'] = 'Unknown'
                 torrent['eta'] = 'Unknown'
-                if torrent['torr_name'] in client_torrents.keys():
-                    torr_resp = client_torrents[torrent['torr_name']]
+                if torrent['torr_hash'] in client_torrents.keys():
+                    torr_resp = client_torrents[torrent['torr_hash']]
                     try:
                         torrent['progress'] = str(100 - ((torr_resp.left_until_done / torr_resp.total_size) * 100)) \
                                               + '% '
@@ -39,14 +40,14 @@ def get_torrents_for_user(user, get_next=0, logger=setup_logger("botUtils")):
                         torrent['eta'] = str(torr_resp.eta.seconds // 60) + ' minutes'
                     except Exception as e:
                         logger.warning(
-                            f"Error while obtaining ETA or other data for torrent {torrent['torr_name']}: {e}")
+                            f"Error while obtaining ETA or other data for torrent {torrent['torr_hash']}: {e}")
             else:
                 torrent['progress'] = '100%'
                 torrent['date_started'] = None
                 torrent['eta'] = 'Finished'
 
         torrents = [{
-            "TorrentName": get_torr_name(x['torr_name']),
+            "TorrentName": get_torr_name(client_torrents_names[x['torr_hash']]),
             "Resolution": x['resolution'],
             "Status": x['status'],
             "Progress": x['progress'],
@@ -100,7 +101,7 @@ def df_as_pretty_text(df, selected_cols=None, remove_index=True):
         cols = selected_cols
 
     rows = df.values.tolist()
-    return tabulate.tabulate(rows, cols, tablefmt='fancy_grid', floatfmt=(".2f"))
+    # return tabulate.tabulate(rows, cols, tablefmt='fancy_grid', floatfmt=(".2f"))
 
 
 def get_progress(user, get_next=0, logger=setup_logger("botUtils")):

@@ -90,8 +90,6 @@ def info_jobs():
 
 if __name__ == '__main__':
     check_database()
-    feed_routine()
-    exit()
 
     scheduler = BlockingScheduler(timezone=TZ)
 

@@ -361,9 +361,9 @@ def check_one_against_torrents_by_torr_id(idd):
     return [object_as_dict(x) for x in result]
 
 
-def check_one_against_torrents_by_torr_name(name):
+def check_one_against_torrents_by_torr_hash(hash):
     with engine.connect() as conn:
-        stmt = select(Torrent).where(Torrent.torr_hash == name)\
+        stmt = select(Torrent).where(Torrent.torr_hash == hash)\
             .where(Torrent.status.in_(['requested download', 'downloading']))
         result = conn.execute(stmt).mappings().fetchall()
     return [object_as_dict(x) for x in result]
@@ -1245,8 +1245,6 @@ def make_client():
 def send_torrent(item, transmission_client=None):
     if not transmission_client:
         transmission_client = Client(host=TORR_HOST, port=TORR_PORT, username=TORR_USER, password=TORR_PASS)
-    print(item)
-    return
     return transmission_client.add_torrent(item, download_dir=TORR_DOWNLOAD_FOLDER)
 
 

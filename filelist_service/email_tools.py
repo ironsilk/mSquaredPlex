@@ -562,7 +562,7 @@ def send_email(items, cypher):
                           'imdb_id': x['imdb_id'],
                           'status': 'user notified (email)',
                           'resolution': int(PTN.parse(x['name'])['resolution'][:-1]),
-                          'torr_name': x['name'],
+                          'torr_hash': None,
                           'requested_by_id': user['telegram_chat_id']
                           }
                          for x in user_items]
