@@ -7,10 +7,9 @@ api_endpoint = os.getenv('TORR_FINISHED_PATH')
 api_url = "http://" + api_host + ":" + str(api_port) + api_endpoint + "?"
 
 torr_name = os.getenv('TR_TORRENT_NAME') or ''
-torr_id = os.getenv('TR_TORRENT_ID') or ''
-torr_label = os.getenv('TR_TORRENT_LABELS') or ''
+torr_hash = os.getenv('TR_TORRENT_HASH') or ''
 torr_name = torr_name.replace(' ', '^')
 
-pkg = '&&&'.join([torr_id, torr_name, torr_label])
+pkg = '&&&'.join([torr_name, torr_hash])
 # Send request
 contents = urllib.request.urlopen(api_url + pkg).read()

@@ -109,6 +109,11 @@ All containers are set to restart `on-failiure` so no worries.
 - Choose whether to rate unrated CSV titles or not. - **done**
 - fix autoscaling, not working right now - **done**
 
+1. db_services = fix tmdb
+2. filelist service = done
+3. myimdb service = done
+4. torr-service = 
+
 
 
 ### Wishlist

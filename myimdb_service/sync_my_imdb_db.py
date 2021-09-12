@@ -2,6 +2,7 @@ import datetime
 import os
 import re
 import time
+from pprint import pprint
 
 import pandas as pd
 import requests
@@ -9,7 +10,8 @@ from bs4 import BeautifulSoup
 from plexapi.exceptions import Unauthorized
 
 from myimdb_services_utils import get_my_movies, get_watchlist_intersections_ids, get_user_watched_movies
-from utils import deconvert_imdb_id, update_many, setup_logger, check_database, remove_from_watchlist_except, Movie
+from utils import deconvert_imdb_id, update_many, setup_logger, check_database, remove_from_watchlist_except, Movie, \
+    insert_many
 from utils import get_my_imdb_users, Watchlist, get_user_watchlist, check_one_against_torrents_by_imdb
 
 MYIMDB_REFRESH_INTERVAL = int(os.getenv('MYIMDB_REFRESH_INTERVAL'))
@@ -30,8 +32,9 @@ def sync_my_imdb():
         if user['imdb_id']:
             imdb_data = get_my_imdb(user['imdb_id'])
             imdb_data = [{'imdb_id': deconvert_imdb_id(key), 'my_score': val['rating'], 'seen_date': val['date'],
-                          'user_id': user['telegram_chat_id'], 'rating_status': 'IMDB rated'} for key, val in imdb_data.items() if int(deconvert_imdb_id(key)) not in already_in_my_movies]
-            update_many(imdb_data, Movie, Movie.id)
+                          'user_id': user['telegram_chat_id'], 'rating_status': 'IMDB rated'}
+                         for key, val in imdb_data.items() if int(deconvert_imdb_id(key)) not in already_in_my_movies]
+            insert_many(imdb_data, Movie)
 
         already_in_my_movies = get_my_movies(user)
         # Sync PLEX data
@@ -44,7 +47,7 @@ def sync_my_imdb():
             plex_data = [x for x in plex_data if x['imdb_id'] not in already_in_my_movies]
             for item in plex_data:
                 item['user_id'] = user['telegram_chat_id']
-            update_many(plex_data, Movie, Movie.id)
+            insert_many(plex_data, Movie)
         # Sync IMDB Watchlist
         if user['scan_watchlist'] == 1:
             sync_watchlist(user)
@@ -137,7 +140,7 @@ def sync_watchlist(user):
             'status': 'new',
         } for x in new_watchlist]
         if to_upload:
-            update_many(to_upload, Watchlist, Watchlist.id)
+            insert_many(to_upload, Watchlist)
         # Remove from DB watchlist those movies which are no longer in IMDB watchlist
         remove_from_watchlist_except(imdb_watchlist, user['imdb_id'])
 

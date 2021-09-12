@@ -78,7 +78,7 @@ def csv_upload_handler(context: CallbackContext):
             except Exception as e:
                 raise e
                 pass
-    update_many(identified_movies, Movie, Movie.id)
+    update_many(identified_movies, Movie, [Movie.id])
     context.bot.send_message(text=f"CSV update successful!\n"
                                   f"Out of {len(df)} entries in your CSV file, "
                                   f"{len(identified_movies)} were movies while the "

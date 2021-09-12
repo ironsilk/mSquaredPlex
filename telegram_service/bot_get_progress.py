@@ -22,7 +22,7 @@ def get_torrents_for_user(user, get_next=0, logger=setup_logger("botUtils")):
     if torrents:
         # Get client torrents
         torr_client = make_client()
-        client_torrents = torr_client.get_torrents()
+        client_torrents = torr_client.get_torrents()  #  TODO careful here we have status flags
         client_torrents = {x.name: x for x in client_torrents}
 
         for torrent in torrents:

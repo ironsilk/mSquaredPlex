@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import datetime
-import json
 import os
 import urllib.parse
 import xml.etree.ElementTree as ET
@@ -9,7 +8,7 @@ from xml.etree.ElementTree import SubElement
 
 import PTN
 
-from utils import OMDB, check_against_user_movies
+from utils import OMDB, check_against_user_movies, insert_many, Torrent
 from utils import TMDB
 from utils import get_my_imdb_users
 from utils import get_torr_quality
@@ -558,13 +557,23 @@ def send_email(items, cypher):
                     logger.info('Sending email')
                     mtls.send_email(PLEX_SERVER_NAME, EMAIL_USER, [user['email']], mail_subject, email_body, '',
                                     EMAIL_HOSTNAME, EMAIL_USER, EMAIL_PASS)
+                # Insert into torrents database
+                items = [{'torr_id': x['id'],
+                          'imdb_id': x['imdb_id'],
+                          'status': 'user notified (email)',
+                          'resolution': int(PTN.parse(x['name'])['resolution'][:-1]),
+                          'torr_name': x['name'],
+                          'requested_by_id': user['telegram_chat_id']
+                          }
+                         for x in user_items]
+                insert_many(items, Torrent)
         return
     logger.info('Nothing left to send')
 
 
 def prepare_item_for_email(item, user_telegram_id, mtls, cypher):
     # Add seen type keys
-    if item['already_in_db']:
+    if item['in_my_movies']:
         item['seen_type'] = 1  # new movie
     else:
         item['seen_type'] = 0  # we have this movie but here's a new torrent for it
@@ -616,26 +625,16 @@ def check_in_my_movies(new_movies, email):
         :param old:
         :return:
         """
-        lst = []
+        old_movies_ids = [x['imdb_id'] for x in old]
         for new_m in new:
-            d = {
-                'already_in_db': False,
-                'better_quality': False,
-            }
-            if new_m['imdb_id'] in [x['imdb_id'] for x in old]:
-                old_quality = [x['resolution'] for x in old if x['imdb_id'] == new_m['imdb_id']][0]
-                new_quality = int(PTN.parse(new_m['name'])['resolution'][:-1])
-                d['already_in_db'] = True
-                if int(new_quality) > int(old_quality):
-                    d['better_quality'] = True
-            lst.append({**new_m, **d})
-        return lst
+            if new_m['imdb_id'] in old_movies_ids:
+                new_m['in_my_movies'] = True
+            else:
+                new_m['in_my_movies'] = False
+        return new
 
     already_in_db = check_against_user_movies(new_movies, email)
     new = get_intersections(new_movies, already_in_db)
-    # Filter out new movies already in database and where quality is the same or poorer
-    new = [x for x in new if x['already_in_db'] is False or x['better_quality'] is True]
-
     return new
 
 
@@ -648,14 +647,14 @@ def generate_torr_links(item, user_telegram_id, cypher):
         return f"http://{TORR_API_HOST}:{TORR_API_PORT}{TORR_API_PATH}?{pkg}"
 
     seed = {
-        'id': item['id'],
+        'torr_id': item['id'],
         'imdb_id': item['imdb_id'],
         'resolution': get_torr_quality(item['name']),
         'folder': TORR_SEED_FOLDER,
         'requested_by': user_telegram_id,
     }
     download = {
-        'id': item['id'],
+        'torr_id': item['id'],
         'imdb_id': item['imdb_id'],
         'resolution': get_torr_quality(item['name']),
         'folder': TORR_DOWNLOAD_FOLDER,
@@ -667,14 +666,5 @@ def generate_torr_links(item, user_telegram_id, cypher):
 if __name__ == '__main__':
     from dotenv import load_dotenv
     load_dotenv()
-    from utils import torr_cypher
-    from pprint import pprint
-    # test package
-    # xx = {'id': '751044', 'name': 'Konferentsiya.2020.1080p.HBO.WEB-DL.AAC2.0.H.264-playWEB', 'imdb': 'tt11258824', 'freeleech': True, 'doubleup': 0, 'upload_date': '2021-09-11 00:46:52', 'download_link': 'https://filelist.io/download.php?id=751044&passkey=f5684696415b6f98834f1872bd03a8c1', 'size': '7.1', 'internal': 1, 'moderated': 0, 'category': 'Filme HD-RO', 'seeders': 35, 'leechers': 5, 'times_completed': 54, 'comments': 0, 'files': 1, 'small_description': 'Drama', 'torr_already_processed': False, 'cast': 'Filipp Avdeev, Natalya Tsvetkova, Natalya Pavlenkova, Kseniya Zueva', 'genres': 'drama', 'imdbID': '11258824', 'titleType': 'movie', 'averageRating': 6.8, 'title': 'Conference', 'originalTitle': 'Konferentsiya', 'startYear': '2020', 'numVotes': 306, 'runtimeMinutes': 135, 'imdb_id': '11258824', 'country': None, 'lang': None, 'ovrw': 'Nearly 18 years after the events at the Dubrovka Theatre Centre, Natalia comes to Moscow from her quiet monastic life. Having received a blessing, she brings together the former hostages of the musical show “Nord-Ost” to hold a memorial evening of the tragedy, whose victims they became on 23-26 October 2002. Recreating the details and chronology of events, Natalia plunges into terrible details of her personal story, her fatal mistake, which crossed out her life. Together with other participants of the event and overcoming a post-traumatic syndrome, she must go again through this emotional experience.', 'tmdb_score': 7.0, 'trailer_link': 'https://www.youtube.com/watch?v=qFc3rhleW3I', 'poster': 'https://image.tmdb.org/t/p/w300_and_h450_bestv2/h3JzGzfqN46dZ9yZIElsZ8gOZGa.jpg', 'last_update_tmdb': datetime.datetime(2021, 9, 11, 6, 47, 37, 138038), 'hit_tmdb': True, 'awards': None, 'meta_score': None, 'rated': None, 'rott_score': None, 'omdb_score': None, 'last_update_omdb': datetime.datetime(2021, 9, 11, 7, 38, 16, 361937), 'hit_omdb': False, 'already_in_db': False, 'better_quality': False, 'seen_type': 0, 'year': '2020', 'genre': 'drama', 'runtime': 135, 'imdb_score': 6.8, 'score': 7.0, 'my_imdb_score': None, 'seen_date': None, 'resolution': '1080p', 'trend': '', 'trailer': 'https://www.youtube.com/watch?v=qFc3rhleW3I'}
-    # seed, dw = generate_torr_links(xx, 1700079840, torr_cypher)
-    item = {'id': '751044', 'imdb_id': '11258824', 'resolution': 1080, 'folder': '/movies', 'requested_by': 1700079840}
-    print(item)
-    print(urllib.parse.urlencode(item))
-    print(urllib.parse.parse_qs("id=751044&imdb_id=11258824&resolution=1080&folder=%2Fmovies&requested_by=1700079840"))
 
 

@@ -127,7 +127,7 @@ class Torrent(Base):
 
     id = Column(Integer, primary_key=True)
     torr_id = Column(Integer)
-    torr_name = Column(String)
+    torr_hash = Column(String)
     imdb_id = Column(Integer)
     resolution = Column(Integer)
     status = Column(String)
@@ -363,7 +363,8 @@ def check_one_against_torrents_by_torr_id(idd):
 
 def check_one_against_torrents_by_torr_name(name):
     with engine.connect() as conn:
-        stmt = select(Torrent).where(Torrent.torr_name == name)
+        stmt = select(Torrent).where(Torrent.torr_hash == name)\
+            .where(Torrent.status.in_(['requested download', 'downloading']))
         result = conn.execute(stmt).mappings().fetchall()
     return [object_as_dict(x) for x in result]
 
@@ -464,9 +465,13 @@ def get_my_imdb_users():
         return conn.execute(select(User)).mappings().all()
 
 
-def get_torrents():
+def get_torrents(excluded_statuses=None):
+    if excluded_statuses is None:
+        excluded_statuses = ['removed', 'user notified (email)']
     with engine.connect() as conn:
-        result = conn.execute(select(Torrent).where(Torrent.status != 'removed')).mappings().all()
+        result = conn.execute(select(Torrent).where(Torrent.status.notin_(
+            excluded_statuses
+        ))).mappings().all()
     return [object_as_dict(x) for x in result]
 
 
@@ -476,6 +481,14 @@ def get_requested_torrents_for_tgram_user(tgram_id):
         result = conn.execute(stmt).mappings().fetchall()
     if result:
         return [object_as_dict(x) for x in result]
+
+
+def get_torrent_by_torr_id_user(torr_id, user_telegram):
+    with engine.connect() as conn:
+        stmt = select(Torrent).where(Torrent.torr_id == torr_id).where(Torrent.requested_by_id == user_telegram)
+        result = conn.execute(stmt)
+    if result:
+        return object_as_dict(result.mappings().fetchone())
 
 
 def get_tgram_user_by_email(email):
@@ -545,6 +558,28 @@ def update_many(items, table, primary_key):
                 set_=update_columns
             )
             result = conn.execute(update_stmt)
+        return result
+
+
+def update_many2(items, table, primary_keys):
+    if items:
+        with engine.connect() as conn:
+            insert_statement = insert(table).values(items)
+            update_columns = {col.name: col for col in insert_statement.excluded
+                              if col.name not in [x.name for x in primary_keys]}
+            update_stmt = insert_statement.on_conflict_do_update(
+                index_elements=primary_keys,
+                set_=update_columns
+            )
+            result = conn.execute(update_stmt)
+        return result
+
+
+def insert_many(items, table):
+    if items:
+        with engine.connect() as conn:
+            stmt = insert(table).values(items)
+            result = conn.execute(stmt)
         return result
 
 
@@ -1210,6 +1245,8 @@ def make_client():
 def send_torrent(item, transmission_client=None):
     if not transmission_client:
         transmission_client = Client(host=TORR_HOST, port=TORR_PORT, username=TORR_USER, password=TORR_PASS)
+    print(item)
+    return
     return transmission_client.add_torrent(item, download_dir=TORR_DOWNLOAD_FOLDER)
 
 

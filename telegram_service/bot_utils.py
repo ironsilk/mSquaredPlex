@@ -134,7 +134,7 @@ def update_torr_db(pkg, torr_response, tgram_id):
         'status': 'requested download',
         'requested_by_id': tgram_id
     }],
-        Torrent, Torrent.id)
+        Torrent, [Torrent.torr_id, Torrent.requested_by_id])
 
 
 def exclude_torrents_from_watchlist(movie_id, tg_id, torr_ids):
@@ -150,7 +150,7 @@ def exclude_torrents_from_watchlist(movie_id, tg_id, torr_ids):
         'excluded_torrents': new,
         'status': 'new',
     }],
-        Watchlist, Watchlist.id)
+        Watchlist, [Watchlist.id])
 
 
 def get_excluded_resolutions(movie_id, tg_id):
@@ -244,7 +244,7 @@ def add_to_watchlist(imdb_id, user, status, excluded_torrents=None):
             else:
                 to_update['excluded_torrents'] = in_watchlist['excluded_torrents']
 
-    update_many([to_update], Watchlist, Watchlist.id)
+    update_many([to_update], Watchlist, [Watchlist.id])
 
 
 if __name__ == '__main__':

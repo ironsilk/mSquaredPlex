@@ -1,429 +1,120 @@
 <?xml version="1.0" encoding="utf-8"?><movies>
-	<movie id_imdb="tt1345883">
-		<id>751053</id>
-		<name>Die.dunkle.Seite.des.Lichts.2009.1080p.NF.WEB-DL.DDP2.0.x264-playWEB</name>
-		<imdb>tt1345883</imdb>
+	<movie id_imdb="tt0119314">
+		<id>751083</id>
+		<name>The.Horse.Whisperer.1998.720p.BluRay.DD5.1.x264-EbP</name>
+		<imdb>tt0119314</imdb>
 		<freeleech>True</freeleech>
 		<doubleup>0</doubleup>
-		<upload_date>2021-09-11 08:50:39</upload_date>
-		<download_link>https://filelist.io/download.php?id=751053&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
-		<size>1.7</size>
-		<internal>1</internal>
-		<moderated>1</moderated>
+		<upload_date>2021-09-11 15:23:14</upload_date>
+		<download_link>https://filelist.io/download.php?id=751083&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
+		<size>10.8</size>
+		<internal>0</internal>
+		<moderated>0</moderated>
 		<category>Filme HD-RO</category>
-		<seeders>43</seeders>
-		<leechers>1</leechers>
-		<times_completed>57</times_completed>
+		<seeders>8</seeders>
+		<leechers>21</leechers>
+		<times_completed>7</times_completed>
 		<comments>0</comments>
-		<files>1</files>
-		<small_description>Documentary</small_description>
-		<torr_already_processed>False</torr_already_processed>
-		<cast>None</cast>
-		<genres>documentary</genres>
-		<imdbID>1345883</imdbID>
-		<titleType>tvMovie</titleType>
-		<averageRating>6.4</averageRating>
-		<title>Dark Side of Light</title>
-		<originalTitle>Die dunkle Seite des Lichts</originalTitle>
-		<startYear>2009</startYear>
-		<numVotes>13</numVotes>
-		<runtimeMinutes>52</runtimeMinutes>
-		<imdb_id>1345883</imdb_id>
+		<files>3</files>
+		<small_description>Drama, Romance, Western</small_description>
+		<cast>Robert Redford, Kristin Scott Thomas, Sam Neill, Dianne Wiest</cast>
+		<genres>drama, romance, western</genres>
+		<imdbID>119314</imdbID>
+		<titleType>movie</titleType>
+		<averageRating>6.6</averageRating>
+		<title>The Horse Whisperer</title>
+		<originalTitle>The Horse Whisperer</originalTitle>
+		<startYear>1998</startYear>
+		<numVotes>40161</numVotes>
+		<runtimeMinutes>169</runtimeMinutes>
+		<imdb_id>119314</imdb_id>
 		<country>None</country>
 		<lang>None</lang>
-		<ovrw>None</ovrw>
-		<tmdb_score>None</tmdb_score>
-		<trailer_link>None</trailer_link>
-		<poster>None</poster>
-		<last_update_tmdb>2021-09-11 10:04:48.894404</last_update_tmdb>
-		<hit_tmdb>False</hit_tmdb>
+		<ovrw>Based on the novel by the same name from Nicholas Evans, the talented Robert Redford presents this meditative family drama set in the country side. Redford not only directs but also stars in the roll of a cowboy with a magical talent for healing.</ovrw>
+		<tmdb_score>6.9</tmdb_score>
+		<trailer_link>https://www.youtube.com/watch?v=W_1dKoCQlxY</trailer_link>
+		<poster>https://image.tmdb.org/t/p/w300_and_h450_bestv2/1Ptdh2fdA5xpH5Zj8AQUAp9Tdoa.jpg</poster>
+		<last_update_tmdb>2021-09-11 13:25:01.917357</last_update_tmdb>
+		<hit_tmdb>True</hit_tmdb>
 		<awards>None</awards>
 		<meta_score>None</meta_score>
 		<rated>None</rated>
 		<rott_score>None</rott_score>
 		<omdb_score>None</omdb_score>
-		<last_update_omdb>2021-09-11 10:04:48.935761</last_update_omdb>
+		<last_update_omdb>2021-09-11 13:25:02.182166</last_update_omdb>
 		<hit_omdb>False</hit_omdb>
-		<already_in_db>False</already_in_db>
-		<better_quality>False</better_quality>
+		<in_my_movies>False</in_my_movies>
 		<seen_type>0</seen_type>
-		<year>2009</year>
-		<genre>documentary</genre>
-		<runtime>52</runtime>
-		<imdb_score>6.4</imdb_score>
-		<score>None</score>
+		<year>1998</year>
+		<genre>drama, romance, western</genre>
+		<runtime>169</runtime>
+		<imdb_score>6.6</imdb_score>
+		<score>6.9</score>
 		<my_imdb_score>None</my_imdb_score>
 		<seen_date>None</seen_date>
-		<resolution>1080p</resolution>
+		<resolution>720p</resolution>
 		<trend/>
-		<trailer>None</trailer>
-		<torr_link_seed>http://192.168.1.99:9092/torr_api?id=751053&amp;imdb_id=1345883&amp;resolution=1080&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_seed>
-		<torr_link_download>http://192.168.1.99:9092/torr_api?id=751053&amp;imdb_id=1345883&amp;resolution=1080&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_download>
-		<trnt id="751053">
-			<id>751053</id>
-			<name>Die.dunkle.Seite.des.Lichts.2009.1080p.NF.WEB-DL.DDP2.0.x264-playWEB</name>
-			<imdb>tt1345883</imdb>
+		<trailer>https://www.youtube.com/watch?v=W_1dKoCQlxY</trailer>
+		<torr_link_seed>http://192.168.1.99:9092/torr_api?torr_id=751083&amp;imdb_id=119314&amp;resolution=720&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_seed>
+		<torr_link_download>http://192.168.1.99:9092/torr_api?torr_id=751083&amp;imdb_id=119314&amp;resolution=720&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_download>
+		<trnt id="751083">
+			<id>751083</id>
+			<name>The.Horse.Whisperer.1998.720p.BluRay.DD5.1.x264-EbP</name>
+			<imdb>tt0119314</imdb>
 			<freeleech>True</freeleech>
 			<doubleup>0</doubleup>
-			<upload_date>2021-09-11 08:50:39</upload_date>
-			<download_link>https://filelist.io/download.php?id=751053&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
-			<size>1.7</size>
-			<internal>1</internal>
-			<moderated>1</moderated>
+			<upload_date>2021-09-11 15:23:14</upload_date>
+			<download_link>https://filelist.io/download.php?id=751083&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
+			<size>10.8</size>
+			<internal>0</internal>
+			<moderated>0</moderated>
 			<category>Filme HD-RO</category>
-			<seeders>43</seeders>
-			<leechers>1</leechers>
-			<times_completed>57</times_completed>
+			<seeders>8</seeders>
+			<leechers>21</leechers>
+			<times_completed>7</times_completed>
 			<comments>0</comments>
-			<files>1</files>
-			<small_description>Documentary</small_description>
-			<torr_already_processed>False</torr_already_processed>
-			<cast>None</cast>
-			<genres>documentary</genres>
-			<imdbID>1345883</imdbID>
-			<titleType>tvMovie</titleType>
-			<averageRating>6.4</averageRating>
-			<title>Dark Side of Light</title>
-			<originalTitle>Die dunkle Seite des Lichts</originalTitle>
-			<startYear>2009</startYear>
-			<numVotes>13</numVotes>
-			<runtimeMinutes>52</runtimeMinutes>
-			<imdb_id>1345883</imdb_id>
+			<files>3</files>
+			<small_description>Drama, Romance, Western</small_description>
+			<cast>Robert Redford, Kristin Scott Thomas, Sam Neill, Dianne Wiest</cast>
+			<genres>drama, romance, western</genres>
+			<imdbID>119314</imdbID>
+			<titleType>movie</titleType>
+			<averageRating>6.6</averageRating>
+			<title>The Horse Whisperer</title>
+			<originalTitle>The Horse Whisperer</originalTitle>
+			<startYear>1998</startYear>
+			<numVotes>40161</numVotes>
+			<runtimeMinutes>169</runtimeMinutes>
+			<imdb_id>119314</imdb_id>
 			<country>None</country>
 			<lang>None</lang>
-			<ovrw>None</ovrw>
-			<tmdb_score>None</tmdb_score>
-			<trailer_link>None</trailer_link>
-			<poster>None</poster>
-			<last_update_tmdb>2021-09-11 10:04:48.894404</last_update_tmdb>
-			<hit_tmdb>False</hit_tmdb>
+			<ovrw>Based on the novel by the same name from Nicholas Evans, the talented Robert Redford presents this meditative family drama set in the country side. Redford not only directs but also stars in the roll of a cowboy with a magical talent for healing.</ovrw>
+			<tmdb_score>6.9</tmdb_score>
+			<trailer_link>https://www.youtube.com/watch?v=W_1dKoCQlxY</trailer_link>
+			<poster>https://image.tmdb.org/t/p/w300_and_h450_bestv2/1Ptdh2fdA5xpH5Zj8AQUAp9Tdoa.jpg</poster>
+			<last_update_tmdb>2021-09-11 13:25:01.917357</last_update_tmdb>
+			<hit_tmdb>True</hit_tmdb>
 			<awards>None</awards>
 			<meta_score>None</meta_score>
 			<rated>None</rated>
 			<rott_score>None</rott_score>
 			<omdb_score>None</omdb_score>
-			<last_update_omdb>2021-09-11 10:04:48.935761</last_update_omdb>
+			<last_update_omdb>2021-09-11 13:25:02.182166</last_update_omdb>
 			<hit_omdb>False</hit_omdb>
-			<already_in_db>False</already_in_db>
-			<better_quality>False</better_quality>
+			<in_my_movies>False</in_my_movies>
 			<seen_type>0</seen_type>
-			<year>2009</year>
-			<genre>documentary</genre>
-			<runtime>52</runtime>
-			<imdb_score>6.4</imdb_score>
-			<score>None</score>
-			<my_imdb_score>None</my_imdb_score>
-			<seen_date>None</seen_date>
-			<resolution>1080p</resolution>
-			<trend/>
-			<trailer>None</trailer>
-			<torr_link_seed>http://192.168.1.99:9092/torr_api?id=751053&amp;imdb_id=1345883&amp;resolution=1080&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_seed>
-			<torr_link_download>http://192.168.1.99:9092/torr_api?id=751053&amp;imdb_id=1345883&amp;resolution=1080&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_download>
-		</trnt>
-	</movie>
-	<movie id_imdb="tt0493464">
-		<id>751015</id>
-		<name>Wanted.2008.720p.BluRay.DD5.1.x264-playHD</name>
-		<imdb>tt0493464</imdb>
-		<freeleech>True</freeleech>
-		<doubleup>0</doubleup>
-		<upload_date>2021-09-10 19:48:10</upload_date>
-		<download_link>https://filelist.io/download.php?id=751015&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
-		<size>7.7</size>
-		<internal>1</internal>
-		<moderated>1</moderated>
-		<category>Filme HD-RO</category>
-		<seeders>97</seeders>
-		<leechers>4</leechers>
-		<times_completed>190</times_completed>
-		<comments>0</comments>
-		<files>1</files>
-		<small_description>Action, Crime, Thriller</small_description>
-		<torr_already_processed>False</torr_already_processed>
-		<cast>Angelina Jolie, James McAvoy, Morgan Freeman, Terence Stamp</cast>
-		<genres>action, crime, thriller</genres>
-		<imdbID>493464</imdbID>
-		<titleType>movie</titleType>
-		<averageRating>6.7</averageRating>
-		<title>Wanted</title>
-		<originalTitle>Wanted</originalTitle>
-		<startYear>2008</startYear>
-		<numVotes>373033</numVotes>
-		<runtimeMinutes>110</runtimeMinutes>
-		<imdb_id>493464</imdb_id>
-		<country>United States, Germany</country>
-		<lang>English</lang>
-		<ovrw>Doormat Wesley Gibson discovers that his recently murdered father - who Wesley never knew - belonged to a secret guild of assassins. After a leather-clad sexpot drafts Wesley into the society, he hones his innate killing skills and turns avenger.</ovrw>
-		<tmdb_score>6.5</tmdb_score>
-		<trailer_link>https://www.youtube.com/watch?v=q9Mr-iYZRZk</trailer_link>
-		<poster>https://image.tmdb.org/t/p/w300_and_h450_bestv2/rTvUr2ESdZ1Ht5zNbgUNmNEHyUT.jpg</poster>
-		<last_update_tmdb>2021-09-10 21:32:35.966834</last_update_tmdb>
-		<hit_tmdb>True</hit_tmdb>
-		<awards>Nominated for 2 Oscars. 4 wins &amp; 25 nominations total</awards>
-		<meta_score>64.0</meta_score>
-		<rated>None</rated>
-		<rott_score>None</rott_score>
-		<omdb_score>None</omdb_score>
-		<last_update_omdb>2021-09-10 21:32:36.323804</last_update_omdb>
-		<hit_omdb>True</hit_omdb>
-		<already_in_db>False</already_in_db>
-		<better_quality>False</better_quality>
-		<seen_type>0</seen_type>
-		<year>2008</year>
-		<genre>action, crime, thriller</genre>
-		<runtime>110</runtime>
-		<imdb_score>6.7</imdb_score>
-		<score>6.5</score>
-		<my_imdb_score>None</my_imdb_score>
-		<seen_date>None</seen_date>
-		<resolution>720p</resolution>
-		<trend/>
-		<trailer>https://www.youtube.com/watch?v=q9Mr-iYZRZk</trailer>
-		<torr_link_seed>http://192.168.1.99:9092/torr_api?id=751015&amp;imdb_id=493464&amp;resolution=720&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_seed>
-		<torr_link_download>http://192.168.1.99:9092/torr_api?id=751015&amp;imdb_id=493464&amp;resolution=720&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_download>
-		<trnt id="751015">
-			<id>751015</id>
-			<name>Wanted.2008.720p.BluRay.DD5.1.x264-playHD</name>
-			<imdb>tt0493464</imdb>
-			<freeleech>True</freeleech>
-			<doubleup>0</doubleup>
-			<upload_date>2021-09-10 19:48:10</upload_date>
-			<download_link>https://filelist.io/download.php?id=751015&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
-			<size>7.7</size>
-			<internal>1</internal>
-			<moderated>1</moderated>
-			<category>Filme HD-RO</category>
-			<seeders>97</seeders>
-			<leechers>4</leechers>
-			<times_completed>190</times_completed>
-			<comments>0</comments>
-			<files>1</files>
-			<small_description>Action, Crime, Thriller</small_description>
-			<torr_already_processed>False</torr_already_processed>
-			<cast>Angelina Jolie, James McAvoy, Morgan Freeman, Terence Stamp</cast>
-			<genres>action, crime, thriller</genres>
-			<imdbID>493464</imdbID>
-			<titleType>movie</titleType>
-			<averageRating>6.7</averageRating>
-			<title>Wanted</title>
-			<originalTitle>Wanted</originalTitle>
-			<startYear>2008</startYear>
-			<numVotes>373033</numVotes>
-			<runtimeMinutes>110</runtimeMinutes>
-			<imdb_id>493464</imdb_id>
-			<country>United States, Germany</country>
-			<lang>English</lang>
-			<ovrw>Doormat Wesley Gibson discovers that his recently murdered father - who Wesley never knew - belonged to a secret guild of assassins. After a leather-clad sexpot drafts Wesley into the society, he hones his innate killing skills and turns avenger.</ovrw>
-			<tmdb_score>6.5</tmdb_score>
-			<trailer_link>https://www.youtube.com/watch?v=q9Mr-iYZRZk</trailer_link>
-			<poster>https://image.tmdb.org/t/p/w300_and_h450_bestv2/rTvUr2ESdZ1Ht5zNbgUNmNEHyUT.jpg</poster>
-			<last_update_tmdb>2021-09-10 21:32:35.966834</last_update_tmdb>
-			<hit_tmdb>True</hit_tmdb>
-			<awards>Nominated for 2 Oscars. 4 wins &amp; 25 nominations total</awards>
-			<meta_score>64.0</meta_score>
-			<rated>None</rated>
-			<rott_score>None</rott_score>
-			<omdb_score>None</omdb_score>
-			<last_update_omdb>2021-09-10 21:32:36.323804</last_update_omdb>
-			<hit_omdb>True</hit_omdb>
-			<already_in_db>False</already_in_db>
-			<better_quality>False</better_quality>
-			<seen_type>0</seen_type>
-			<year>2008</year>
-			<genre>action, crime, thriller</genre>
-			<runtime>110</runtime>
-			<imdb_score>6.7</imdb_score>
-			<score>6.5</score>
+			<year>1998</year>
+			<genre>drama, romance, western</genre>
+			<runtime>169</runtime>
+			<imdb_score>6.6</imdb_score>
+			<score>6.9</score>
 			<my_imdb_score>None</my_imdb_score>
 			<seen_date>None</seen_date>
 			<resolution>720p</resolution>
 			<trend/>
-			<trailer>https://www.youtube.com/watch?v=q9Mr-iYZRZk</trailer>
-			<torr_link_seed>http://192.168.1.99:9092/torr_api?id=751015&amp;imdb_id=493464&amp;resolution=720&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_seed>
-			<torr_link_download>http://192.168.1.99:9092/torr_api?id=751015&amp;imdb_id=493464&amp;resolution=720&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_download>
-		</trnt>
-		<trnt id="751014">
-			<id>751014</id>
-			<name>Wanted.2008.1080p.BluRay.DD5.1.x264-playHD</name>
-			<imdb>tt0493464</imdb>
-			<freeleech>True</freeleech>
-			<doubleup>0</doubleup>
-			<upload_date>2021-09-10 19:47:48</upload_date>
-			<download_link>https://filelist.io/download.php?id=751014&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
-			<size>14.1</size>
-			<internal>1</internal>
-			<moderated>1</moderated>
-			<category>Filme HD-RO</category>
-			<seeders>137</seeders>
-			<leechers>5</leechers>
-			<times_completed>193</times_completed>
-			<comments>2</comments>
-			<files>1</files>
-			<small_description>Action, Crime, Fantasy</small_description>
-			<torr_already_processed>False</torr_already_processed>
-			<cast>Angelina Jolie, James McAvoy, Morgan Freeman, Terence Stamp</cast>
-			<genres>action, crime, thriller</genres>
-			<imdbID>493464</imdbID>
-			<titleType>movie</titleType>
-			<averageRating>6.7</averageRating>
-			<title>Wanted</title>
-			<originalTitle>Wanted</originalTitle>
-			<startYear>2008</startYear>
-			<numVotes>373033</numVotes>
-			<runtimeMinutes>110</runtimeMinutes>
-			<imdb_id>493464</imdb_id>
-			<country>United States, Germany</country>
-			<lang>English</lang>
-			<ovrw>Doormat Wesley Gibson discovers that his recently murdered father - who Wesley never knew - belonged to a secret guild of assassins. After a leather-clad sexpot drafts Wesley into the society, he hones his innate killing skills and turns avenger.</ovrw>
-			<tmdb_score>6.5</tmdb_score>
-			<trailer_link>https://www.youtube.com/watch?v=q9Mr-iYZRZk</trailer_link>
-			<poster>https://image.tmdb.org/t/p/w300_and_h450_bestv2/rTvUr2ESdZ1Ht5zNbgUNmNEHyUT.jpg</poster>
-			<last_update_tmdb>2021-09-10 21:32:35.966834</last_update_tmdb>
-			<hit_tmdb>True</hit_tmdb>
-			<awards>Nominated for 2 Oscars. 4 wins &amp; 25 nominations total</awards>
-			<meta_score>64.0</meta_score>
-			<rated>None</rated>
-			<rott_score>None</rott_score>
-			<omdb_score>None</omdb_score>
-			<last_update_omdb>2021-09-10 21:32:36.323804</last_update_omdb>
-			<hit_omdb>True</hit_omdb>
-			<already_in_db>False</already_in_db>
-			<better_quality>False</better_quality>
-			<seen_type>0</seen_type>
-			<year>2008</year>
-			<genre>action, crime, thriller</genre>
-			<runtime>110</runtime>
-			<imdb_score>6.7</imdb_score>
-			<score>6.5</score>
-			<my_imdb_score>None</my_imdb_score>
-			<seen_date>None</seen_date>
-			<resolution>1080p</resolution>
-			<trend/>
-			<trailer>https://www.youtube.com/watch?v=q9Mr-iYZRZk</trailer>
-			<torr_link_seed>http://192.168.1.99:9092/torr_api?id=751014&amp;imdb_id=493464&amp;resolution=1080&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_seed>
-			<torr_link_download>http://192.168.1.99:9092/torr_api?id=751014&amp;imdb_id=493464&amp;resolution=1080&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_download>
-		</trnt>
-	</movie>
-	<movie id_imdb="tt3766424">
-		<id>751009</id>
-		<name>Jackass.Presents.Bad.Grandpa.5.2014.1080p.BluRay.DTS.x264-VietHD</name>
-		<imdb>tt3766424</imdb>
-		<freeleech>True</freeleech>
-		<doubleup>0</doubleup>
-		<upload_date>2021-09-10 17:34:36</upload_date>
-		<download_link>https://filelist.io/download.php?id=751009&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
-		<size>14.0</size>
-		<internal>0</internal>
-		<moderated>1</moderated>
-		<category>Filme HD-RO</category>
-		<seeders>49</seeders>
-		<leechers>0</leechers>
-		<times_completed>88</times_completed>
-		<comments>2</comments>
-		<files>2</files>
-		<small_description>Comedy</small_description>
-		<torr_already_processed>False</torr_already_processed>
-		<cast>Marilynn Allain, Georgina Cates, Madison Davis, George Faughnan</cast>
-		<genres>comedy</genres>
-		<imdbID>3766424</imdbID>
-		<titleType>video</titleType>
-		<averageRating>6.3</averageRating>
-		<title>Bad Grandpa .5</title>
-		<originalTitle>Bad Grandpa .5</originalTitle>
-		<startYear>2014</startYear>
-		<numVotes>4631</numVotes>
-		<runtimeMinutes>76</runtimeMinutes>
-		<imdb_id>3766424</imdb_id>
-		<country>USA</country>
-		<lang>English</lang>
-		<ovrw>Bad Grandpa .5 gives you a whole new perspective on the world of Irving Zisman with bonus scenes and pranks also featuring Spike Jonze as 'Gloria' and Catherine Keener as Irving's wife 'Ellie', plus a look at the evolution of Johnny Knoxville's naughty alter-ego, the makeup effects, and a behind-the-scenes peek at the idiocy it takes to make a hidden camera movie in public.</ovrw>
-		<tmdb_score>5.9</tmdb_score>
-		<trailer_link>https://www.youtube.com/watch?v=62p48GiJ_rY</trailer_link>
-		<poster>https://image.tmdb.org/t/p/w300_and_h450_bestv2/48HKtHMiQJYQFjFWULnlCEqkELG.jpg</poster>
-		<last_update_tmdb>2021-09-10 21:32:36.508231</last_update_tmdb>
-		<hit_tmdb>True</hit_tmdb>
-		<awards>N/A</awards>
-		<meta_score>None</meta_score>
-		<rated>None</rated>
-		<rott_score>None</rott_score>
-		<omdb_score>None</omdb_score>
-		<last_update_omdb>2021-09-10 21:32:36.933470</last_update_omdb>
-		<hit_omdb>True</hit_omdb>
-		<already_in_db>False</already_in_db>
-		<better_quality>False</better_quality>
-		<seen_type>0</seen_type>
-		<year>2014</year>
-		<genre>comedy</genre>
-		<runtime>76</runtime>
-		<imdb_score>6.3</imdb_score>
-		<score>5.9</score>
-		<my_imdb_score>None</my_imdb_score>
-		<seen_date>None</seen_date>
-		<resolution>1080p</resolution>
-		<trend/>
-		<trailer>https://www.youtube.com/watch?v=62p48GiJ_rY</trailer>
-		<torr_link_seed>http://192.168.1.99:9092/torr_api?id=751009&amp;imdb_id=3766424&amp;resolution=1080&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_seed>
-		<torr_link_download>http://192.168.1.99:9092/torr_api?id=751009&amp;imdb_id=3766424&amp;resolution=1080&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_download>
-		<trnt id="751009">
-			<id>751009</id>
-			<name>Jackass.Presents.Bad.Grandpa.5.2014.1080p.BluRay.DTS.x264-VietHD</name>
-			<imdb>tt3766424</imdb>
-			<freeleech>True</freeleech>
-			<doubleup>0</doubleup>
-			<upload_date>2021-09-10 17:34:36</upload_date>
-			<download_link>https://filelist.io/download.php?id=751009&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
-			<size>14.0</size>
-			<internal>0</internal>
-			<moderated>1</moderated>
-			<category>Filme HD-RO</category>
-			<seeders>49</seeders>
-			<leechers>0</leechers>
-			<times_completed>88</times_completed>
-			<comments>2</comments>
-			<files>2</files>
-			<small_description>Comedy</small_description>
-			<torr_already_processed>False</torr_already_processed>
-			<cast>Marilynn Allain, Georgina Cates, Madison Davis, George Faughnan</cast>
-			<genres>comedy</genres>
-			<imdbID>3766424</imdbID>
-			<titleType>video</titleType>
-			<averageRating>6.3</averageRating>
-			<title>Bad Grandpa .5</title>
-			<originalTitle>Bad Grandpa .5</originalTitle>
-			<startYear>2014</startYear>
-			<numVotes>4631</numVotes>
-			<runtimeMinutes>76</runtimeMinutes>
-			<imdb_id>3766424</imdb_id>
-			<country>USA</country>
-			<lang>English</lang>
-			<ovrw>Bad Grandpa .5 gives you a whole new perspective on the world of Irving Zisman with bonus scenes and pranks also featuring Spike Jonze as 'Gloria' and Catherine Keener as Irving's wife 'Ellie', plus a look at the evolution of Johnny Knoxville's naughty alter-ego, the makeup effects, and a behind-the-scenes peek at the idiocy it takes to make a hidden camera movie in public.</ovrw>
-			<tmdb_score>5.9</tmdb_score>
-			<trailer_link>https://www.youtube.com/watch?v=62p48GiJ_rY</trailer_link>
-			<poster>https://image.tmdb.org/t/p/w300_and_h450_bestv2/48HKtHMiQJYQFjFWULnlCEqkELG.jpg</poster>
-			<last_update_tmdb>2021-09-10 21:32:36.508231</last_update_tmdb>
-			<hit_tmdb>True</hit_tmdb>
-			<awards>N/A</awards>
-			<meta_score>None</meta_score>
-			<rated>None</rated>
-			<rott_score>None</rott_score>
-			<omdb_score>None</omdb_score>
-			<last_update_omdb>2021-09-10 21:32:36.933470</last_update_omdb>
-			<hit_omdb>True</hit_omdb>
-			<already_in_db>False</already_in_db>
-			<better_quality>False</better_quality>
-			<seen_type>0</seen_type>
-			<year>2014</year>
-			<genre>comedy</genre>
-			<runtime>76</runtime>
-			<imdb_score>6.3</imdb_score>
-			<score>5.9</score>
-			<my_imdb_score>None</my_imdb_score>
-			<seen_date>None</seen_date>
-			<resolution>1080p</resolution>
-			<trend/>
-			<trailer>https://www.youtube.com/watch?v=62p48GiJ_rY</trailer>
-			<torr_link_seed>http://192.168.1.99:9092/torr_api?id=751009&amp;imdb_id=3766424&amp;resolution=1080&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_seed>
-			<torr_link_download>http://192.168.1.99:9092/torr_api?id=751009&amp;imdb_id=3766424&amp;resolution=1080&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_download>
+			<trailer>https://www.youtube.com/watch?v=W_1dKoCQlxY</trailer>
+			<torr_link_seed>http://192.168.1.99:9092/torr_api?torr_id=751083&amp;imdb_id=119314&amp;resolution=720&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_seed>
+			<torr_link_download>http://192.168.1.99:9092/torr_api?torr_id=751083&amp;imdb_id=119314&amp;resolution=720&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_download>
 		</trnt>
 	</movie>
 </movies>
