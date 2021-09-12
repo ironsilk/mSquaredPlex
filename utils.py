@@ -18,7 +18,7 @@ from dotenv import load_dotenv
 from plexapi.server import PlexServer
 from transmission_rpc import Client
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, ARRAY, \
-    Float, MetaData, create_engine, select, desc, delete, inspect
+    Float, MetaData, create_engine, select, desc, delete, inspect, func
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.dialects.postgresql import insert
 
@@ -169,7 +169,7 @@ class OmdbMovie(Base):
     country = Column(String)
     lang = Column(String)
     meta_score = Column(Float)
-    rated = Column(Float)
+    rated = Column(String)
     rott_score = Column(Float)
     omdb_score = Column(Float)
     last_update_omdb = Column(DateTime)
@@ -1089,6 +1089,95 @@ class TMDB(GenericMovie):
             logger.debug('')
 
 
+class OMDB(GenericMovie):
+
+    def __init__(self, id_imdb):
+        GenericMovie.__init__(self, id_imdb)
+        self.genre = None
+        self.lang = None
+        self.imdb_score = None
+        self.rott_score = None
+        self.meta_score = None
+        self.rated = None
+        self.awards = None
+        self.director = None
+        self.actors = None
+        self.apikey_omdb = OMDB_API_KEY
+
+    def get_data(self):
+        logger.debug('get_data {}'.format(self.id_imdb))
+
+        try:
+            r = requests.get(
+                url="https://www.omdbapi.com/",
+                params={
+                    'i': self.id_imdb,
+                    'apikey': OMDB_API_KEY,
+                },
+            )
+            raw_omdb = r.json()
+            print(raw_omdb)
+        except Exception:
+            logger.debug('could not load JSON from omdb for id:{}'.format(self.id_imdb))
+            return
+
+        if 'title' in raw_omdb:
+            self.title = raw_omdb['title']
+        else:
+            logger.debug('no "title" in omdb json')
+
+        if 'year' in raw_omdb:
+            self.year = raw_omdb['year']
+        else:
+            logger.debug('no "year" in omdb json')
+
+        if 'country' in raw_omdb:
+            self.country = raw_omdb['country']
+        else:
+            logger.debug('no "country" in omdb json')
+
+        if 'genre' in raw_omdb:
+            self.genre = raw_omdb['genre']
+        else:
+            logger.debug('no "genre" in omdb json')
+
+        if 'language' in raw_omdb:
+            self.lang = raw_omdb['language']
+        else:
+            logger.debug('no "language" in omdb json')
+
+        if 'ratings' in raw_omdb:
+            for data in raw_omdb['ratings']:
+                if data['source'] == 'Internet Movie Database':
+                    self.imdb_score = data['value'][:-3]
+                elif data['source'] == 'Rotten Tomatoes':
+                    self.rott_score = data['value'][:-1]
+                elif data['source'] == 'Metacritic':
+                    self.meta_score = data['value'][:-4]
+        else:
+            logger.debug('no "ratings" in omdb json')
+
+        if 'rated' in raw_omdb:
+            self.rated = raw_omdb['rated']
+        else:
+            logger.debug('no "rated" in omdb json')
+
+        if 'awards' in raw_omdb:
+            self.awards = raw_omdb['awards']
+        else:
+            logger.debug('no "awards" in omdb json')
+
+        if 'director' in raw_omdb:
+            self.director = raw_omdb['director']
+        else:
+            logger.debug('no "director" in omdb json')
+
+        if 'actors' in raw_omdb:
+            self.actors = raw_omdb['actors']
+        else:
+            logger.debug('no "actors" in omdb json')
+
+
 def get_tmdb(idd):
     tmdb = TMDB(convert_imdb_id(idd), '', '')
     tmdb.get_data()
@@ -1133,6 +1222,37 @@ def get_omdb(idd):
         'omdb_score': item['Metascore'],
         'meta_score': try_or(lambda: [x['Value'].split('/')[0] for x in item['Ratings'] if x['Source'] == 'Metacritic'][0]),
         'last_update_omdb': datetime.datetime.now(),
+    }
+    for key, val in item.items():
+        if val == 'N/A':
+            item[key] = None
+    return item
+
+
+def get_omdb2(idd):
+    omdb = OMDB(convert_imdb_id(idd))
+    omdb.get_data()
+    try:
+        rated = float(omdb.rated)
+    except (ValueError, TypeError):
+        rated = None
+
+    if all(v is None for v in [omdb.awards, omdb.country, omdb.lang, omdb.meta_score, omdb.rott_score, omdb.score]):
+        hit = False
+    else:
+        hit = True
+
+    item = {
+        'imdb_id': idd,
+        'awards': omdb.awards,
+        'country': omdb.country,
+        'lang': omdb.lang,
+        'meta_score': omdb.meta_score,
+        'rated': rated,
+        'rott_score': omdb.rott_score,
+        'omdb_score': omdb.score,
+        'last_update_omdb': datetime.datetime.now(),
+        'hit_omdb': hit,
     }
     return item
 
@@ -1219,7 +1339,32 @@ stmt = select(TmdbMovie, OmdbMovie).join(OmdbMovie, TmdbMovie.imdb_id == OmdbMov
 if __name__ == '__main__':
     from pprint import pprint
 
-    check_database()
+    # TODO speed up this query, think of min/max id instead of anything else.
+    # Ia toate alea, salveaza-le intr-un pickle ceva si citeste de acolo.
+    # Apoi la filme mai noi... luam varianta asta cu max ID din omdb si TMDB si ce e mai nou
+    # in title_basics de varianta aia, cautam si facem update.
+    # pentru update efectiv putem sa avem o rutina care sa faca exact asta fara sa se uite la last_update.
 
-    pprint(get_tmdb(903624))
-    pprint(get_tmdb(11111111))
+    """
+    Prima rutina: ia toate tconst din title basics care au titleType movie sau d-astea,
+    -> salveaza in pickle si rumega prin ele.
+    -> Rutina care sa ruleze o data la 3 luni sau ceva. ca o sa dureze. 
+    
+    Apoi alta rutina: vezi maxImdb_id din OMDB si TMDB, query in title_basics pentru titluri care au id
+    mai mare decat asta si rumega prin ce iese
+    
+    De vazut cum o fac pe asta a 2a sa nu ruleze cand merge cealalta. Cred ca un On start -> da stop la cealalta.
+    conn = connect_db()
+    stmt = select(func.min(TmdbMovie.imdb_id))
+    result = conn.execute(stmt).mappings().fetchone()['min_1']
+    print(result)
+    stmt = select(func.min(OmdbMovie.imdb_id))
+    result = conn.execute(stmt).mappings().fetchone()['min_1']
+    if not result:
+        stmt = select(func.max(TitleBasics.tconst))
+        result = conn.execute(stmt).mappings().fetchone()['max_1']
+        print(result)
+        """
+    check_database()
+    pprint(get_omdb(903624))
+    pprint(get_omdb2(903624))
