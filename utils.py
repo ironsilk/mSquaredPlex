@@ -11,7 +11,6 @@ from time import time
 
 import PTN
 import imdb
-import omdb.api as omdb_api
 import requests
 import tmdbsimple as tmdb_api
 from Crypto.Cipher import ChaCha20
@@ -22,6 +21,7 @@ from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, A
     Float, MetaData, create_engine, select, desc, delete, inspect
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.dialects.postgresql import insert
+
 load_dotenv()
 
 # ENV variables
@@ -333,7 +333,7 @@ def check_against_user_movies(movies, email):
     :return:
     """
     with engine.connect() as conn:
-        stmt = select(Movie).where(Movie.imdb_id.in_([x['imdb_id'] for x in movies]))\
+        stmt = select(Movie).where(Movie.imdb_id.in_([x['imdb_id'] for x in movies])) \
             .where(Movie.user.has(User.email == email))
         result = conn.execute(stmt).mappings().fetchall()
     return [object_as_dict(x) for x in result]
@@ -341,7 +341,7 @@ def check_against_user_movies(movies, email):
 
 def check_against_user_watchlist(movies, user_imdb_id):
     with engine.connect() as conn:
-        stmt = select(Watchlist).where(Watchlist.imdb_id.in_(movies))\
+        stmt = select(Watchlist).where(Watchlist.imdb_id.in_(movies)) \
             .where(Movie.user.has(User.imdb_id == user_imdb_id))
         result = conn.execute(stmt).mappings().fetchall()
     return [object_as_dict(x) for x in result]
@@ -363,7 +363,7 @@ def check_one_against_torrents_by_torr_id(idd):
 
 def check_one_against_torrents_by_torr_hash(hash):
     with engine.connect() as conn:
-        stmt = select(Torrent).where(Torrent.torr_hash == hash)\
+        stmt = select(Torrent).where(Torrent.torr_hash == hash) \
             .where(Torrent.status.in_(['requested download', 'downloading']))
         result = conn.execute(stmt).mappings().fetchall()
     return [object_as_dict(x) for x in result]
@@ -394,8 +394,12 @@ def get_movie_imdb(imdb_id):
                     'votes', 'runtimes', 'rating', 'director']:
             if key not in movie.data.keys():
                 movie.data[key] = None
+        try:
+            cast = ', '.join([x['name'] for x in movie.data['cast'][:5]]) if movie.data['cast'] else None
+        except KeyError:
+            cast = None
         item = {
-            'cast': ', '.join([x['name'] for x in movie.data['cast'][:5]]) if movie.data['cast'] else None,
+            'cast': cast,
             'genres': ', '.join(movie.data['genres']) if movie.data['genres'] else None,
             'imdbID': movie.movieID,
             'titleType': movie.data['kind'],
@@ -434,13 +438,17 @@ def get_movie_tmdb_omdb(imdb_id):
     tmdb = get_movie_tmdb_local(imdb_id)
     if not tmdb:
         tmdb = get_tmdb(imdb_id)
-        if tmdb['hit_tmdb']:
+        if tmdb:
             update_many([tmdb], TmdbMovie, TmdbMovie.imdb_id)
+        else:
+            tmdb = dict()
     omdb = get_movie_omdb_local(imdb_id)
     if not omdb:
         omdb = get_omdb(imdb_id)
-        if omdb['hit_omdb']:
+        if omdb:
             update_many([omdb], OmdbMovie, OmdbMovie.imdb_id)
+        else:
+            omdb = dict()
     return {**tmdb, **omdb}
 
 
@@ -525,7 +533,7 @@ def get_user_watchlist(user_imdb_id):
 
 def get_from_watchlist_by_user_and_imdb(user_imdb_id, imdb_id):
     with engine.connect() as conn:
-        stmt = select(Watchlist).where(Watchlist.user.has(User.imdb_id == user_imdb_id))\
+        stmt = select(Watchlist).where(Watchlist.user.has(User.imdb_id == user_imdb_id)) \
             .where(Watchlist.imdb_id == imdb_id)
         result = conn.execute(stmt)
     if result:
@@ -534,7 +542,7 @@ def get_from_watchlist_by_user_and_imdb(user_imdb_id, imdb_id):
 
 def get_from_watchlist_by_user_telegram_id_and_imdb(imdb_id, telegram_chat_id):
     with engine.connect() as conn:
-        stmt = select(Watchlist).where(Watchlist.user.has(User.telegram_chat_id == telegram_chat_id))\
+        stmt = select(Watchlist).where(Watchlist.user.has(User.telegram_chat_id == telegram_chat_id)) \
             .where(Watchlist.imdb_id == imdb_id)
         result = conn.execute(stmt)
     return object_as_dict(result.mappings().fetchone())
@@ -585,7 +593,7 @@ def insert_many(items, table):
 
 def remove_from_watchlist_except(except_items, user_imdb_id):
     with engine.connect() as conn:
-        stmt = delete(Watchlist).where(Watchlist.user.has(User.imdb_id == user_imdb_id))\
+        stmt = delete(Watchlist).where(Watchlist.user.has(User.imdb_id == user_imdb_id)) \
             .where(Watchlist.imdb_id.notin_(except_items))
         result = conn.execute(stmt)
     return result
@@ -685,88 +693,6 @@ class GenericMovie:
 
         except Exception:
             logger.debug('get_movie_dblist err')
-
-
-class OMDB(GenericMovie):
-
-    def __init__(self, id_imdb):
-        GenericMovie.__init__(self, id_imdb)
-        self.genre = None
-        self.lang = None
-        self.imdb_score = None
-        self.rott_score = None
-        self.meta_score = None
-        self.rated = None
-        self.awards = None
-        self.director = None
-        self.actors = None
-        self.apikey_omdb = OMDB_API_KEY
-
-    def get_data(self):
-        logger.debug('get_data {}'.format(self.id_imdb))
-
-        try:
-            omdb_api.set_default('apikey', self.apikey_omdb)
-            raw_omdb = omdb_api.imdbid(self.id_imdb)
-        except Exception:
-            logger.debug('could not load JSON from omdb for id:{}'.format(self.id_imdb))
-            return
-
-        if 'title' in raw_omdb:
-            self.title = raw_omdb['title']
-        else:
-            logger.debug('no "title" in omdb json')
-
-        if 'year' in raw_omdb:
-            self.year = raw_omdb['year']
-        else:
-            logger.debug('no "year" in omdb json')
-
-        if 'country' in raw_omdb:
-            self.country = raw_omdb['country']
-        else:
-            logger.debug('no "country" in omdb json')
-
-        if 'genre' in raw_omdb:
-            self.genre = raw_omdb['genre']
-        else:
-            logger.debug('no "genre" in omdb json')
-
-        if 'language' in raw_omdb:
-            self.lang = raw_omdb['language']
-        else:
-            logger.debug('no "language" in omdb json')
-
-        if 'ratings' in raw_omdb:
-            for data in raw_omdb['ratings']:
-                if data['source'] == 'Internet Movie Database':
-                    self.imdb_score = data['value'][:-3]
-                elif data['source'] == 'Rotten Tomatoes':
-                    self.rott_score = data['value'][:-1]
-                elif data['source'] == 'Metacritic':
-                    self.meta_score = data['value'][:-4]
-        else:
-            logger.debug('no "ratings" in omdb json')
-
-        if 'rated' in raw_omdb:
-            self.rated = raw_omdb['rated']
-        else:
-            logger.debug('no "rated" in omdb json')
-
-        if 'awards' in raw_omdb:
-            self.awards = raw_omdb['awards']
-        else:
-            logger.debug('no "awards" in omdb json')
-
-        if 'director' in raw_omdb:
-            self.director = raw_omdb['director']
-        else:
-            logger.debug('no "director" in omdb json')
-
-        if 'actors' in raw_omdb:
-            self.actors = raw_omdb['actors']
-        else:
-            logger.debug('no "actors" in omdb json')
 
 
 class TMDB(GenericMovie):
@@ -1163,42 +1089,12 @@ class TMDB(GenericMovie):
             logger.debug('')
 
 
-def get_omdb(idd):
-    omdb = OMDB(convert_imdb_id(idd))
-    omdb.get_data()
-    try:
-        rated = float(omdb.rated)
-    except (ValueError, TypeError):
-        rated = None
-
-    if all(v is None for v in [omdb.awards, omdb.country, omdb.lang, omdb.meta_score, omdb.rott_score, omdb.score]):
-        hit = False
-    else:
-        hit = True
-
-    item = {
-        'imdb_id': idd,
-        'awards': omdb.awards,
-        'country': omdb.country,
-        'lang': omdb.lang,
-        'meta_score': omdb.meta_score,
-        'rated': rated,
-        'rott_score': omdb.rott_score,
-        'omdb_score': omdb.score,
-        'last_update_omdb': datetime.datetime.now(),
-        'hit_omdb': hit,
-    }
-    return item
-
-
 def get_tmdb(idd):
     tmdb = TMDB(convert_imdb_id(idd), '', '')
     tmdb.get_data()
 
     if all(v is None for v in [tmdb.country, tmdb.lang, tmdb.ovrw, tmdb.score, tmdb.trailer]):
-        hit = False
-    else:
-        hit = True
+        return None
 
     item = {
         'imdb_id': idd,
@@ -1209,7 +1105,62 @@ def get_tmdb(idd):
         'trailer_link': tmdb.trailer,
         'poster': tmdb.poster,
         'last_update_tmdb': datetime.datetime.now(),
-        'hit_tmdb': hit,
+    }
+
+    return item
+
+
+def get_omdb(idd):
+    r = requests.get(
+        url="https://www.omdbapi.com/",
+        params={
+            'i': convert_imdb_id(idd),
+            'apikey': OMDB_API_KEY,
+        },
+    )
+    item = r.json()
+    if item['Response'] == 'False':
+        logger.error("OMDB retrieve problems")
+        return None
+    item = {
+        'imdb_id': idd,
+        'awards': item['Awards'],
+        'country': item['Country'],
+        'lang': item['Language'],
+        'rated': item['Rated'],
+        'rott_score': try_or(lambda: [''.join([s for s in x['Value'] if s.isdigit()])
+                                      for x in item['Ratings'] if x['Source'] == 'Rotten Tomatoes'][0]),
+        'omdb_score': item['Metascore'],
+        'meta_score': try_or(lambda: [x['Value'].split('/')[0] for x in item['Ratings'] if x['Source'] == 'Metacritic'][0]),
+        'last_update_omdb': datetime.datetime.now(),
+    }
+    return item
+
+
+def get_tmdb2(idd):
+    headers = {
+        "Content-Type": "application/json;charset=utf-8",
+        "Authorization": f"Bearer {TMDB_API_KEY}",
+    }
+    r = requests.get(
+        url=f"https://api.themoviedb.org/3/movie/{convert_imdb_id(idd)}",
+        headers=headers
+    )
+    item = r.json()
+    pprint(item)
+    if 'id' not in item.keys():
+        logger.error("TMDB retrieve problems")
+        return None
+    item = {
+        'imdb_id': idd,
+        'country': 'tmdb.country',
+        'lang': 'tmdb.lang',
+        'ovrw': item['overview'],
+        'tmdb_score': item['vote_average'],
+        'trailer_link': 'tmdb.trailer',
+        'poster': 'tmdb.poster',
+        'last_update_tmdb': datetime.datetime.now(),
+        'hit_tmdb': 'hit',
     }
     return item
 
@@ -1252,6 +1203,12 @@ def parse_torr_name(name):
     return PTN.parse(name)
 
 
+def try_or(func, default=None, expected_exc=(Exception,)):
+    try:
+        return func()
+    except expected_exc as e:
+        return default
+
 # SQL examples and other notes:
 """
 # left join example
@@ -1259,12 +1216,10 @@ stmt = select(TmdbMovie, OmdbMovie).join(OmdbMovie, TmdbMovie.imdb_id == OmdbMov
     where(TmdbMovie.imdb_id == imdb_id)
 """
 
-
 if __name__ == '__main__':
     from pprint import pprint
+
     check_database()
 
-
-
-
-
+    pprint(get_tmdb(903624))
+    pprint(get_tmdb(11111111))

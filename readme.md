@@ -94,6 +94,7 @@ All containers are set to restart `on-failiure` so no worries.
 - ask user who asked for download and didnt watch the movie before deletion
   and maybe confirm in with the admin.
 - Show my watchlist.
+- Fix TMDB and OMDB updates, use min/max ID or something else.
 
 
 ### Wishlist

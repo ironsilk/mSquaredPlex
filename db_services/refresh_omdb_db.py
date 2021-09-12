@@ -49,9 +49,7 @@ def process_items(items):
     new_items = []
     for item in items:
         item = get_omdb(item['tconst'])
-        if not item['hit_omdb']:
-            new_items.append(item)
-        else:
+        if item:
             new_items.append(item)
     return new_items
 
