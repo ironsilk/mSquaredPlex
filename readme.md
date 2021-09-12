@@ -87,41 +87,18 @@ internet so no functions will be affected.
 
 - There might be some errors in logs when starting up for the first time, until you login into telegram yourself.
 All containers are set to restart `on-failiure` so no worries.
-  
-- Mysql might be slow: this might help: https://phpforus.com/how-to-make-mysql-run-fast-with-ext4-on-ubuntu/
- So slow that you might need to startup the services twice on first DB initialisation.
-  Might be also slow because of fking up of docker volumes so to remove unused volumes: `sudo docker volume prune`.
-  The final solution for this shit is always `sudo docker system prune -a` - Attention, it removes everything (volumes,
-  networks, containers) not in use by any active docker container at that time. Run it before running again
-  `sudo docker-compose -f docker-compose_MAINSTACK.yml up -d --build`
-- Still haven't figured out how to make those transmission startup settings. - **done, see bottom page**
+
 
 ## TODO
 
-- Fix movieLib!
 - ask user who asked for download and didnt watch the movie before deletion
   and maybe confirm in with the admin.
 - Show my watchlist.
-- Torrents download status for each user **done** - need to prettify the dataframe maybe
-- notification when movie was downloaded - **done**
-- Download a CSV with my database - ratings and views. - **done**
-- Upload Netflix view history :X and integrate it. - **done**
-- Choose whether to rate unrated CSV titles or not. - **done**
-- fix autoscaling, not working right now - **done**
-
-1. db_services = fix tmdb
-2. filelist service = done
-3. myimdb service = done
-4. torr-service = 
-
 
 
 ### Wishlist
 - recommend a movie - later stages, complex.
 - Favorite a director/actor whatever and receive notifications when a new movie of his/hers is available.
-- Torrents download status for each user **done** - need to prettify the dataframe maybe
-
-
 
 
 ### In order to solve TRANSMISSION configuration problem:
@@ -139,18 +116,7 @@ startup.
 It will return a container ID
 6. `docker start {ID}` that ID. You can open a CLI into the container and use `cat defaults/settings.json` and `cat config/settings.json` to see that
 your configs have been saved.
-   
 
-### MYSQL docker problems:
-
-Might be this:
-https://jsatt.com/blog/mysql-docker-performance/ - which leads to this: https://stackoverflow.com/questions/5474662/mysql-optimize-all-tables
-
-
-Could be this tho, the drive:
-https://phpforus.com/how-to-make-mysql-run-fast-with-ext4-on-ubuntu/
-
-or this https://github.com/docker/for-linux/issues/247
 
 
   

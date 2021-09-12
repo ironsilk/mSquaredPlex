@@ -187,7 +187,6 @@ class TORR_REFRESHER:
 
 @timing
 def refresher_routine():
-    logger = setup_logger('TorrRefresher')
     refresher = TORR_REFRESHER()
     refresher.update_statuses()
     logger.info("Routine done, closing connections.")
