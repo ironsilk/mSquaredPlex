@@ -1,120 +1,1005 @@
 <?xml version="1.0" encoding="utf-8"?><movies>
-	<movie id_imdb="tt0119314">
-		<id>751083</id>
-		<name>The.Horse.Whisperer.1998.720p.BluRay.DD5.1.x264-EbP</name>
-		<imdb>tt0119314</imdb>
+	<movie id_imdb="tt3062880">
+		<id>751206</id>
+		<name>Gett.2014.1080p.BluRay.DD5.1.x264-EA</name>
+		<imdb>tt3062880</imdb>
 		<freeleech>True</freeleech>
 		<doubleup>0</doubleup>
-		<upload_date>2021-09-11 15:23:14</upload_date>
-		<download_link>https://filelist.io/download.php?id=751083&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
-		<size>10.8</size>
+		<upload_date>2021-09-12 15:48:46</upload_date>
+		<download_link>https://filelist.io/download.php?id=751206&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
+		<size>13.6</size>
 		<internal>0</internal>
-		<moderated>0</moderated>
+		<moderated>1</moderated>
 		<category>Filme HD-RO</category>
-		<seeders>8</seeders>
-		<leechers>21</leechers>
-		<times_completed>7</times_completed>
+		<seeders>27</seeders>
+		<leechers>4</leechers>
+		<times_completed>33</times_completed>
 		<comments>0</comments>
-		<files>3</files>
-		<small_description>Drama, Romance, Western</small_description>
-		<cast>Robert Redford, Kristin Scott Thomas, Sam Neill, Dianne Wiest</cast>
-		<genres>drama, romance, western</genres>
-		<imdbID>119314</imdbID>
+		<files>2</files>
+		<small_description>Drama</small_description>
+		<cast>Ronit Elkabetz, Simon Abkarian, Gabi Amrani, Dalia Beger</cast>
+		<genres>drama</genres>
+		<imdbID>3062880</imdbID>
 		<titleType>movie</titleType>
-		<averageRating>6.6</averageRating>
-		<title>The Horse Whisperer</title>
-		<originalTitle>The Horse Whisperer</originalTitle>
-		<startYear>1998</startYear>
-		<numVotes>40161</numVotes>
-		<runtimeMinutes>169</runtimeMinutes>
-		<imdb_id>119314</imdb_id>
+		<averageRating>7.7</averageRating>
+		<title>Gett</title>
+		<originalTitle>Gett</originalTitle>
+		<startYear>2014</startYear>
+		<numVotes>6298</numVotes>
+		<runtimeMinutes>115</runtimeMinutes>
+		<imdb_id>3062880</imdb_id>
 		<country>None</country>
 		<lang>None</lang>
-		<ovrw>Based on the novel by the same name from Nicholas Evans, the talented Robert Redford presents this meditative family drama set in the country side. Redford not only directs but also stars in the roll of a cowboy with a magical talent for healing.</ovrw>
-		<tmdb_score>6.9</tmdb_score>
-		<trailer_link>https://www.youtube.com/watch?v=W_1dKoCQlxY</trailer_link>
-		<poster>https://image.tmdb.org/t/p/w300_and_h450_bestv2/1Ptdh2fdA5xpH5Zj8AQUAp9Tdoa.jpg</poster>
-		<last_update_tmdb>2021-09-11 13:25:01.917357</last_update_tmdb>
+		<ovrw>The trial story of Viviane Amsalem's five year fight to obtain her divorce in front of the only legal authority competent for divorce cases in Israel, the Rabbinical Court.</ovrw>
+		<tmdb_score>7.5</tmdb_score>
+		<trailer_link>https://www.youtube.com/watch?v=Y9yZoUPAHkE</trailer_link>
+		<poster>https://image.tmdb.org/t/p/w300_and_h450_bestv2/9p83O8o8Z10HQBd60mhL24jD22W.jpg</poster>
+		<last_update_tmdb>2021-09-12 15:00:05.714090</last_update_tmdb>
 		<hit_tmdb>True</hit_tmdb>
 		<awards>None</awards>
 		<meta_score>None</meta_score>
 		<rated>None</rated>
 		<rott_score>None</rott_score>
 		<omdb_score>None</omdb_score>
-		<last_update_omdb>2021-09-11 13:25:02.182166</last_update_omdb>
+		<last_update_omdb>2021-09-12 15:00:06.070835</last_update_omdb>
 		<hit_omdb>False</hit_omdb>
 		<in_my_movies>False</in_my_movies>
 		<seen_type>0</seen_type>
-		<year>1998</year>
-		<genre>drama, romance, western</genre>
-		<runtime>169</runtime>
-		<imdb_score>6.6</imdb_score>
-		<score>6.9</score>
+		<year>2014</year>
+		<genre>drama</genre>
+		<runtime>115</runtime>
+		<imdb_score>7.7</imdb_score>
+		<score>7.5</score>
 		<my_imdb_score>None</my_imdb_score>
 		<seen_date>None</seen_date>
-		<resolution>720p</resolution>
+		<resolution>1080p</resolution>
 		<trend/>
-		<trailer>https://www.youtube.com/watch?v=W_1dKoCQlxY</trailer>
-		<torr_link_seed>http://192.168.1.99:9092/torr_api?torr_id=751083&amp;imdb_id=119314&amp;resolution=720&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_seed>
-		<torr_link_download>http://192.168.1.99:9092/torr_api?torr_id=751083&amp;imdb_id=119314&amp;resolution=720&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_download>
-		<trnt id="751083">
-			<id>751083</id>
-			<name>The.Horse.Whisperer.1998.720p.BluRay.DD5.1.x264-EbP</name>
-			<imdb>tt0119314</imdb>
+		<trailer>https://www.youtube.com/watch?v=Y9yZoUPAHkE</trailer>
+		<torr_link_seed>http://192.168.1.99:9092/torr_api?torr_id=751206&amp;imdb_id=3062880&amp;resolution=1080&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_seed>
+		<torr_link_download>http://192.168.1.99:9092/torr_api?torr_id=751206&amp;imdb_id=3062880&amp;resolution=1080&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_download>
+		<trnt id="751206">
+			<id>751206</id>
+			<name>Gett.2014.1080p.BluRay.DD5.1.x264-EA</name>
+			<imdb>tt3062880</imdb>
 			<freeleech>True</freeleech>
 			<doubleup>0</doubleup>
-			<upload_date>2021-09-11 15:23:14</upload_date>
-			<download_link>https://filelist.io/download.php?id=751083&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
-			<size>10.8</size>
+			<upload_date>2021-09-12 15:48:46</upload_date>
+			<download_link>https://filelist.io/download.php?id=751206&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
+			<size>13.6</size>
 			<internal>0</internal>
-			<moderated>0</moderated>
+			<moderated>1</moderated>
 			<category>Filme HD-RO</category>
-			<seeders>8</seeders>
-			<leechers>21</leechers>
-			<times_completed>7</times_completed>
+			<seeders>27</seeders>
+			<leechers>4</leechers>
+			<times_completed>33</times_completed>
 			<comments>0</comments>
-			<files>3</files>
-			<small_description>Drama, Romance, Western</small_description>
-			<cast>Robert Redford, Kristin Scott Thomas, Sam Neill, Dianne Wiest</cast>
-			<genres>drama, romance, western</genres>
-			<imdbID>119314</imdbID>
+			<files>2</files>
+			<small_description>Drama</small_description>
+			<cast>Ronit Elkabetz, Simon Abkarian, Gabi Amrani, Dalia Beger</cast>
+			<genres>drama</genres>
+			<imdbID>3062880</imdbID>
 			<titleType>movie</titleType>
-			<averageRating>6.6</averageRating>
-			<title>The Horse Whisperer</title>
-			<originalTitle>The Horse Whisperer</originalTitle>
-			<startYear>1998</startYear>
-			<numVotes>40161</numVotes>
-			<runtimeMinutes>169</runtimeMinutes>
-			<imdb_id>119314</imdb_id>
+			<averageRating>7.7</averageRating>
+			<title>Gett</title>
+			<originalTitle>Gett</originalTitle>
+			<startYear>2014</startYear>
+			<numVotes>6298</numVotes>
+			<runtimeMinutes>115</runtimeMinutes>
+			<imdb_id>3062880</imdb_id>
 			<country>None</country>
 			<lang>None</lang>
-			<ovrw>Based on the novel by the same name from Nicholas Evans, the talented Robert Redford presents this meditative family drama set in the country side. Redford not only directs but also stars in the roll of a cowboy with a magical talent for healing.</ovrw>
-			<tmdb_score>6.9</tmdb_score>
-			<trailer_link>https://www.youtube.com/watch?v=W_1dKoCQlxY</trailer_link>
-			<poster>https://image.tmdb.org/t/p/w300_and_h450_bestv2/1Ptdh2fdA5xpH5Zj8AQUAp9Tdoa.jpg</poster>
-			<last_update_tmdb>2021-09-11 13:25:01.917357</last_update_tmdb>
+			<ovrw>The trial story of Viviane Amsalem's five year fight to obtain her divorce in front of the only legal authority competent for divorce cases in Israel, the Rabbinical Court.</ovrw>
+			<tmdb_score>7.5</tmdb_score>
+			<trailer_link>https://www.youtube.com/watch?v=Y9yZoUPAHkE</trailer_link>
+			<poster>https://image.tmdb.org/t/p/w300_and_h450_bestv2/9p83O8o8Z10HQBd60mhL24jD22W.jpg</poster>
+			<last_update_tmdb>2021-09-12 15:00:05.714090</last_update_tmdb>
 			<hit_tmdb>True</hit_tmdb>
 			<awards>None</awards>
 			<meta_score>None</meta_score>
 			<rated>None</rated>
 			<rott_score>None</rott_score>
 			<omdb_score>None</omdb_score>
-			<last_update_omdb>2021-09-11 13:25:02.182166</last_update_omdb>
+			<last_update_omdb>2021-09-12 15:00:06.070835</last_update_omdb>
 			<hit_omdb>False</hit_omdb>
 			<in_my_movies>False</in_my_movies>
 			<seen_type>0</seen_type>
-			<year>1998</year>
-			<genre>drama, romance, western</genre>
-			<runtime>169</runtime>
-			<imdb_score>6.6</imdb_score>
+			<year>2014</year>
+			<genre>drama</genre>
+			<runtime>115</runtime>
+			<imdb_score>7.7</imdb_score>
+			<score>7.5</score>
+			<my_imdb_score>None</my_imdb_score>
+			<seen_date>None</seen_date>
+			<resolution>1080p</resolution>
+			<trend/>
+			<trailer>https://www.youtube.com/watch?v=Y9yZoUPAHkE</trailer>
+			<torr_link_seed>http://192.168.1.99:9092/torr_api?torr_id=751206&amp;imdb_id=3062880&amp;resolution=1080&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_seed>
+			<torr_link_download>http://192.168.1.99:9092/torr_api?torr_id=751206&amp;imdb_id=3062880&amp;resolution=1080&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_download>
+		</trnt>
+		<trnt id="751205">
+			<id>751205</id>
+			<name>Gett.2014.720p.BluRay.DD5.1.x264-EA</name>
+			<imdb>tt3062880</imdb>
+			<freeleech>True</freeleech>
+			<doubleup>0</doubleup>
+			<upload_date>2021-09-12 15:48:44</upload_date>
+			<download_link>https://filelist.io/download.php?id=751205&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
+			<size>6.6</size>
+			<internal>0</internal>
+			<moderated>1</moderated>
+			<category>Filme HD-RO</category>
+			<seeders>30</seeders>
+			<leechers>4</leechers>
+			<times_completed>35</times_completed>
+			<comments>0</comments>
+			<files>2</files>
+			<small_description>Drama</small_description>
+			<cast>Ronit Elkabetz, Simon Abkarian, Gabi Amrani, Dalia Beger</cast>
+			<genres>drama</genres>
+			<imdbID>3062880</imdbID>
+			<titleType>movie</titleType>
+			<averageRating>7.7</averageRating>
+			<title>Gett</title>
+			<originalTitle>Gett</originalTitle>
+			<startYear>2014</startYear>
+			<numVotes>6298</numVotes>
+			<runtimeMinutes>115</runtimeMinutes>
+			<imdb_id>3062880</imdb_id>
+			<country>None</country>
+			<lang>None</lang>
+			<ovrw>The trial story of Viviane Amsalem's five year fight to obtain her divorce in front of the only legal authority competent for divorce cases in Israel, the Rabbinical Court.</ovrw>
+			<tmdb_score>7.5</tmdb_score>
+			<trailer_link>https://www.youtube.com/watch?v=Y9yZoUPAHkE</trailer_link>
+			<poster>https://image.tmdb.org/t/p/w300_and_h450_bestv2/9p83O8o8Z10HQBd60mhL24jD22W.jpg</poster>
+			<last_update_tmdb>2021-09-12 15:00:05.714090</last_update_tmdb>
+			<hit_tmdb>True</hit_tmdb>
+			<awards>None</awards>
+			<meta_score>None</meta_score>
+			<rated>None</rated>
+			<rott_score>None</rott_score>
+			<omdb_score>None</omdb_score>
+			<last_update_omdb>2021-09-12 15:00:06.210788</last_update_omdb>
+			<hit_omdb>False</hit_omdb>
+			<in_my_movies>False</in_my_movies>
+			<seen_type>0</seen_type>
+			<year>2014</year>
+			<genre>drama</genre>
+			<runtime>115</runtime>
+			<imdb_score>7.7</imdb_score>
+			<score>7.5</score>
+			<my_imdb_score>None</my_imdb_score>
+			<seen_date>None</seen_date>
+			<resolution>720p</resolution>
+			<trend/>
+			<trailer>https://www.youtube.com/watch?v=Y9yZoUPAHkE</trailer>
+			<torr_link_seed>http://192.168.1.99:9092/torr_api?torr_id=751205&amp;imdb_id=3062880&amp;resolution=720&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_seed>
+			<torr_link_download>http://192.168.1.99:9092/torr_api?torr_id=751205&amp;imdb_id=3062880&amp;resolution=720&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_download>
+		</trnt>
+	</movie>
+	<movie id_imdb="tt1445520">
+		<id>751200</id>
+		<name>Footnote.2011.720p.BluRay.DTS.x264-EbP</name>
+		<imdb>tt1445520</imdb>
+		<freeleech>True</freeleech>
+		<doubleup>0</doubleup>
+		<upload_date>2021-09-12 15:19:54</upload_date>
+		<download_link>https://filelist.io/download.php?id=751200&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
+		<size>5.2</size>
+		<internal>0</internal>
+		<moderated>1</moderated>
+		<category>Filme HD-RO</category>
+		<seeders>29</seeders>
+		<leechers>0</leechers>
+		<times_completed>35</times_completed>
+		<comments>0</comments>
+		<files>2</files>
+		<small_description>Comedy, Drama</small_description>
+		<cast>Shlomo Bar-Aba, Lior Ashkenazi, Aliza Rosen, Alma Zack</cast>
+		<genres>comedy, drama</genres>
+		<imdbID>1445520</imdbID>
+		<titleType>movie</titleType>
+		<averageRating>7.1</averageRating>
+		<title>Footnote</title>
+		<originalTitle>Hearat Shulayim</originalTitle>
+		<startYear>2011</startYear>
+		<numVotes>5925</numVotes>
+		<runtimeMinutes>107</runtimeMinutes>
+		<imdb_id>1445520</imdb_id>
+		<country>None</country>
+		<lang>None</lang>
+		<ovrw>Jerusalem, Israel. Professors Eliezer and Uriel Shkolnik, father and son, have dedicated their lives to the study of the Jewish scriptures. Eliezer is a stubborn and methodical scholar who has never been recognized for his work; Uriel is a rising star, someone admired and praised by his colleagues. The fragile balance that has kept their personal relationship almost intact is broken in an unexpected way by a simple phone call.</ovrw>
+		<tmdb_score>7.3</tmdb_score>
+		<trailer_link>https://www.youtube.com/watch?v=8dwe7GR9kO4</trailer_link>
+		<poster>https://image.tmdb.org/t/p/w300_and_h450_bestv2/qy0W1KssDhGbtisBGKZHlcuuYqn.jpg</poster>
+		<last_update_tmdb>2021-09-12 15:00:07.313234</last_update_tmdb>
+		<hit_tmdb>True</hit_tmdb>
+		<awards>None</awards>
+		<meta_score>None</meta_score>
+		<rated>None</rated>
+		<rott_score>None</rott_score>
+		<omdb_score>None</omdb_score>
+		<last_update_omdb>2021-09-12 15:00:07.649246</last_update_omdb>
+		<hit_omdb>False</hit_omdb>
+		<in_my_movies>False</in_my_movies>
+		<seen_type>0</seen_type>
+		<year>2011</year>
+		<genre>comedy, drama</genre>
+		<runtime>107</runtime>
+		<imdb_score>7.1</imdb_score>
+		<score>7.3</score>
+		<my_imdb_score>None</my_imdb_score>
+		<seen_date>None</seen_date>
+		<resolution>720p</resolution>
+		<trend/>
+		<trailer>https://www.youtube.com/watch?v=8dwe7GR9kO4</trailer>
+		<torr_link_seed>http://192.168.1.99:9092/torr_api?torr_id=751200&amp;imdb_id=1445520&amp;resolution=720&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_seed>
+		<torr_link_download>http://192.168.1.99:9092/torr_api?torr_id=751200&amp;imdb_id=1445520&amp;resolution=720&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_download>
+		<trnt id="751200">
+			<id>751200</id>
+			<name>Footnote.2011.720p.BluRay.DTS.x264-EbP</name>
+			<imdb>tt1445520</imdb>
+			<freeleech>True</freeleech>
+			<doubleup>0</doubleup>
+			<upload_date>2021-09-12 15:19:54</upload_date>
+			<download_link>https://filelist.io/download.php?id=751200&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
+			<size>5.2</size>
+			<internal>0</internal>
+			<moderated>1</moderated>
+			<category>Filme HD-RO</category>
+			<seeders>29</seeders>
+			<leechers>0</leechers>
+			<times_completed>35</times_completed>
+			<comments>0</comments>
+			<files>2</files>
+			<small_description>Comedy, Drama</small_description>
+			<cast>Shlomo Bar-Aba, Lior Ashkenazi, Aliza Rosen, Alma Zack</cast>
+			<genres>comedy, drama</genres>
+			<imdbID>1445520</imdbID>
+			<titleType>movie</titleType>
+			<averageRating>7.1</averageRating>
+			<title>Footnote</title>
+			<originalTitle>Hearat Shulayim</originalTitle>
+			<startYear>2011</startYear>
+			<numVotes>5925</numVotes>
+			<runtimeMinutes>107</runtimeMinutes>
+			<imdb_id>1445520</imdb_id>
+			<country>None</country>
+			<lang>None</lang>
+			<ovrw>Jerusalem, Israel. Professors Eliezer and Uriel Shkolnik, father and son, have dedicated their lives to the study of the Jewish scriptures. Eliezer is a stubborn and methodical scholar who has never been recognized for his work; Uriel is a rising star, someone admired and praised by his colleagues. The fragile balance that has kept their personal relationship almost intact is broken in an unexpected way by a simple phone call.</ovrw>
+			<tmdb_score>7.3</tmdb_score>
+			<trailer_link>https://www.youtube.com/watch?v=8dwe7GR9kO4</trailer_link>
+			<poster>https://image.tmdb.org/t/p/w300_and_h450_bestv2/qy0W1KssDhGbtisBGKZHlcuuYqn.jpg</poster>
+			<last_update_tmdb>2021-09-12 15:00:07.313234</last_update_tmdb>
+			<hit_tmdb>True</hit_tmdb>
+			<awards>None</awards>
+			<meta_score>None</meta_score>
+			<rated>None</rated>
+			<rott_score>None</rott_score>
+			<omdb_score>None</omdb_score>
+			<last_update_omdb>2021-09-12 15:00:07.649246</last_update_omdb>
+			<hit_omdb>False</hit_omdb>
+			<in_my_movies>False</in_my_movies>
+			<seen_type>0</seen_type>
+			<year>2011</year>
+			<genre>comedy, drama</genre>
+			<runtime>107</runtime>
+			<imdb_score>7.1</imdb_score>
+			<score>7.3</score>
+			<my_imdb_score>None</my_imdb_score>
+			<seen_date>None</seen_date>
+			<resolution>720p</resolution>
+			<trend/>
+			<trailer>https://www.youtube.com/watch?v=8dwe7GR9kO4</trailer>
+			<torr_link_seed>http://192.168.1.99:9092/torr_api?torr_id=751200&amp;imdb_id=1445520&amp;resolution=720&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_seed>
+			<torr_link_download>http://192.168.1.99:9092/torr_api?torr_id=751200&amp;imdb_id=1445520&amp;resolution=720&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_download>
+		</trnt>
+	</movie>
+	<movie id_imdb="tt0114369">
+		<id>751199</id>
+		<name>Se7en.1995.1080p.BluRay.DD5.1.x264-playHD</name>
+		<imdb>tt0114369</imdb>
+		<freeleech>True</freeleech>
+		<doubleup>0</doubleup>
+		<upload_date>2021-09-12 15:09:26</upload_date>
+		<download_link>https://filelist.io/download.php?id=751199&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
+		<size>19.1</size>
+		<internal>1</internal>
+		<moderated>1</moderated>
+		<category>Filme HD-RO</category>
+		<seeders>48</seeders>
+		<leechers>8</leechers>
+		<times_completed>52</times_completed>
+		<comments>3</comments>
+		<files>1</files>
+		<small_description>Crime, Drama, Mystery</small_description>
+		<cast>Morgan Freeman, Brad Pitt, Kevin Spacey, Andrew Kevin Walker</cast>
+		<genres>crime, drama, mystery</genres>
+		<imdbID>114369</imdbID>
+		<titleType>movie</titleType>
+		<averageRating>8.6</averageRating>
+		<title>Se7en</title>
+		<originalTitle>Se7en</originalTitle>
+		<startYear>1995</startYear>
+		<numVotes>1512778</numVotes>
+		<runtimeMinutes>127</runtimeMinutes>
+		<imdb_id>114369</imdb_id>
+		<country>None</country>
+		<lang>None</lang>
+		<ovrw>Two homicide detectives are on a desperate hunt for a serial killer whose crimes are based on the 'seven deadly sins' in this dark and haunting film that takes viewers from the tortured remains of one victim to the next. The seasoned Det. Sommerset researches each sin in an effort to get inside the killer's mind, while his novice partner, Mills, scoffs at his efforts to unravel the case.</ovrw>
+		<tmdb_score>8.3</tmdb_score>
+		<trailer_link>https://www.youtube.com/watch?v=SpKbZ_3zlb0</trailer_link>
+		<poster>https://image.tmdb.org/t/p/w300_and_h450_bestv2/69Sns8WoET6CfaYlIkHbla4l7nC.jpg</poster>
+		<last_update_tmdb>2021-09-12 15:00:08.694867</last_update_tmdb>
+		<hit_tmdb>True</hit_tmdb>
+		<awards>None</awards>
+		<meta_score>None</meta_score>
+		<rated>None</rated>
+		<rott_score>None</rott_score>
+		<omdb_score>None</omdb_score>
+		<last_update_omdb>2021-09-12 15:00:10.100838</last_update_omdb>
+		<hit_omdb>False</hit_omdb>
+		<in_my_movies>False</in_my_movies>
+		<seen_type>0</seen_type>
+		<year>1995</year>
+		<genre>crime, drama, mystery</genre>
+		<runtime>127</runtime>
+		<imdb_score>8.6</imdb_score>
+		<score>8.3</score>
+		<my_imdb_score>None</my_imdb_score>
+		<seen_date>None</seen_date>
+		<resolution>1080p</resolution>
+		<trend/>
+		<trailer>https://www.youtube.com/watch?v=SpKbZ_3zlb0</trailer>
+		<torr_link_seed>http://192.168.1.99:9092/torr_api?torr_id=751199&amp;imdb_id=114369&amp;resolution=1080&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_seed>
+		<torr_link_download>http://192.168.1.99:9092/torr_api?torr_id=751199&amp;imdb_id=114369&amp;resolution=1080&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_download>
+		<trnt id="751199">
+			<id>751199</id>
+			<name>Se7en.1995.1080p.BluRay.DD5.1.x264-playHD</name>
+			<imdb>tt0114369</imdb>
+			<freeleech>True</freeleech>
+			<doubleup>0</doubleup>
+			<upload_date>2021-09-12 15:09:26</upload_date>
+			<download_link>https://filelist.io/download.php?id=751199&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
+			<size>19.1</size>
+			<internal>1</internal>
+			<moderated>1</moderated>
+			<category>Filme HD-RO</category>
+			<seeders>48</seeders>
+			<leechers>8</leechers>
+			<times_completed>52</times_completed>
+			<comments>3</comments>
+			<files>1</files>
+			<small_description>Crime, Drama, Mystery</small_description>
+			<cast>Morgan Freeman, Brad Pitt, Kevin Spacey, Andrew Kevin Walker</cast>
+			<genres>crime, drama, mystery</genres>
+			<imdbID>114369</imdbID>
+			<titleType>movie</titleType>
+			<averageRating>8.6</averageRating>
+			<title>Se7en</title>
+			<originalTitle>Se7en</originalTitle>
+			<startYear>1995</startYear>
+			<numVotes>1512778</numVotes>
+			<runtimeMinutes>127</runtimeMinutes>
+			<imdb_id>114369</imdb_id>
+			<country>None</country>
+			<lang>None</lang>
+			<ovrw>Two homicide detectives are on a desperate hunt for a serial killer whose crimes are based on the 'seven deadly sins' in this dark and haunting film that takes viewers from the tortured remains of one victim to the next. The seasoned Det. Sommerset researches each sin in an effort to get inside the killer's mind, while his novice partner, Mills, scoffs at his efforts to unravel the case.</ovrw>
+			<tmdb_score>8.3</tmdb_score>
+			<trailer_link>https://www.youtube.com/watch?v=SpKbZ_3zlb0</trailer_link>
+			<poster>https://image.tmdb.org/t/p/w300_and_h450_bestv2/69Sns8WoET6CfaYlIkHbla4l7nC.jpg</poster>
+			<last_update_tmdb>2021-09-12 15:00:08.694867</last_update_tmdb>
+			<hit_tmdb>True</hit_tmdb>
+			<awards>None</awards>
+			<meta_score>None</meta_score>
+			<rated>None</rated>
+			<rott_score>None</rott_score>
+			<omdb_score>None</omdb_score>
+			<last_update_omdb>2021-09-12 15:00:10.100838</last_update_omdb>
+			<hit_omdb>False</hit_omdb>
+			<in_my_movies>False</in_my_movies>
+			<seen_type>0</seen_type>
+			<year>1995</year>
+			<genre>crime, drama, mystery</genre>
+			<runtime>127</runtime>
+			<imdb_score>8.6</imdb_score>
+			<score>8.3</score>
+			<my_imdb_score>None</my_imdb_score>
+			<seen_date>None</seen_date>
+			<resolution>1080p</resolution>
+			<trend/>
+			<trailer>https://www.youtube.com/watch?v=SpKbZ_3zlb0</trailer>
+			<torr_link_seed>http://192.168.1.99:9092/torr_api?torr_id=751199&amp;imdb_id=114369&amp;resolution=1080&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_seed>
+			<torr_link_download>http://192.168.1.99:9092/torr_api?torr_id=751199&amp;imdb_id=114369&amp;resolution=1080&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_download>
+		</trnt>
+		<trnt id="751168">
+			<id>751168</id>
+			<name>Se7en.1995.720p.BluRay.DD5.1.x264-playHD</name>
+			<imdb>tt0114369</imdb>
+			<freeleech>True</freeleech>
+			<doubleup>0</doubleup>
+			<upload_date>2021-09-12 12:12:08</upload_date>
+			<download_link>https://filelist.io/download.php?id=751168&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
+			<size>10.1</size>
+			<internal>1</internal>
+			<moderated>1</moderated>
+			<category>Filme HD-RO</category>
+			<seeders>82</seeders>
+			<leechers>13</leechers>
+			<times_completed>87</times_completed>
+			<comments>3</comments>
+			<files>1</files>
+			<small_description>Crime, Drama, Mystery</small_description>
+			<cast>Morgan Freeman, Brad Pitt, Kevin Spacey, Andrew Kevin Walker</cast>
+			<genres>crime, drama, mystery</genres>
+			<imdbID>114369</imdbID>
+			<titleType>movie</titleType>
+			<averageRating>8.6</averageRating>
+			<title>Se7en</title>
+			<originalTitle>Se7en</originalTitle>
+			<startYear>1995</startYear>
+			<numVotes>1512778</numVotes>
+			<runtimeMinutes>127</runtimeMinutes>
+			<imdb_id>114369</imdb_id>
+			<country>None</country>
+			<lang>None</lang>
+			<ovrw>Two homicide detectives are on a desperate hunt for a serial killer whose crimes are based on the 'seven deadly sins' in this dark and haunting film that takes viewers from the tortured remains of one victim to the next. The seasoned Det. Sommerset researches each sin in an effort to get inside the killer's mind, while his novice partner, Mills, scoffs at his efforts to unravel the case.</ovrw>
+			<tmdb_score>8.3</tmdb_score>
+			<trailer_link>https://www.youtube.com/watch?v=SpKbZ_3zlb0</trailer_link>
+			<poster>https://image.tmdb.org/t/p/w300_and_h450_bestv2/69Sns8WoET6CfaYlIkHbla4l7nC.jpg</poster>
+			<last_update_tmdb>2021-09-12 15:00:08.694867</last_update_tmdb>
+			<hit_tmdb>True</hit_tmdb>
+			<awards>None</awards>
+			<meta_score>None</meta_score>
+			<rated>None</rated>
+			<rott_score>None</rott_score>
+			<omdb_score>None</omdb_score>
+			<last_update_omdb>2021-09-12 15:00:14.246072</last_update_omdb>
+			<hit_omdb>False</hit_omdb>
+			<in_my_movies>False</in_my_movies>
+			<seen_type>0</seen_type>
+			<year>1995</year>
+			<genre>crime, drama, mystery</genre>
+			<runtime>127</runtime>
+			<imdb_score>8.6</imdb_score>
+			<score>8.3</score>
+			<my_imdb_score>None</my_imdb_score>
+			<seen_date>None</seen_date>
+			<resolution>720p</resolution>
+			<trend/>
+			<trailer>https://www.youtube.com/watch?v=SpKbZ_3zlb0</trailer>
+			<torr_link_seed>http://192.168.1.99:9092/torr_api?torr_id=751168&amp;imdb_id=114369&amp;resolution=720&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_seed>
+			<torr_link_download>http://192.168.1.99:9092/torr_api?torr_id=751168&amp;imdb_id=114369&amp;resolution=720&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_download>
+		</trnt>
+	</movie>
+	<movie id_imdb="tt0454065">
+		<id>751198</id>
+		<name>The.Aerial.2007.1080p.NF.WEB-DL.DDP2.0.x264-TEPES</name>
+		<imdb>tt0454065</imdb>
+		<freeleech>True</freeleech>
+		<doubleup>0</doubleup>
+		<upload_date>2021-09-12 15:02:38</upload_date>
+		<download_link>https://filelist.io/download.php?id=751198&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
+		<size>3.5</size>
+		<internal>0</internal>
+		<moderated>1</moderated>
+		<category>Filme HD-RO</category>
+		<seeders>34</seeders>
+		<leechers>1</leechers>
+		<times_completed>42</times_completed>
+		<comments>0</comments>
+		<files>2</files>
+		<small_description>Drama, Fantasy, Sci-Fi</small_description>
+		<cast>Alejandro Urdapilleta, Valeria Bertuccelli, Julieta Cardinali, Rafael Ferro, Florencia Raggi</cast>
+		<genres>drama, fantasy, sci-fi</genres>
+		<imdbID>454065</imdbID>
+		<titleType>movie</titleType>
+		<averageRating>7.4</averageRating>
+		<title>The Aerial</title>
+		<originalTitle>La antena</originalTitle>
+		<startYear>2007</startYear>
+		<numVotes>4181</numVotes>
+		<runtimeMinutes>99</runtimeMinutes>
+		<imdb_id>454065</imdb_id>
+		<country>None</country>
+		<lang>None</lang>
+		<ovrw>The denizens of a nameless city 'in the year XX' have lost their voices. People communicate by mouthing out words that are spelled mid-air. The only person who has kept the use of her voice is La Voz ('the voice'), a singer working for the sole TV channel broadcast in the city, run by Mr. TV, who desires La Voz. La Voz wears a hood over her head that hides away her face. She has a son called Tomás, an eyeless little kid who nonetheless also has a voice (although this is kept a secret). Tomás lives next door to Ana, whom he one day befriends after a letter addressed to his house is erroneously delivered to hers.</ovrw>
+		<tmdb_score>6.9</tmdb_score>
+		<trailer_link>https://www.youtube.com/watch?v=l6ATFt4eE30</trailer_link>
+		<poster>https://image.tmdb.org/t/p/w300_and_h450_bestv2/hHe7E6zHtSnqa0iI7EO54jrHySE.jpg</poster>
+		<last_update_tmdb>2021-09-12 15:00:11.066224</last_update_tmdb>
+		<hit_tmdb>True</hit_tmdb>
+		<awards>None</awards>
+		<meta_score>None</meta_score>
+		<rated>None</rated>
+		<rott_score>None</rott_score>
+		<omdb_score>None</omdb_score>
+		<last_update_omdb>2021-09-12 15:00:11.396824</last_update_omdb>
+		<hit_omdb>False</hit_omdb>
+		<in_my_movies>False</in_my_movies>
+		<seen_type>0</seen_type>
+		<year>2007</year>
+		<genre>drama, fantasy, sci-fi</genre>
+		<runtime>99</runtime>
+		<imdb_score>7.4</imdb_score>
+		<score>6.9</score>
+		<my_imdb_score>None</my_imdb_score>
+		<seen_date>None</seen_date>
+		<resolution>1080p</resolution>
+		<trend/>
+		<trailer>https://www.youtube.com/watch?v=l6ATFt4eE30</trailer>
+		<torr_link_seed>http://192.168.1.99:9092/torr_api?torr_id=751198&amp;imdb_id=454065&amp;resolution=1080&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_seed>
+		<torr_link_download>http://192.168.1.99:9092/torr_api?torr_id=751198&amp;imdb_id=454065&amp;resolution=1080&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_download>
+		<trnt id="751198">
+			<id>751198</id>
+			<name>The.Aerial.2007.1080p.NF.WEB-DL.DDP2.0.x264-TEPES</name>
+			<imdb>tt0454065</imdb>
+			<freeleech>True</freeleech>
+			<doubleup>0</doubleup>
+			<upload_date>2021-09-12 15:02:38</upload_date>
+			<download_link>https://filelist.io/download.php?id=751198&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
+			<size>3.5</size>
+			<internal>0</internal>
+			<moderated>1</moderated>
+			<category>Filme HD-RO</category>
+			<seeders>34</seeders>
+			<leechers>1</leechers>
+			<times_completed>42</times_completed>
+			<comments>0</comments>
+			<files>2</files>
+			<small_description>Drama, Fantasy, Sci-Fi</small_description>
+			<cast>Alejandro Urdapilleta, Valeria Bertuccelli, Julieta Cardinali, Rafael Ferro, Florencia Raggi</cast>
+			<genres>drama, fantasy, sci-fi</genres>
+			<imdbID>454065</imdbID>
+			<titleType>movie</titleType>
+			<averageRating>7.4</averageRating>
+			<title>The Aerial</title>
+			<originalTitle>La antena</originalTitle>
+			<startYear>2007</startYear>
+			<numVotes>4181</numVotes>
+			<runtimeMinutes>99</runtimeMinutes>
+			<imdb_id>454065</imdb_id>
+			<country>None</country>
+			<lang>None</lang>
+			<ovrw>The denizens of a nameless city 'in the year XX' have lost their voices. People communicate by mouthing out words that are spelled mid-air. The only person who has kept the use of her voice is La Voz ('the voice'), a singer working for the sole TV channel broadcast in the city, run by Mr. TV, who desires La Voz. La Voz wears a hood over her head that hides away her face. She has a son called Tomás, an eyeless little kid who nonetheless also has a voice (although this is kept a secret). Tomás lives next door to Ana, whom he one day befriends after a letter addressed to his house is erroneously delivered to hers.</ovrw>
+			<tmdb_score>6.9</tmdb_score>
+			<trailer_link>https://www.youtube.com/watch?v=l6ATFt4eE30</trailer_link>
+			<poster>https://image.tmdb.org/t/p/w300_and_h450_bestv2/hHe7E6zHtSnqa0iI7EO54jrHySE.jpg</poster>
+			<last_update_tmdb>2021-09-12 15:00:11.066224</last_update_tmdb>
+			<hit_tmdb>True</hit_tmdb>
+			<awards>None</awards>
+			<meta_score>None</meta_score>
+			<rated>None</rated>
+			<rott_score>None</rott_score>
+			<omdb_score>None</omdb_score>
+			<last_update_omdb>2021-09-12 15:00:11.396824</last_update_omdb>
+			<hit_omdb>False</hit_omdb>
+			<in_my_movies>False</in_my_movies>
+			<seen_type>0</seen_type>
+			<year>2007</year>
+			<genre>drama, fantasy, sci-fi</genre>
+			<runtime>99</runtime>
+			<imdb_score>7.4</imdb_score>
+			<score>6.9</score>
+			<my_imdb_score>None</my_imdb_score>
+			<seen_date>None</seen_date>
+			<resolution>1080p</resolution>
+			<trend/>
+			<trailer>https://www.youtube.com/watch?v=l6ATFt4eE30</trailer>
+			<torr_link_seed>http://192.168.1.99:9092/torr_api?torr_id=751198&amp;imdb_id=454065&amp;resolution=1080&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_seed>
+			<torr_link_download>http://192.168.1.99:9092/torr_api?torr_id=751198&amp;imdb_id=454065&amp;resolution=1080&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_download>
+		</trnt>
+		<trnt id="751197">
+			<id>751197</id>
+			<name>The.Aerial.2007.720p.NF.WEB-DL.DDP2.0.x264-TEPES</name>
+			<imdb>tt0454065</imdb>
+			<freeleech>True</freeleech>
+			<doubleup>0</doubleup>
+			<upload_date>2021-09-12 15:02:33</upload_date>
+			<download_link>https://filelist.io/download.php?id=751197&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
+			<size>1.9</size>
+			<internal>0</internal>
+			<moderated>1</moderated>
+			<category>Filme HD-RO</category>
+			<seeders>24</seeders>
+			<leechers>0</leechers>
+			<times_completed>31</times_completed>
+			<comments>0</comments>
+			<files>2</files>
+			<small_description>Drama, Fantasy, Sci-Fi</small_description>
+			<cast>Alejandro Urdapilleta, Valeria Bertuccelli, Julieta Cardinali, Rafael Ferro, Florencia Raggi</cast>
+			<genres>drama, fantasy, sci-fi</genres>
+			<imdbID>454065</imdbID>
+			<titleType>movie</titleType>
+			<averageRating>7.4</averageRating>
+			<title>The Aerial</title>
+			<originalTitle>La antena</originalTitle>
+			<startYear>2007</startYear>
+			<numVotes>4181</numVotes>
+			<runtimeMinutes>99</runtimeMinutes>
+			<imdb_id>454065</imdb_id>
+			<country>None</country>
+			<lang>None</lang>
+			<ovrw>The denizens of a nameless city 'in the year XX' have lost their voices. People communicate by mouthing out words that are spelled mid-air. The only person who has kept the use of her voice is La Voz ('the voice'), a singer working for the sole TV channel broadcast in the city, run by Mr. TV, who desires La Voz. La Voz wears a hood over her head that hides away her face. She has a son called Tomás, an eyeless little kid who nonetheless also has a voice (although this is kept a secret). Tomás lives next door to Ana, whom he one day befriends after a letter addressed to his house is erroneously delivered to hers.</ovrw>
+			<tmdb_score>6.9</tmdb_score>
+			<trailer_link>https://www.youtube.com/watch?v=l6ATFt4eE30</trailer_link>
+			<poster>https://image.tmdb.org/t/p/w300_and_h450_bestv2/hHe7E6zHtSnqa0iI7EO54jrHySE.jpg</poster>
+			<last_update_tmdb>2021-09-12 15:00:11.066224</last_update_tmdb>
+			<hit_tmdb>True</hit_tmdb>
+			<awards>None</awards>
+			<meta_score>None</meta_score>
+			<rated>None</rated>
+			<rott_score>None</rott_score>
+			<omdb_score>None</omdb_score>
+			<last_update_omdb>2021-09-12 15:00:11.538946</last_update_omdb>
+			<hit_omdb>False</hit_omdb>
+			<in_my_movies>False</in_my_movies>
+			<seen_type>0</seen_type>
+			<year>2007</year>
+			<genre>drama, fantasy, sci-fi</genre>
+			<runtime>99</runtime>
+			<imdb_score>7.4</imdb_score>
 			<score>6.9</score>
 			<my_imdb_score>None</my_imdb_score>
 			<seen_date>None</seen_date>
 			<resolution>720p</resolution>
 			<trend/>
-			<trailer>https://www.youtube.com/watch?v=W_1dKoCQlxY</trailer>
-			<torr_link_seed>http://192.168.1.99:9092/torr_api?torr_id=751083&amp;imdb_id=119314&amp;resolution=720&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_seed>
-			<torr_link_download>http://192.168.1.99:9092/torr_api?torr_id=751083&amp;imdb_id=119314&amp;resolution=720&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_download>
+			<trailer>https://www.youtube.com/watch?v=l6ATFt4eE30</trailer>
+			<torr_link_seed>http://192.168.1.99:9092/torr_api?torr_id=751197&amp;imdb_id=454065&amp;resolution=720&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_seed>
+			<torr_link_download>http://192.168.1.99:9092/torr_api?torr_id=751197&amp;imdb_id=454065&amp;resolution=720&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_download>
+		</trnt>
+	</movie>
+	<movie id_imdb="tt0462200">
+		<id>751194</id>
+		<name>Black.Snake.Moan.2006.1080p.BluRay.DD5.1.x264-CtrlHD</name>
+		<imdb>tt0462200</imdb>
+		<freeleech>True</freeleech>
+		<doubleup>0</doubleup>
+		<upload_date>2021-09-12 14:52:42</upload_date>
+		<download_link>https://filelist.io/download.php?id=751194&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
+		<size>13.6</size>
+		<internal>0</internal>
+		<moderated>1</moderated>
+		<category>Filme HD-RO</category>
+		<seeders>49</seeders>
+		<leechers>7</leechers>
+		<times_completed>57</times_completed>
+		<comments>0</comments>
+		<files>2</files>
+		<small_description>Drama, Music</small_description>
+		<cast>Christina Ricci, Samuel L. Jackson, Justin Timberlake, S. Epatha Merkerson</cast>
+		<genres>drama, music</genres>
+		<imdbID>462200</imdbID>
+		<titleType>movie</titleType>
+		<averageRating>6.9</averageRating>
+		<title>Black Snake Moan</title>
+		<originalTitle>Black Snake Moan</originalTitle>
+		<startYear>2006</startYear>
+		<numVotes>62350</numVotes>
+		<runtimeMinutes>116</runtimeMinutes>
+		<imdb_id>462200</imdb_id>
+		<country>None</country>
+		<lang>None</lang>
+		<ovrw>A God-fearing bluesman takes to a wild young woman who, as a victim of childhood sexual abuse, is looking everywhere for love, but never quite finding it.</ovrw>
+		<tmdb_score>6.9</tmdb_score>
+		<trailer_link>https://www.youtube.com/watch?v=VYMqX3SKIGY</trailer_link>
+		<poster>https://image.tmdb.org/t/p/w300_and_h450_bestv2/pT7sB08oyNda5zIjeQ8qnjmkPMe.jpg</poster>
+		<last_update_tmdb>2021-09-12 15:00:12.486834</last_update_tmdb>
+		<hit_tmdb>True</hit_tmdb>
+		<awards>None</awards>
+		<meta_score>None</meta_score>
+		<rated>None</rated>
+		<rott_score>None</rott_score>
+		<omdb_score>None</omdb_score>
+		<last_update_omdb>2021-09-12 15:00:12.802823</last_update_omdb>
+		<hit_omdb>False</hit_omdb>
+		<in_my_movies>False</in_my_movies>
+		<seen_type>0</seen_type>
+		<year>2006</year>
+		<genre>drama, music</genre>
+		<runtime>116</runtime>
+		<imdb_score>6.9</imdb_score>
+		<score>6.9</score>
+		<my_imdb_score>None</my_imdb_score>
+		<seen_date>None</seen_date>
+		<resolution>1080p</resolution>
+		<trend/>
+		<trailer>https://www.youtube.com/watch?v=VYMqX3SKIGY</trailer>
+		<torr_link_seed>http://192.168.1.99:9092/torr_api?torr_id=751194&amp;imdb_id=462200&amp;resolution=1080&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_seed>
+		<torr_link_download>http://192.168.1.99:9092/torr_api?torr_id=751194&amp;imdb_id=462200&amp;resolution=1080&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_download>
+		<trnt id="751194">
+			<id>751194</id>
+			<name>Black.Snake.Moan.2006.1080p.BluRay.DD5.1.x264-CtrlHD</name>
+			<imdb>tt0462200</imdb>
+			<freeleech>True</freeleech>
+			<doubleup>0</doubleup>
+			<upload_date>2021-09-12 14:52:42</upload_date>
+			<download_link>https://filelist.io/download.php?id=751194&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
+			<size>13.6</size>
+			<internal>0</internal>
+			<moderated>1</moderated>
+			<category>Filme HD-RO</category>
+			<seeders>49</seeders>
+			<leechers>7</leechers>
+			<times_completed>57</times_completed>
+			<comments>0</comments>
+			<files>2</files>
+			<small_description>Drama, Music</small_description>
+			<cast>Christina Ricci, Samuel L. Jackson, Justin Timberlake, S. Epatha Merkerson</cast>
+			<genres>drama, music</genres>
+			<imdbID>462200</imdbID>
+			<titleType>movie</titleType>
+			<averageRating>6.9</averageRating>
+			<title>Black Snake Moan</title>
+			<originalTitle>Black Snake Moan</originalTitle>
+			<startYear>2006</startYear>
+			<numVotes>62350</numVotes>
+			<runtimeMinutes>116</runtimeMinutes>
+			<imdb_id>462200</imdb_id>
+			<country>None</country>
+			<lang>None</lang>
+			<ovrw>A God-fearing bluesman takes to a wild young woman who, as a victim of childhood sexual abuse, is looking everywhere for love, but never quite finding it.</ovrw>
+			<tmdb_score>6.9</tmdb_score>
+			<trailer_link>https://www.youtube.com/watch?v=VYMqX3SKIGY</trailer_link>
+			<poster>https://image.tmdb.org/t/p/w300_and_h450_bestv2/pT7sB08oyNda5zIjeQ8qnjmkPMe.jpg</poster>
+			<last_update_tmdb>2021-09-12 15:00:12.486834</last_update_tmdb>
+			<hit_tmdb>True</hit_tmdb>
+			<awards>None</awards>
+			<meta_score>None</meta_score>
+			<rated>None</rated>
+			<rott_score>None</rott_score>
+			<omdb_score>None</omdb_score>
+			<last_update_omdb>2021-09-12 15:00:12.802823</last_update_omdb>
+			<hit_omdb>False</hit_omdb>
+			<in_my_movies>False</in_my_movies>
+			<seen_type>0</seen_type>
+			<year>2006</year>
+			<genre>drama, music</genre>
+			<runtime>116</runtime>
+			<imdb_score>6.9</imdb_score>
+			<score>6.9</score>
+			<my_imdb_score>None</my_imdb_score>
+			<seen_date>None</seen_date>
+			<resolution>1080p</resolution>
+			<trend/>
+			<trailer>https://www.youtube.com/watch?v=VYMqX3SKIGY</trailer>
+			<torr_link_seed>http://192.168.1.99:9092/torr_api?torr_id=751194&amp;imdb_id=462200&amp;resolution=1080&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_seed>
+			<torr_link_download>http://192.168.1.99:9092/torr_api?torr_id=751194&amp;imdb_id=462200&amp;resolution=1080&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_download>
+		</trnt>
+	</movie>
+	<movie id_imdb="tt0095705">
+		<id>751182</id>
+		<name>The.Naked.Gun.From.the.Files.of.Police.Squad!.1988.720p.BluRay.DTS.x264-CRiSC</name>
+		<imdb>tt0095705</imdb>
+		<freeleech>True</freeleech>
+		<doubleup>0</doubleup>
+		<upload_date>2021-09-12 13:38:38</upload_date>
+		<download_link>https://filelist.io/download.php?id=751182&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
+		<size>7.8</size>
+		<internal>0</internal>
+		<moderated>1</moderated>
+		<category>Filme HD-RO</category>
+		<seeders>49</seeders>
+		<leechers>3</leechers>
+		<times_completed>64</times_completed>
+		<comments>0</comments>
+		<files>2</files>
+		<small_description>Comedy, Crime</small_description>
+		<cast>Leslie Nielsen, Priscilla Presley, O.J. Simpson, Ricardo Montalban</cast>
+		<genres>comedy, crime</genres>
+		<imdbID>95705</imdbID>
+		<titleType>movie</titleType>
+		<averageRating>7.6</averageRating>
+		<title>The Naked Gun: from the Files of Police Squad!</title>
+		<originalTitle>The Naked Gun: From the Files of Police Squad!</originalTitle>
+		<startYear>1988</startYear>
+		<numVotes>160107</numVotes>
+		<runtimeMinutes>85</runtimeMinutes>
+		<imdb_id>95705</imdb_id>
+		<country>None</country>
+		<lang>None</lang>
+		<ovrw>When the incompetent Lieutenant Frank Drebin seeks the ruthless killer of his partner, he stumbles upon an attempt to assassinate Queen Elizabeth II.</ovrw>
+		<tmdb_score>7.2</tmdb_score>
+		<trailer_link>https://www.youtube.com/watch?v=PACTQutbow4</trailer_link>
+		<poster>https://image.tmdb.org/t/p/w300_and_h450_bestv2/zT0mhZqZQJE1gSY5Eg9qcGP4NYo.jpg</poster>
+		<last_update_tmdb>2021-09-12 15:00:13.756255</last_update_tmdb>
+		<hit_tmdb>True</hit_tmdb>
+		<awards>None</awards>
+		<meta_score>None</meta_score>
+		<rated>None</rated>
+		<rott_score>None</rott_score>
+		<omdb_score>None</omdb_score>
+		<last_update_omdb>2021-09-12 15:00:14.097819</last_update_omdb>
+		<hit_omdb>False</hit_omdb>
+		<in_my_movies>False</in_my_movies>
+		<seen_type>0</seen_type>
+		<year>1988</year>
+		<genre>comedy, crime</genre>
+		<runtime>85</runtime>
+		<imdb_score>7.6</imdb_score>
+		<score>7.2</score>
+		<my_imdb_score>None</my_imdb_score>
+		<seen_date>None</seen_date>
+		<resolution>720p</resolution>
+		<trend/>
+		<trailer>https://www.youtube.com/watch?v=PACTQutbow4</trailer>
+		<torr_link_seed>http://192.168.1.99:9092/torr_api?torr_id=751182&amp;imdb_id=95705&amp;resolution=720&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_seed>
+		<torr_link_download>http://192.168.1.99:9092/torr_api?torr_id=751182&amp;imdb_id=95705&amp;resolution=720&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_download>
+		<trnt id="751182">
+			<id>751182</id>
+			<name>The.Naked.Gun.From.the.Files.of.Police.Squad!.1988.720p.BluRay.DTS.x264-CRiSC</name>
+			<imdb>tt0095705</imdb>
+			<freeleech>True</freeleech>
+			<doubleup>0</doubleup>
+			<upload_date>2021-09-12 13:38:38</upload_date>
+			<download_link>https://filelist.io/download.php?id=751182&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
+			<size>7.8</size>
+			<internal>0</internal>
+			<moderated>1</moderated>
+			<category>Filme HD-RO</category>
+			<seeders>49</seeders>
+			<leechers>3</leechers>
+			<times_completed>64</times_completed>
+			<comments>0</comments>
+			<files>2</files>
+			<small_description>Comedy, Crime</small_description>
+			<cast>Leslie Nielsen, Priscilla Presley, O.J. Simpson, Ricardo Montalban</cast>
+			<genres>comedy, crime</genres>
+			<imdbID>95705</imdbID>
+			<titleType>movie</titleType>
+			<averageRating>7.6</averageRating>
+			<title>The Naked Gun: from the Files of Police Squad!</title>
+			<originalTitle>The Naked Gun: From the Files of Police Squad!</originalTitle>
+			<startYear>1988</startYear>
+			<numVotes>160107</numVotes>
+			<runtimeMinutes>85</runtimeMinutes>
+			<imdb_id>95705</imdb_id>
+			<country>None</country>
+			<lang>None</lang>
+			<ovrw>When the incompetent Lieutenant Frank Drebin seeks the ruthless killer of his partner, he stumbles upon an attempt to assassinate Queen Elizabeth II.</ovrw>
+			<tmdb_score>7.2</tmdb_score>
+			<trailer_link>https://www.youtube.com/watch?v=PACTQutbow4</trailer_link>
+			<poster>https://image.tmdb.org/t/p/w300_and_h450_bestv2/zT0mhZqZQJE1gSY5Eg9qcGP4NYo.jpg</poster>
+			<last_update_tmdb>2021-09-12 15:00:13.756255</last_update_tmdb>
+			<hit_tmdb>True</hit_tmdb>
+			<awards>None</awards>
+			<meta_score>None</meta_score>
+			<rated>None</rated>
+			<rott_score>None</rott_score>
+			<omdb_score>None</omdb_score>
+			<last_update_omdb>2021-09-12 15:00:14.097819</last_update_omdb>
+			<hit_omdb>False</hit_omdb>
+			<in_my_movies>False</in_my_movies>
+			<seen_type>0</seen_type>
+			<year>1988</year>
+			<genre>comedy, crime</genre>
+			<runtime>85</runtime>
+			<imdb_score>7.6</imdb_score>
+			<score>7.2</score>
+			<my_imdb_score>None</my_imdb_score>
+			<seen_date>None</seen_date>
+			<resolution>720p</resolution>
+			<trend/>
+			<trailer>https://www.youtube.com/watch?v=PACTQutbow4</trailer>
+			<torr_link_seed>http://192.168.1.99:9092/torr_api?torr_id=751182&amp;imdb_id=95705&amp;resolution=720&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_seed>
+			<torr_link_download>http://192.168.1.99:9092/torr_api?torr_id=751182&amp;imdb_id=95705&amp;resolution=720&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_download>
+		</trnt>
+	</movie>
+	<movie id_imdb="tt0104348">
+		<id>751132</id>
+		<name>Glengarry.Glen.Ross.1992.1080p.BluRay.DD5.1.x264-CtrlHD</name>
+		<imdb>tt0104348</imdb>
+		<freeleech>True</freeleech>
+		<doubleup>0</doubleup>
+		<upload_date>2021-09-12 00:43:05</upload_date>
+		<download_link>https://filelist.io/download.php?id=751132&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
+		<size>14.3</size>
+		<internal>0</internal>
+		<moderated>1</moderated>
+		<category>Filme HD-RO</category>
+		<seeders>70</seeders>
+		<leechers>2</leechers>
+		<times_completed>98</times_completed>
+		<comments>0</comments>
+		<files>2</files>
+		<small_description>Crime, Drama, Mystery</small_description>
+		<cast>Al Pacino, Jack Lemmon, Alec Baldwin, Alan Arkin</cast>
+		<genres>crime, drama, mystery</genres>
+		<imdbID>104348</imdbID>
+		<titleType>movie</titleType>
+		<averageRating>7.7</averageRating>
+		<title>Glengarry Glen Ross</title>
+		<originalTitle>Glengarry Glen Ross</originalTitle>
+		<startYear>1992</startYear>
+		<numVotes>100627</numVotes>
+		<runtimeMinutes>100</runtimeMinutes>
+		<imdb_id>104348</imdb_id>
+		<country>None</country>
+		<lang>None</lang>
+		<ovrw>When an office full of Chicago real estate salesmen is given the news that all but the top two will be fired at the end of the week, the atmosphere begins to heat up. Shelley Levene, who has a sick daughter, does everything in his power to get better leads from his boss, John Williamson, but to no avail. When his coworker Dave Moss comes up with a plan to steal the leads, things get complicated for the tough-talking salesmen.</ovrw>
+		<tmdb_score>7.4</tmdb_score>
+		<trailer_link>https://www.youtube.com/watch?v=QgAU2RJHfvE</trailer_link>
+		<poster>https://image.tmdb.org/t/p/w300_and_h450_bestv2/zcaEDx8KlVfh4vKfMNLhiSi5Oz4.jpg</poster>
+		<last_update_tmdb>2021-09-12 09:57:43.749663</last_update_tmdb>
+		<hit_tmdb>True</hit_tmdb>
+		<awards>None</awards>
+		<meta_score>None</meta_score>
+		<rated>None</rated>
+		<rott_score>None</rott_score>
+		<omdb_score>None</omdb_score>
+		<last_update_omdb>2021-09-12 15:00:14.660796</last_update_omdb>
+		<hit_omdb>False</hit_omdb>
+		<in_my_movies>False</in_my_movies>
+		<seen_type>0</seen_type>
+		<year>1992</year>
+		<genre>crime, drama, mystery</genre>
+		<runtime>100</runtime>
+		<imdb_score>7.7</imdb_score>
+		<score>7.4</score>
+		<my_imdb_score>None</my_imdb_score>
+		<seen_date>None</seen_date>
+		<resolution>1080p</resolution>
+		<trend/>
+		<trailer>https://www.youtube.com/watch?v=QgAU2RJHfvE</trailer>
+		<torr_link_seed>http://192.168.1.99:9092/torr_api?torr_id=751132&amp;imdb_id=104348&amp;resolution=1080&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_seed>
+		<torr_link_download>http://192.168.1.99:9092/torr_api?torr_id=751132&amp;imdb_id=104348&amp;resolution=1080&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_download>
+		<trnt id="751132">
+			<id>751132</id>
+			<name>Glengarry.Glen.Ross.1992.1080p.BluRay.DD5.1.x264-CtrlHD</name>
+			<imdb>tt0104348</imdb>
+			<freeleech>True</freeleech>
+			<doubleup>0</doubleup>
+			<upload_date>2021-09-12 00:43:05</upload_date>
+			<download_link>https://filelist.io/download.php?id=751132&amp;passkey=f5684696415b6f98834f1872bd03a8c1</download_link>
+			<size>14.3</size>
+			<internal>0</internal>
+			<moderated>1</moderated>
+			<category>Filme HD-RO</category>
+			<seeders>70</seeders>
+			<leechers>2</leechers>
+			<times_completed>98</times_completed>
+			<comments>0</comments>
+			<files>2</files>
+			<small_description>Crime, Drama, Mystery</small_description>
+			<cast>Al Pacino, Jack Lemmon, Alec Baldwin, Alan Arkin</cast>
+			<genres>crime, drama, mystery</genres>
+			<imdbID>104348</imdbID>
+			<titleType>movie</titleType>
+			<averageRating>7.7</averageRating>
+			<title>Glengarry Glen Ross</title>
+			<originalTitle>Glengarry Glen Ross</originalTitle>
+			<startYear>1992</startYear>
+			<numVotes>100627</numVotes>
+			<runtimeMinutes>100</runtimeMinutes>
+			<imdb_id>104348</imdb_id>
+			<country>None</country>
+			<lang>None</lang>
+			<ovrw>When an office full of Chicago real estate salesmen is given the news that all but the top two will be fired at the end of the week, the atmosphere begins to heat up. Shelley Levene, who has a sick daughter, does everything in his power to get better leads from his boss, John Williamson, but to no avail. When his coworker Dave Moss comes up with a plan to steal the leads, things get complicated for the tough-talking salesmen.</ovrw>
+			<tmdb_score>7.4</tmdb_score>
+			<trailer_link>https://www.youtube.com/watch?v=QgAU2RJHfvE</trailer_link>
+			<poster>https://image.tmdb.org/t/p/w300_and_h450_bestv2/zcaEDx8KlVfh4vKfMNLhiSi5Oz4.jpg</poster>
+			<last_update_tmdb>2021-09-12 09:57:43.749663</last_update_tmdb>
+			<hit_tmdb>True</hit_tmdb>
+			<awards>None</awards>
+			<meta_score>None</meta_score>
+			<rated>None</rated>
+			<rott_score>None</rott_score>
+			<omdb_score>None</omdb_score>
+			<last_update_omdb>2021-09-12 15:00:14.660796</last_update_omdb>
+			<hit_omdb>False</hit_omdb>
+			<in_my_movies>False</in_my_movies>
+			<seen_type>0</seen_type>
+			<year>1992</year>
+			<genre>crime, drama, mystery</genre>
+			<runtime>100</runtime>
+			<imdb_score>7.7</imdb_score>
+			<score>7.4</score>
+			<my_imdb_score>None</my_imdb_score>
+			<seen_date>None</seen_date>
+			<resolution>1080p</resolution>
+			<trend/>
+			<trailer>https://www.youtube.com/watch?v=QgAU2RJHfvE</trailer>
+			<torr_link_seed>http://192.168.1.99:9092/torr_api?torr_id=751132&amp;imdb_id=104348&amp;resolution=1080&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_seed>
+			<torr_link_download>http://192.168.1.99:9092/torr_api?torr_id=751132&amp;imdb_id=104348&amp;resolution=1080&amp;folder=%2Fmovies&amp;requested_by=1700079840</torr_link_download>
 		</trnt>
 	</movie>
 </movies>

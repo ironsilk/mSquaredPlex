@@ -58,7 +58,7 @@ def csv_upload_handler(context: CallbackContext):
                             res.append(x.data)
                             break
                 if res:
-                    my_movie = get_my_movie_by_imdb(deconvert_imdb_id(res[0]['id']))
+                    my_movie = get_my_movie_by_imdb(deconvert_imdb_id(res[0]['id']), user['telegram_chat_id'])
                     if not my_movie:
                         item = {
                             'seen_date': movie['Date'].to_pydatetime(),
@@ -78,11 +78,11 @@ def csv_upload_handler(context: CallbackContext):
             except Exception as e:
                 raise e
                 pass
-    update_many(identified_movies, Movie, [Movie.id])
+    update_many(identified_movies, Movie, Movie.id)
     context.bot.send_message(text=f"CSV update successful!\n"
                                   f"Out of {len(df)} entries in your CSV file, "
-                                  f"{len(identified_movies)} were movies while the "
-                                  f"rest of {soap_or_unidentified} were either soap episodes, "
+                                  f"{len(identified_movies)} were movies while "
+                                  f"{soap_or_unidentified} were either soap episodes, "
                                   f"series or likewise. The rest were already in your database "
                                   f"({len(df) - len(identified_movies) - soap_or_unidentified})",
                              chat_id=tgram_user)
@@ -95,7 +95,7 @@ def csv_download_handler(context: CallbackContext):
     my_movies = get_user_movies(user)
     enhanced = []
     # Get titles for each movie :)
-    for movie in my_movies[:2]:
+    for movie in my_movies:
         enhanced.append(get_movie_details(movie))
     df = pd.DataFrame(enhanced)
     # Create an in-memory file

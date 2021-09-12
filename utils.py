@@ -444,9 +444,9 @@ def get_movie_tmdb_omdb(imdb_id):
     return {**tmdb, **omdb}
 
 
-def get_my_movie_by_imdb(idd):
+def get_my_movie_by_imdb(idd, telegram_id):
     with engine.connect() as conn:
-        stmt = select(Movie).where(Movie.imdb_id == idd)
+        stmt = select(Movie).where(Movie.imdb_id == idd).where(Movie.user_id == telegram_id)
         result = conn.execute(stmt)
     if result:
         return object_as_dict(result.mappings().fetchone())

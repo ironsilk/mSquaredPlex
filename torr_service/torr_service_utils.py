@@ -56,7 +56,7 @@ class TORRAPI:
             return
         # Update in torrents DB
         db_torrent = get_torrent_by_torr_id_user(pkg['torr_id'], int(pkg['requested_by']))
-        db_torrent['status'] = 'requested_download'
+        db_torrent['status'] = 'requested download'
         db_torrent['torr_hash'] = torr_response.hashString
         update_many([db_torrent], Torrent, Torrent.id)
 
@@ -197,6 +197,6 @@ def refresher_routine():
 
 if __name__ == '__main__':
     x = TORR_REFRESHER(setup_logger('cacat'))
-    x.get_torrents()
+    #x.get_torrents()
     #x.update_statuses()
-    # refresher_routine()
+    refresher_routine()

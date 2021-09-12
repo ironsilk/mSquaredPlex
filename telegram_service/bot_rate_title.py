@@ -36,7 +36,7 @@ def bot_rate_titles(context: CallbackContext) -> None:
 def update_movie_rated_status(item, new_status):
     item = dict(item)
     item['rating_status'] = new_status
-    update_many([item], Movie, [Movie.id])
+    update_many([item], Movie, Movie.id)
 
 
 if __name__ == '__main__':

@@ -150,7 +150,8 @@ def give_imdb(update: Update, context: CallbackContext):
             photo=open(TELEGRAM_IMDB_RATINGS, 'rb'),
             caption="I'll need you to go to your IMDB account and copy here your user ID, like the one in the photo, "
                     "ur77571297. Also make sure that your Ratings are PUBLIC and so is your Watchlist (10 pages max).\n"
-                    "If this is too much, just type 'fuck it' and skip this step.",
+                    "If this is too much, just type 'fuck it' and skip this step.\n"
+                    "https://www.imdb.com/",
         )
         return CHECK_IMDB
     else:
@@ -167,11 +168,11 @@ def check_imdb(update: Update, context: CallbackContext):
 def register_user(update: Update, context: CallbackContext):
     global USERS
     # Update user to database
-    update_many([context.user_data['new_user']], User, [User.telegram_chat_id])
+    update_many([context.user_data['new_user']], User, User.telegram_chat_id)
     USERS = get_telegram_users()
     update.effective_message.reply_text("Ok, that's it. I'll take care of the rest, from now on "
                                         "anytime you type something i'll be here to help you out. Enjoy!\n"
-                                        "Type \\help to find out more.")
+                                        "Type /help to find out more.")
     return start(update, context)
 
 
@@ -234,7 +235,7 @@ def parse_imdb_id(update: Update, context: CallbackContext) -> int:
     imdb_id = ''.join([x for x in update.message.text if x.isdigit()]).lstrip('0')
 
     # Get IMDB data
-    pkg = get_movie_from_all_databases(imdb_id)
+    pkg = get_movie_from_all_databases(imdb_id, update.effective_user['id'])
     context.user_data['pkg'] = pkg
     context.user_data['more_options'] = False
 
@@ -264,7 +265,7 @@ def parse_imdb_text(update: Update, context: CallbackContext) -> int:
         imdb_id = ''.join([x for x in imdb_id if x.isdigit()]).lstrip('0')
 
         # Get IMDB data
-        pkg = get_movie_from_all_databases(imdb_id)
+        pkg = get_movie_from_all_databases(imdb_id, update.effective_user['id'])
         context.user_data['pkg'] = pkg
 
         message, image = make_movie_reply(pkg)
@@ -303,7 +304,7 @@ def choose_multiple(update: Update, context: CallbackContext) -> int:
             return IDENTIFY_MOVIE
         movie = movies.pop(0)
         # Check again if we can find it
-        pkg = get_movie_from_all_databases(movie['id'])
+        pkg = get_movie_from_all_databases(movie['id'], update.effective_user['id'])
         # context.user_data['pkg'] = pkg
         if pkg:
             context.user_data['pkg'] = pkg
@@ -564,7 +565,7 @@ def change_watchlist_command(update: Update, context: CallbackContext) -> None:
         pkg['scan_watchlist'] = 1
     else:
         pkg['scan_watchlist'] = 0
-    update_many([pkg], User, [User.telegram_chat_id])
+    update_many([pkg], User, User.telegram_chat_id)
     update.message.reply_text("Updated your watchlist preferences.")
 
 
@@ -575,7 +576,7 @@ def change_newsletter_command(update: Update, context: CallbackContext) -> None:
         pkg['email_newsletters'] = 1
     else:
         pkg['email_newsletters'] = 0
-    update_many([pkg], User, [User.telegram_chat_id])
+    update_many([pkg], User, User.telegram_chat_id)
     update.message.reply_text("Updated your newsletter preferences.")
 
 
@@ -631,19 +632,19 @@ def rate_title_entry(update: Update, context: CallbackContext) -> int:
 def submit_rating(update: Update, context: CallbackContext) -> int:
     if update.message.text in [str(x) for x in list(range(1, 11))]:
         # Got rating
-        item = get_my_movie_by_imdb(context.user_data['pkg']['imdb'])
+        item = get_my_movie_by_imdb(context.user_data['pkg']['imdb'], update.effective_user['id'])
         item['rating_status'] = 'rated in telegram'
         item['my_score'] = int(update.message.text)
-        update_many([item], Movie, [Movie.id])
+        update_many([item], Movie, Movie.id)
         update.effective_message.reply_text(f"Ok, great! Here's a link if you also want to rate it on IMDB:\n"
                                             f"https://www.imdb.com/title/"
                                             f"{convert_imdb_id(context.user_data['pkg']['imdb'])}/")
         return ConversationHandler.END
 
     elif update.message.text == "I've changed my mind":
-        item = get_my_movie_by_imdb(context.user_data['pkg']['imdb'])
+        item = get_my_movie_by_imdb(context.user_data['pkg']['imdb'], update.effective_user['id'])
         item['rating_status'] = 'refused to rate'
-        update_many([item], Movie, [Movie.id])
+        update_many([item], Movie, Movie.id)
         update.effective_message.reply_text("Ok, no worries! I won't bother you about this title anymore.\n"
                                             "Have a great day!")
         return ConversationHandler.END

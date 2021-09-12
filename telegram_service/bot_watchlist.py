@@ -83,5 +83,5 @@ def update_watchlist_item_status(movie_id, tg_id, new_status):
         'user_id': tg_id,
         'status': new_status,
     }],
-        Watchlist, [Watchlist.id])
+        Watchlist, Watchlist.id)
 

@@ -172,10 +172,10 @@ def invite_friend(email, account=None, plex=None):
     return True
 
 
-def get_movie_from_all_databases(imdb_id):
+def get_movie_from_all_databases(imdb_id, telegram_id):
     new_movie = False
     # Check if it's in my_movies:
-    my_item = get_my_movie_by_imdb(imdb_id)
+    my_item = get_my_movie_by_imdb(imdb_id, telegram_id)
     if not my_item:
         my_item = dict()
         new_movie = True
@@ -248,4 +248,5 @@ def add_to_watchlist(imdb_id, user, status, excluded_torrents=None):
 
 
 if __name__ == '__main__':
-    print(get_movie_from_all_databases(6763664))
+    # print(get_movie_from_all_databases(6763664))
+    pass

@@ -15,16 +15,15 @@ HCTI_API_KEY = os.getenv('HTML_API_KEY')
 def get_torrents_for_user(user, get_next=0, logger=setup_logger("botUtils")):
     # Get torrents from my db
     torrents = get_requested_torrents_for_tgram_user(user)
-    torrents = list(reversed([x for x in torrents if x['status'] != 'removed']))
-    # Check if there are any
-    torrents = torrents[get_next:]
-
     if torrents:
+        torrents = list(reversed([x for x in torrents if x['status'] not in ['removed', 'user notified (email)']]))
+        # Check if there are any
+        torrents = torrents[get_next:]
         # Get client torrents
         torr_client = make_client()
         client_torrents_raw = torr_client.get_torrents()
         client_torrents = {x.hashString: x for x in client_torrents_raw}
-        client_torrents_names = {x.hashString: x.name for x in client_torrents}
+        client_torrents_names = {x.hashString: x.name for x in client_torrents_raw}
 
         for torrent in torrents:
             if torrent['status'] != 'seeding':
@@ -34,8 +33,8 @@ def get_torrents_for_user(user, get_next=0, logger=setup_logger("botUtils")):
                 if torrent['torr_hash'] in client_torrents.keys():
                     torr_resp = client_torrents[torrent['torr_hash']]
                     try:
-                        torrent['progress'] = str(100 - ((torr_resp.left_until_done / torr_resp.total_size) * 100)) \
-                                              + '% '
+                        torrent['progress'] = str(100 - ((torr_resp.left_until_done /
+                                                          torr_resp.total_size) * 100))[:5] + '% '
                         torrent['date_started'] = torr_resp.date_started
                         torrent['eta'] = str(torr_resp.eta.seconds // 60) + ' minutes'
                     except Exception as e:
@@ -45,9 +44,9 @@ def get_torrents_for_user(user, get_next=0, logger=setup_logger("botUtils")):
                 torrent['progress'] = '100%'
                 torrent['date_started'] = None
                 torrent['eta'] = 'Finished'
-
         torrents = [{
-            "TorrentName": get_torr_name(client_torrents_names[x['torr_hash']]),
+            "TorrentName": get_torr_name(client_torrents_names[x['torr_hash']])
+            if x['torr_hash'] in client_torrents_names.keys() else None,
             "Resolution": x['resolution'],
             "Status": x['status'],
             "Progress": x['progress'],
