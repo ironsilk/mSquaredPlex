@@ -8,7 +8,7 @@ from xml.etree.ElementTree import SubElement
 
 import PTN
 
-from utils import OMDB, check_against_user_movies, insert_many, Torrent
+from utils import check_against_user_movies, insert_many, Torrent, get_omdb
 from utils import TMDB
 from utils import get_my_imdb_users
 from utils import get_torr_quality
@@ -399,13 +399,13 @@ class Mtls:
                     self.update_trnt_child_xml(xml_file_path, tmdb.id_imdb, '{0}'.format(item[0]),
                                                '{0}'.format(item[1]))
 
-                omdb = OMDB(id_imdb)
-                omdb.get_data()
+                omdb = get_omdb(id_imdb)
 
-                self.update_trnt_child_xml(xml_file_path, omdb.id_imdb, 'rated', '{0}'.format(omdb.rated))
+                self.update_trnt_child_xml(xml_file_path, omdb.id_imdb, 'rated', '{0}'.format(omdb['rated']))
                 self.update_trnt_child_xml(xml_file_path, omdb.id_imdb, 'imdb_score', '{0}'.format(omdb.imdb_score))
-                self.update_trnt_child_xml(xml_file_path, omdb.id_imdb, 'rott_score', '{0}'.format(omdb.rott_score))
-                self.update_trnt_child_xml(xml_file_path, omdb.id_imdb, 'meta_score', '{0}'.format(omdb.meta_score))
+                self.update_trnt_child_xml(xml_file_path, omdb.id_imdb, 'imdb_score', '{0}'.format('test'))
+                self.update_trnt_child_xml(xml_file_path, omdb.id_imdb, 'rott_score', '{0}'.format(omdb['rott_score']))
+                self.update_trnt_child_xml(xml_file_path, omdb.id_imdb, 'meta_score', '{0}'.format(omdb['meta_score']))
 
         self.xml_pritify(xml_file_path)
 
@@ -539,7 +539,7 @@ def send_email(items, cypher):
                 for item in user_items:
                     mtls = prepare_item_for_email(item, user['telegram_chat_id'], mtls, cypher)
 
-                mtls.update_filelist_xml(XML_TRNT_PATH)
+                # mtls.update_filelist_xml(XML_TRNT_PATH)
                 mtls.count_xml(XML_TRNT_PATH)
 
                 list_new, list_trnt, list_seen = mtls.read_filelist_xml(XML_TRNT_PATH, MOVIE_TEMPLATE_PATH,
