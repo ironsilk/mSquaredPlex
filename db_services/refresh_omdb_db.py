@@ -1,6 +1,7 @@
 import os
 
-from utils import setup_logger, get_omdb, get_omdb_api_limit, get_new_imdb_titles_for_omdb, OmdbMovie, update_many
+from utils import setup_logger, get_omdb, get_omdb_api_limit, get_new_imdb_titles_for_omdb, OmdbMovie, update_many, \
+    get_all_imdb_movies
 
 logger = setup_logger('OMDB_refresher')
 
@@ -26,7 +27,7 @@ def get_omdb_data():
     else:
         calls_to_make = OMDB_API_LIMIT - executed_calls
     logger.info(f"We have {calls_to_make} API calls left.")
-    new_for_omdb_cursor = get_new_imdb_titles_for_omdb()
+    new_for_omdb_cursor = get_all_imdb_movies()
     while new_for_omdb_cursor.returns_rows:
         try:
             if (calls_to_make - INSERT_RATE) < 0:

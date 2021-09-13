@@ -1,6 +1,6 @@
 import os
 
-from utils import get_tmdb, update_many, TmdbMovie
+from utils import get_tmdb, update_many, TmdbMovie, get_all_imdb_movies
 from utils import logger, get_new_imdb_titles_for_tmdb
 
 REVIEW_INTERVAL_REFRESH = int(os.getenv('REVIEW_INTERVAL_REFRESH'))
@@ -19,7 +19,7 @@ def get_tmdb_data():
     # New titles
     logger.info("Downloading data for new TMDB titles")
     tmdb_inserted = 0
-    new_for_tmdb_cursor = get_new_imdb_titles_for_tmdb()
+    new_for_tmdb_cursor = get_all_imdb_movies()
     while new_for_tmdb_cursor.returns_rows:
         try:
             batch = new_for_tmdb_cursor.mappings().fetchmany(INSERT_RATE)
