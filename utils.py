@@ -317,7 +317,8 @@ def get_all_imdb_movies():
     with engine.connect() as conn:
         stmt = select(TitleBasics.tconst).where(TitleBasics.titleType.in_(['movie', 'tvMovie', 'short']))
         stmt = stmt.order_by(desc(TitleBasics.tconst))
-    return conn.execute(stmt)
+        result = conn.execute(stmt)
+    return result
 
 
 def check_against_my_torrents(torrents):
