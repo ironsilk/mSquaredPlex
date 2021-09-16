@@ -34,7 +34,7 @@ def get_tmdb_data():
     while results:
         try:
             batch = [results.pop(0) for idx in range(min(INSERT_RATE, len(results)))]
-            batch = process_items(batch)
+            batch = process_tmdb_items(batch)
             if batch:
                 update_many(batch, TmdbMovie, TmdbMovie.imdb_id)
             # Save to pickle
@@ -48,8 +48,9 @@ def get_tmdb_data():
             return
     logger.info('Finishing routine...')
 
+
 @timing
-def process_items(items):
+def process_tmdb_items(items):
     new_items = []
     for item in items:
         item = get_tmdb(item)

@@ -2,7 +2,7 @@ import os
 import pickle
 
 from utils import setup_logger, get_omdb, get_omdb_api_limit, OmdbMovie, update_many, \
-    get_all_imdb_movies
+    get_all_imdb_movies, timing
 
 logger = setup_logger('OMDB_refresher')
 
@@ -49,18 +49,12 @@ def get_omdb_data():
             else:
                 go = INSERT_RATE
             batch = [results.pop(0) for idx in range(go)]
-            new_items = []
-            for idx, item in enumerate(batch):
-                item = get_omdb(item)
-                if item['response'] not in ['Ok', 'Error getting data.']:
-                    # We've hit API limit
-                    logger.info(f"Hit maximum calls or key problem: {item['response']} -> ending loop.")
-                    calls_to_make = 0
-                    return
-                del item['response']
-                new_items.append(item)
-            if new_items:
-                update_many(new_items, OmdbMovie, OmdbMovie.imdb_id)
+            batch = process_omdb_items(batch)
+            if batch == 0:
+                calls_to_make = 0
+                return
+            elif batch:
+                update_many(batch, OmdbMovie, OmdbMovie.imdb_id)
             # Save to pickle
             with open('tconst_data_omdb.pkl', 'wb') as fp:
                 pickle.dump(results, fp)
@@ -68,9 +62,22 @@ def get_omdb_data():
             calls_to_make -= go
             logger.info(f"We have {calls_to_make} API calls left.")
         except Exception as e:
-            raise e
             logger.error(f"Some other erorr while pulling IMDB data: {e}")
             return
+
+
+@timing
+def process_omdb_items(items):
+    new_items = []
+    for idx, item in enumerate(items):
+        item = get_omdb(item)
+        if item['response'] not in ['Ok', 'Error getting data.']:
+            # We've hit API limit
+            logger.info(f"Hit maximum calls or key problem: {item['response']} -> ending loop.")
+            return 0
+        del item['response']
+        new_items.append(item)
+    return new_items
 
 
 if __name__ == '__main__':

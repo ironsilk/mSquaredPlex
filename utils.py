@@ -1220,4 +1220,14 @@ stmt = select(TmdbMovie, OmdbMovie).join(OmdbMovie, TmdbMovie.imdb_id == OmdbMov
 """
 
 if __name__ == '__main__':
-    pass
+    from pprint import pprint
+
+    results = get_all_imdb_movies().mappings().fetchall()
+    results = [x['tconst'] for x in results]
+    print(len(results))
+    @timing
+    def do(results):
+        for idx, x in enumerate(results):
+            y = get_omdb(x)
+            print(idx, y['response'], y)
+    do(results[:1000])
