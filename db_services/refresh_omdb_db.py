@@ -53,9 +53,8 @@ def get_omdb_data():
             for idx, item in enumerate(batch):
                 item = get_omdb(item)
                 if item['response'] not in ['Ok', 'Error getting data.']:
-                    logger.info(item['response'])
                     # We've hit API limit
-                    logger.info("Hit maximum calls, ending loop.")
+                    logger.info(f"Hit maximum calls or key problem: {item['response']} -> ending loop.")
                     break
                 del item['response']
                 new_items.append(item)
