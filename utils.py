@@ -8,6 +8,7 @@ import re
 import xml.etree.ElementTree as ET
 from functools import wraps
 from time import time
+from pprint import pprint
 
 import PTN
 import imdb
@@ -38,6 +39,7 @@ PLEX_ADMIN_EMAILS = os.getenv('PLEX_ADMIN_EMAILS')
 
 OMDB_API_KEY = os.getenv('OMDB_API_KEY')
 TMDB_API_KEY = os.getenv('TMDB_API_KEY')
+TMDB_V4_API_KEY = os.getenv('TMDB_V4_API_KEY')
 
 TORR_HASH_KEY = os.getenv('TORR_HASH_KEY')
 
@@ -452,6 +454,7 @@ def get_movie_tmdb_omdb(imdb_id):
     omdb = get_movie_omdb_local(imdb_id)
     if not omdb:
         omdb = get_omdb(imdb_id)
+        del omdb['response']
         if omdb['hit_omdb']:
             update_many([omdb], OmdbMovie, OmdbMovie.imdb_id)
 
@@ -1141,6 +1144,7 @@ def get_omdb(idd):
             'meta_score': None,
             'last_update_omdb': datetime.datetime.now(),
             'hit_omdb': False,
+            'response': item['Error'],
         }
     item = {
         'imdb_id': idd,
@@ -1155,38 +1159,11 @@ def get_omdb(idd):
             lambda: [x['Value'].split('/')[0] for x in item['Ratings'] if x['Source'] == 'Metacritic'][0]),
         'last_update_omdb': datetime.datetime.now(),
         'hit_omdb': True,
+        'response': 'Ok',
     }
     for key, val in item.items():
         if val == 'N/A':
             item[key] = None
-    return item
-
-
-def get_tmdb2(idd):
-    headers = {
-        "Content-Type": "application/json;charset=utf-8",
-        "Authorization": f"Bearer {TMDB_API_KEY}",
-    }
-    r = requests.get(
-        url=f"https://api.themoviedb.org/3/movie/{convert_imdb_id(idd)}",
-        headers=headers
-    )
-    item = r.json()
-    pprint(item)
-    if 'id' not in item.keys():
-        logger.error("TMDB retrieve problems")
-        return None
-    item = {
-        'imdb_id': idd,
-        'country': 'tmdb.country',
-        'lang': 'tmdb.lang',
-        'ovrw': item['overview'],
-        'tmdb_score': item['vote_average'],
-        'trailer_link': 'tmdb.trailer',
-        'poster': 'tmdb.poster',
-        'last_update_tmdb': datetime.datetime.now(),
-        'hit_tmdb': 'hit',
-    }
     return item
 
 
@@ -1243,6 +1220,4 @@ stmt = select(TmdbMovie, OmdbMovie).join(OmdbMovie, TmdbMovie.imdb_id == OmdbMov
 """
 
 if __name__ == '__main__':
-    from pprint import pprint
-    check_database()
-    pprint(check_one_against_torrents_by_torr_id(751323))
+    pass

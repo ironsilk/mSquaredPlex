@@ -1,6 +1,7 @@
 import os
+import pickle
 
-from utils import setup_logger, get_omdb, get_omdb_api_limit, get_new_imdb_titles_for_omdb, OmdbMovie, update_many, \
+from utils import setup_logger, get_omdb, get_omdb_api_limit, OmdbMovie, update_many, \
     get_all_imdb_movies
 
 logger = setup_logger('OMDB_refresher')
@@ -19,6 +20,15 @@ def get_omdb_data():
     """
     # New titles
     logger.info("Downloading data for new OMDB titles")
+    # Try to open local file
+    if os.path.isfile('tconst_data_omdb.pkl'):
+        with open('tconst_data_omdb.pkl', 'rb') as fp:
+            results = pickle.load(fp)
+    else:
+        logger.info("Local file not found, refreshing entire database.")
+        results = get_all_imdb_movies().mappings().fetchall()
+        results = [x['tconst'] for x in results]
+
     # Get how many API calls we have left
     executed_calls = len(get_omdb_api_limit())
     if executed_calls > OMDB_API_LIMIT:
@@ -27,16 +37,32 @@ def get_omdb_data():
     else:
         calls_to_make = OMDB_API_LIMIT - executed_calls
     logger.info(f"We have {calls_to_make} API calls left.")
-    new_for_omdb_cursor = get_all_imdb_movies()
-    while new_for_omdb_cursor.returns_rows:
+    logger.info(f"We have {len(results)} items left to process in this iteration for OMDB.")
+
+    while results:
         try:
-            if (calls_to_make - INSERT_RATE) < 0:
+            if calls_to_make == 0:
+                logger.info("Hit maximum calls, ending loop.")
+                break
+            elif (calls_to_make - INSERT_RATE) < 0:
                 go = calls_to_make
             else:
                 go = INSERT_RATE
-            batch = new_for_omdb_cursor.mappings().fetchmany(go)
-            batch = process_items(batch)
-            update_many(batch, OmdbMovie, OmdbMovie.imdb_id)
+            batch = [results.pop(0) for idx in range(go)]
+            new_items = []
+            for idx, item in enumerate(batch):
+                item = get_omdb(item)
+                if item['response'] not in ['Ok', 'Error getting data.']:
+                    # We've hit API limit
+                    logger.info("Hit maximum calls, ending loop.")
+                    break
+                del item['response']
+                new_items.append(item)
+            if new_items:
+                update_many(new_items, OmdbMovie, OmdbMovie.imdb_id)
+            # Save to pickle
+            with open('tconst_data_omdb.pkl', 'wb') as fp:
+                pickle.dump(results, fp)
             logger.info(f"Inserted {len(batch)} into OMDB database out of {go} searches.")
             calls_to_make -= go
             logger.info(f"We have {calls_to_make} API calls left.")
@@ -44,15 +70,6 @@ def get_omdb_data():
             raise e
             logger.error(f"Some other erorr while pulling IMDB data: {e}")
             return
-
-
-def process_items(items):
-    new_items = []
-    for item in items:
-        item = get_omdb(item['tconst'])
-        if item:
-            new_items.append(item)
-    return new_items
 
 
 if __name__ == '__main__':
