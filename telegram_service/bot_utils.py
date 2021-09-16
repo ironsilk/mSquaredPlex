@@ -5,7 +5,7 @@ import requests
 
 from utils import check_one_against_torrents_by_imdb, get_movie_details, get_user_by_tgram_id, get_my_imdb_users, \
     Torrent, Watchlist, get_user_watchlist, get_from_watchlist_by_user_and_imdb, get_my_movie_by_imdb, \
-    get_from_watchlist_by_user_telegram_id_and_imdb
+    get_from_watchlist_by_user_telegram_id_and_imdb, insert_many
 from utils import update_many, connect_plex
 from utils import deconvert_imdb_id, check_one_against_torrents_by_torr_id
 from utils import setup_logger
@@ -107,7 +107,7 @@ def make_trailer_shorten_url(link):
                 # Do, nothing, return the link as it is
                 pass
         except Exception as e:
-         return f"🎥: {link}"
+            return f"🎥: {link}"
     return None
 
 
@@ -126,15 +126,32 @@ def get_telegram_users():
 
 
 def update_torr_db(pkg, torr_response, tgram_id):
-    update_many([{
-        'torr_id': pkg['id'],
-        'torr_hash': torr_response.hashString,
-        'imdb_id': deconvert_imdb_id(pkg['imdb']),
-        'resolution': pkg['resolution'],
-        'status': 'requested download',
-        'requested_by_id': tgram_id
-    }],
-        Torrent, [Torrent.torr_id, Torrent.requested_by_id])
+    # Check if torrent was already requested by user
+    results = check_one_against_torrents_by_torr_id(pkg['id'])
+    if results:
+        result = [x for x in results if x['requested_by_id'] == tgram_id]
+        if result:
+            result = result[0]
+            update_many([{
+                'id': result['id'],
+                'torr_id': pkg['id'],
+                'torr_hash': torr_response.hashString,
+                'imdb_id': deconvert_imdb_id(pkg['imdb']),
+                'resolution': pkg['resolution'],
+                'status': 'requested download',
+                'requested_by_id': tgram_id
+            }],
+                Torrent, Torrent.id)
+    else:
+        insert_many([{
+            'torr_id': pkg['id'],
+            'torr_hash': torr_response.hashString,
+            'imdb_id': deconvert_imdb_id(pkg['imdb']),
+            'resolution': pkg['resolution'],
+            'status': 'requested download',
+            'requested_by_id': tgram_id
+        }],
+            Torrent)
 
 
 def exclude_torrents_from_watchlist(movie_id, tg_id, torr_ids):
@@ -146,11 +163,11 @@ def exclude_torrents_from_watchlist(movie_id, tg_id, torr_ids):
     update_many([{
         'id': watchlist_item['id'],
         'imdb_id': movie_id,
-        'user_id': watchlist_item['imdb_id'], # TODO what?
+        'user_id': watchlist_item['imdb_id'],  # TODO what?
         'excluded_torrents': new,
         'status': 'new',
     }],
-        Watchlist, [Watchlist.id])
+        Watchlist, Watchlist.id)
 
 
 def get_excluded_resolutions(movie_id, tg_id):
@@ -223,7 +240,6 @@ def search_imdb_title(item, ia=None):
 
 
 def add_to_watchlist(imdb_id, user, status, excluded_torrents=None):
-
     # See if movie already there
     in_watchlist = get_from_watchlist_by_user_and_imdb(user['imdb_id'], imdb_id)
     to_update = {

@@ -100,7 +100,5 @@ if __name__ == '__main__':
 
     scheduler.add_job(info_jobs, 'interval', minutes=30, id='Filelist RoutineInfo', coalesce=True,
                       next_run_time=datetime.now(), misfire_grace_time=3000000, replace_existing=True)
-    scheduler.add_job(feed_routine, 'interval', minutes=5, id='Filelist Routine', coalesce=True,
-                      next_run_time=datetime.now(), misfire_grace_time=3000000, replace_existing=True)
 
     scheduler.start()

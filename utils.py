@@ -1245,3 +1245,4 @@ stmt = select(TmdbMovie, OmdbMovie).join(OmdbMovie, TmdbMovie.imdb_id == OmdbMov
 if __name__ == '__main__':
     from pprint import pprint
     check_database()
+    pprint(check_one_against_torrents_by_torr_id(751323))
