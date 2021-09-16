@@ -1245,4 +1245,3 @@ stmt = select(TmdbMovie, OmdbMovie).join(OmdbMovie, TmdbMovie.imdb_id == OmdbMov
 if __name__ == '__main__':
     from pprint import pprint
     check_database()
-    pprint(get_omdb(133093))
