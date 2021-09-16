@@ -55,7 +55,8 @@ def get_omdb_data():
                 if item['response'] not in ['Ok', 'Error getting data.']:
                     # We've hit API limit
                     logger.info(f"Hit maximum calls or key problem: {item['response']} -> ending loop.")
-                    break
+                    calls_to_make = 0
+                    return
                 del item['response']
                 new_items.append(item)
             if new_items:
