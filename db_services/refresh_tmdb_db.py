@@ -1,6 +1,6 @@
 import os
 
-from utils import get_tmdb, update_many, TmdbMovie, get_all_imdb_movies, get_tmdb2, timing
+from utils import get_tmdb, update_many, TmdbMovie, get_all_imdb_movies, timing
 from utils import logger
 import pickle
 import os.path
