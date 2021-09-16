@@ -51,7 +51,6 @@ def get_omdb_data():
             batch = [results.pop(0) for idx in range(go)]
             batch = process_omdb_items(batch)
             if batch == 0:
-                calls_to_make = 0
                 return
             elif batch:
                 update_many(batch, OmdbMovie, OmdbMovie.imdb_id)

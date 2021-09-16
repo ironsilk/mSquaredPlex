@@ -1131,6 +1131,7 @@ def get_omdb(idd):
         },
     )
     item = r.json()
+    pprint(item)
     if item['Response'] == 'False':
         logger.debug("OMDB retrieve problems")
         return {
@@ -1221,8 +1222,8 @@ stmt = select(TmdbMovie, OmdbMovie).join(OmdbMovie, TmdbMovie.imdb_id == OmdbMov
 
 if __name__ == '__main__':
     from pprint import pprint
-
-    results = get_all_imdb_movies().mappings().fetchall()
+    '''
+        results = get_all_imdb_movies().mappings().fetchall()
     results = [x['tconst'] for x in results]
     print(len(results))
     @timing
@@ -1231,3 +1232,6 @@ if __name__ == '__main__':
             y = get_omdb(x)
             print(idx, y['response'], y)
     do(results[:1000])
+    '''
+    get_omdb(120737)
+    get_tmdb(120737)

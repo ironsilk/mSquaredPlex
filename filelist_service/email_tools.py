@@ -588,7 +588,7 @@ def prepare_item_for_email(item, user_telegram_id, mtls, cypher):
     item['my_imdb_score'] = item['my_score'] if 'my_score' in item.keys() else None
     item['seen_date'] = item['seen_date'] if 'seen_date' in item.keys() else None
     item['resolution'] = str(get_torr_quality(item['name'])) + 'p'
-    item['trend'] = ''  # TODO asta nu stiu de unde sa-l iau
+    item['trend'] = ''  # TODO la torrent, pentru seed
     item['id'] = str(item['id'])
     item['freeleech'] = True if item['freeleech'] == 1 else False
     item['trailer'] = item['trailer_link']
@@ -606,7 +606,7 @@ def prepare_item_for_email(item, user_telegram_id, mtls, cypher):
         if mtls.find is False:
             mtls.new_trnt_link_xml(XML_TRNT_PATH, item['imdb'], item['id'],
                                    trnt_data=item)
-    mtls.xml_pritify(XML_TRNT_PATH)
+    mtls.xml_pritify(XML_TRNT_PATH)  # reader only
     return mtls
 
 
