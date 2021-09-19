@@ -103,16 +103,18 @@ def df_as_pretty_text(df, selected_cols=None, remove_index=True):
     # return tabulate.tabulate(rows, cols, tablefmt='fancy_grid', floatfmt=(".2f"))
 
 
-def get_progress(user, get_next=0, logger=setup_logger("botUtils")):
+def get_progress_df(user, get_next=0, logger=setup_logger("botUtils")):
     torrents = get_torrents_for_user(user, get_next, logger)
     if torrents:
         df = pd.DataFrame(torrents)
         return df_as_image(df)
 
 
+def get_progress(user, get_next=0, logger=setup_logger("botUtils")):
+    torrents = get_torrents_for_user(user, get_next, logger)
+    return torrents
+
+
 if __name__ == '__main__':
-    t = get_torrents_for_user(1700079840)
-    dff = pd.DataFrame(t)
+    t = get_progress(1700079840)
     print(t)
-    x = df_as_image(dff, path='test.png')
-    print(df_as_pretty_text(dff))

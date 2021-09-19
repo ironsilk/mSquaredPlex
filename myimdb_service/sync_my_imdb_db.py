@@ -36,7 +36,7 @@ def sync_my_imdb():
                          for key, val in imdb_data.items() if int(deconvert_imdb_id(key)) not in already_in_my_movies]
             insert_many(imdb_data, Movie)
 
-        already_in_my_movies = get_my_movies(user)
+        already_in_my_movies = get_my_movies(user) or []
         # Sync PLEX data
         try:
             plex_data = get_user_watched_movies(user['email'])

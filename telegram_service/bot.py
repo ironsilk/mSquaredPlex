@@ -9,7 +9,7 @@ from telegram import (
     InlineKeyboardButton,
     Update, )
 from telegram.ext import Updater, MessageHandler, Filters, CallbackContext, ConversationHandler, CallbackQueryHandler, \
-    CommandHandler
+    CommandHandler, DispatcherHandlerStop
 from transmission_rpc.error import TransmissionError
 
 from bot_csv import csv_upload_handler, csv_download_handler
@@ -27,6 +27,7 @@ TELEGRAM_AUTH_TEST_PATH = os.getenv('TELEGRAM_AUTH_TEST_PATH')
 TELEGRAM_AUTH_APPROVE = os.getenv('TELEGRAM_AUTH_APPROVE')
 TELEGRAM_IMDB_RATINGS = os.getenv('TELEGRAM_IMDB_RATINGS')
 TELEGRAM_NETFLIX_PNG = os.getenv('TELEGRAM_NETFLIX_PNG')
+TELEGRAM_RESET_PNG = os.getenv('TELEGRAM_RESET_PNG')
 TELEGRAM_WATCHLIST_ROUTINE_INTERVAL = int(os.getenv('TELEGRAM_WATCHLIST_ROUTINE_INTERVAL'))
 TELEGRAM_RATE_ROUTINE_INTERVAL = int(os.getenv('TELEGRAM_RATE_ROUTINE_INTERVAL'))
 
@@ -45,10 +46,30 @@ logging.basicConfig(
 
 logger = logging.getLogger('MovieTimeBot')
 
-# Stages
-CHOOSE_TASK, IDENTIFY_MOVIE, CHOOSE_MULTIPLE, CHOOSE_ONE, CONFIRM_REDOWNLOAD_ACTION, SEARCH_FOR_TORRENTS, \
-DOWNLOAD_TORRENT, CHECK_RIDDLE_RESPONSE, CHECK_EMAIL, GIVE_IMDB, CHECK_IMDB, SUBMIT_RATING, \
-WATCHLIST_NO_TORR, DOWNLOAD_PROGRESS, NETFLIX_CSV, RATE_OR_NOT_TO_RATE, DOWNLOAD_CSV = range(17)
+# State definitions for top level conversation
+CHOOSE_TASK, REGISTER_USER, DOWNLOAD_MOVIE, CHECK_PROGRESS, UPLOAD_ACTIVITY, RATE_TITLE = range(6)
+
+# State definitions  DOWNLOAD_MOVIE
+CHOOSE_MULTIPLE, CHOOSE_ONE, CONFIRM_REDOWNLOAD_ACTION, SEARCH_FOR_TORRENTS, \
+DOWNLOAD_TORRENT, WATCHLIST_NO_TORR = range(6, 12)
+
+# State definitions for CHECK_PROGRESS
+DOWNLOAD_PROGRESS = 12
+
+# State definitions for UPLOAD_ACTIVITY
+NETFLIX_CSV, RATE_OR_NOT_TO_RATE = 13, 14
+
+# State definitions for DOWNLOAD_ACTIVITY
+DOWNLOAD_CSV = 15
+
+# State definitions for RATE_TITLE
+SUBMIT_RATING = 16
+
+# State definitions for REGISTER_USER
+CHECK_EMAIL, GIVE_IMDB, CHECK_IMDB = range(17, 20)
+
+# State definitions for aux functions
+RESET_CONVERSATION = 21
 
 # Keyboards
 menu_keyboard = [
@@ -81,10 +102,12 @@ USERS = []
 def auth_wrap(f):
     @wraps(f)
     def wrap(update: Update, context: CallbackContext):
+        print(f"Wrapped {f.__name__}", )
         user = update.effective_user['id']
         if user in USERS.keys():
             # Ok boss
             result = f(update, context)
+            print(result)
             return result
         else:
             # Check this mofo
@@ -92,7 +115,7 @@ def auth_wrap(f):
                 photo=open(TELEGRAM_AUTH_TEST_PATH, 'rb'),
                 caption="Looks like you're new here. Answer correctly and you may enter.",
             )
-            return CHECK_RIDDLE_RESPONSE
+            return REGISTER_USER
 
     return wrap
 
@@ -108,7 +131,7 @@ def check_riddle(update: Update, context: CallbackContext):
         return CHECK_EMAIL
     else:
         update.effective_message.reply_text("Sorry boi, ur welcome to try again.")
-        return CHECK_RIDDLE_RESPONSE
+        return REGISTER_USER
 
 
 def check_email(update: Update, context: CallbackContext):
@@ -181,6 +204,11 @@ def wrong_input(update: Update, context: CallbackContext):
     return CHECK_EMAIL
 
 
+def wrong_input_imdb(update: Update, context: CallbackContext):
+    update.effective_message.reply_text("Wrong input, please try again.")
+    return CHECK_IMDB
+
+
 @auth_wrap
 def start(update: Update, context: CallbackContext) -> int:
     """Send a message when the command /start is issued."""
@@ -198,7 +226,7 @@ def choose_task(update: Update, context: CallbackContext) -> int:
     if update.message.text == menu_keyboard[0][0]:
         message = 'Great, give me an IMDB id, a title or an IMDB link.'
         update.message.reply_text(message)
-        return IDENTIFY_MOVIE
+        return DOWNLOAD_MOVIE
 
     elif update.message.text == menu_keyboard[1][0]:
         update.effective_message.reply_text('Ok, retrieving data... (might be slow sometimes)')
@@ -220,12 +248,12 @@ def choose_task(update: Update, context: CallbackContext) -> int:
                                            "Choose Yes/No",
                                    reply_markup=ReplyKeyboardMarkup(bool_keyboard, one_time_keyboard=True,
                                                                     resize_keyboard=True))
-        return RATE_OR_NOT_TO_RATE
+        return UPLOAD_ACTIVITY
     elif update.message.text == menu_keyboard[2][1]:
         update.message.reply_text("Ok, we've started the process, we'll let you know once it's done.")
         return download_csv(update, context)
 
-    return ConversationHandler.END
+    return break_level(update, context)
 
 
 @auth_wrap
@@ -284,7 +312,7 @@ def parse_imdb_text(update: Update, context: CallbackContext) -> int:
             update.effective_message.reply_text("Couldn't find the specified ID in the link, are you"
                                                 "sure it's an IMDB link? Try pasting only the ID, as in"
                                                 "`tt0903624`.")
-            return IDENTIFY_MOVIE
+            return DOWNLOAD_MOVIE
         else:
             # Test for title
             movies = search_imdb_title(update.message.text)
@@ -301,7 +329,7 @@ def choose_multiple(update: Update, context: CallbackContext) -> int:
         if type(movies) == str:
             update.effective_message.reply_text("We're having trouble with our IMDB API, please"
                                                 "insert an IMDB ID or paste a link.")
-            return IDENTIFY_MOVIE
+            return DOWNLOAD_MOVIE
         movie = movies.pop(0)
         # Check again if we can find it
         pkg = get_movie_from_all_databases(movie['id'], update.effective_user['id'])
@@ -326,7 +354,7 @@ def choose_multiple(update: Update, context: CallbackContext) -> int:
         update.effective_message.reply_text("Couldn't find the specified movie,"
                                             "Try pasting the IMDB id or a link"
                                             "`tt0903624`.")
-        return IDENTIFY_MOVIE
+        return DOWNLOAD_MOVIE
 
 
 @auth_wrap
@@ -339,9 +367,9 @@ def accept_reject_title(update: Update, context: CallbackContext) -> int:
             return choose_multiple(update, context)
         else:
             update.effective_message.reply_text("These were all the hits.")
-            return bail(update, context)
+            return break_level(update, context)
     elif update.message.text == 'Exit':
-        return bail(update, context)
+        return break_level(update, context)
 
 
 @auth_wrap
@@ -376,7 +404,7 @@ def confirm_redownload_action(update: Update, context: CallbackContext) -> int:
     if update.message.text == 'Yes':
         return search_for_torrents(update, context)
     else:
-        return bail(update, context)
+        return break_level(update, context)
 
 
 @auth_wrap
@@ -433,14 +461,10 @@ def add_to_watchlist_no_torrent(update: Update, context: CallbackContext) -> int
         else:
             add_to_watchlist(deconvert_imdb_id(context.user_data['pkg']['imdb']), user, 'new',
                              [x['id'] for x in context.user_data['pkg']['torrents']])
-        message = "Added to watchlist! What's next?"
-    else:
-        message = "Ok, what would you like to do next?"
-    update.message.reply_text(
-        message,
-        reply_markup=ReplyKeyboardMarkup(menu_keyboard, one_time_keyboard=True, resize_keyboard=True),
-    )
-    return CHOOSE_TASK
+        message = "Added to watchlist!"
+        update.message.reply_text(message)
+
+    return break_level(update, context)
 
 
 @auth_wrap
@@ -461,7 +485,7 @@ def download_torrent(update: Update, context: CallbackContext) -> int:
             logger.error(f"Error on torrent send: {e}")
             message = f"Download failed, please check logs and try again."
         query.edit_message_text(text=message)
-        return ConversationHandler.END
+        return CHOOSE_TASK
     else:
         if 'from_watchlist' in context.user_data.keys():
             query.edit_message_text(text="Ok, i'll remove these torrent options from future watchlist alerts "
@@ -477,58 +501,15 @@ def download_torrent(update: Update, context: CallbackContext) -> int:
 
 @auth_wrap
 def get_download_progress(update: Update, context: CallbackContext) -> int:
-    def load_more(torrents, context):
-        # TODO prettyfy this text here, right now it's crap.
-        message = f"Torrent statuses"
-        context.user_data['download_progress'] += 5
-        context.bot.send_photo(
-            chat_id=user,
-            caption=message,
-            photo=torrents,
-            reply_markup=InlineKeyboardMarkup(
-                [[InlineKeyboardButton('Show more', callback_data=1)]],
-                one_time_keyboard=True),
-        )
-        return DOWNLOAD_PROGRESS
-
     user = update.effective_user['id']
-    photo_response = get_progress(user, get_next=context.user_data['download_progress'], logger=logger)
-    if update.message:
-        # Means that it's the first time we got here
-        if photo_response:
-            return load_more(photo_response, context)
-        else:
-            update.message.reply_text('No torrents to show. Have a great one!')
-            return ConversationHandler.END
-    else:
-        # User pressed "Show more"
-        update.callback_query.answer()
-        if photo_response:
-            update.callback_query.edit_message_reply_markup(reply_markup=None)
-            return load_more(photo_response, context)
-        else:
-            update.callback_query.edit_message_reply_markup(reply_markup=None)
-            context.bot.send_message(user, 'No more torrents to show. Bazinga!')
-            return ConversationHandler.END
-
-
-@auth_wrap
-def bail(update: Update, context: CallbackContext) -> int:
-    if update.message.text.lower() == 'suka' or 'exit':
-        context.user_data.clear()
-        update.message.reply_text("Ok, have a great day!")
-        return ConversationHandler.END
-    update.message.reply_text("Please re-enter your search query or type 'suka' to exit")
-    context.user_data.clear()
-    return IDENTIFY_MOVIE
-
-
-@auth_wrap
-def go_back(update, context, message):
-    update.message.reply_text(message)
-    context.user_data.clear()
-    context.user_data['dont_greet'] = True
-    return choose_task(update, context)
+    torrents = get_progress(user, logger=logger)
+    for torrent in torrents:
+        update.message.reply_text(f"{torrent['TorrentName']}\n"
+                                  f"Resolution: {torrent['Resolution']}\n"
+                                  f"Status: {torrent['Status']}\n"
+                                  f"Progress: {torrent['Progress']}\n"
+                                  f"ETA: {torrent['ETA']}")
+    return break_level(update, context)
 
 
 @auth_wrap
@@ -538,7 +519,6 @@ def help_command(update: Update, context: CallbackContext) -> None:
     watchlist_status = 'MONITORING' if USERS[update.effective_user.id]['scan_watchlist'] == 1 else 'NOT MONITORING'
     email_status = 'RECEIVING' if USERS[update.effective_user.id]['email_newsletters'] else 'NOT RECEIVING'
     update.message.reply_text("Type anything for the bot to start.\n\n"
-                              "Type /reset to get out of any situation.\n\n"
                               f"Right now we are {watchlist_status} your watchlist. "
                               f"Type /change_watchlist "
                               "to reverse the status.\n\n"
@@ -550,12 +530,14 @@ def help_command(update: Update, context: CallbackContext) -> None:
 
 
 @auth_wrap
-def reset_command(update: Update, context: CallbackContext) -> None:
+def break_level(update: Update, context: CallbackContext) -> None:
     """Dude u messed up :) """
-    update.message.reply_text("I just died'ed. Report to the admin if i messed up badly. His fault.")
     context.user_data.clear()
-    # TODO nu iese treaba asta aici, trebuie sa vad cum fac sa mi iasa cand dau /reset
-    return ConversationHandler.END
+    update.message.reply_text(
+        f"Ok, so, watcha wanna do next?",
+        reply_markup=ReplyKeyboardMarkup(menu_keyboard, one_time_keyboard=True, resize_keyboard=True),
+    )
+    return CHOOSE_TASK
 
 
 @auth_wrap
@@ -616,6 +598,7 @@ def exclude_res_from_watchlist(update: Update, context: CallbackContext) -> int:
 
 @auth_wrap
 def rate_title_entry(update: Update, context: CallbackContext) -> int:
+    print('in rate title entry')
     context.user_data['pkg'] = {
         'imdb': int(update.message.text.replace('/RateTitle', '')),
     }
@@ -625,7 +608,7 @@ def rate_title_entry(update: Update, context: CallbackContext) -> int:
                                                                                   one_time_keyboard=True,
                                                                                   resize_keyboard=True,
                                                                                   ))
-    return SUBMIT_RATING
+    return RATE_TITLE
 
 
 @auth_wrap
@@ -639,7 +622,7 @@ def submit_rating(update: Update, context: CallbackContext) -> int:
         update.effective_message.reply_text(f"Ok, great! Here's a link if you also want to rate it on IMDB:\n"
                                             f"https://www.imdb.com/title/"
                                             f"{convert_imdb_id(context.user_data['pkg']['imdb'])}/")
-        return ConversationHandler.END
+        return break_level(update, context)
 
     elif update.message.text == "I've changed my mind":
         item = get_my_movie_by_imdb(context.user_data['pkg']['imdb'], update.effective_user['id'])
@@ -647,10 +630,10 @@ def submit_rating(update: Update, context: CallbackContext) -> int:
         update_many([item], Movie, Movie.id)
         update.effective_message.reply_text("Ok, no worries! I won't bother you about this title anymore.\n"
                                             "Have a great day!")
-        return ConversationHandler.END
+        return break_level(update, context)
     else:
         update.effective_message.reply_text("Please choose an option from the keyboard.")
-        return SUBMIT_RATING
+        return RATE_TITLE
 
 
 @auth_wrap
@@ -677,7 +660,7 @@ def netflix_csv(update: Update, context: CallbackContext) -> int:
         context=csv_context,
         when=0
     )
-    return ConversationHandler.END
+    return break_level(update, context)
 
 
 @auth_wrap
@@ -689,7 +672,7 @@ def netflix_no_csv(update: Update, context: CallbackContext) -> int:
 @auth_wrap
 def netflix_no_rate_option(update: Update, context: CallbackContext) -> int:
     update.message.reply_text("Choose Yes or No, bro.")
-    return RATE_OR_NOT_TO_RATE
+    return UPLOAD_ACTIVITY
 
 
 @auth_wrap
@@ -702,11 +685,22 @@ def download_csv(update: Update, context: CallbackContext) -> int:
         context=csv_context,
         when=0
     )
+    return break_level(update, context)
+
+
+def test(update, context, message):
+    print('in test function')
     return ConversationHandler.END
 
 
-def end(update, context, message):
-    return ConversationHandler.END
+@auth_wrap
+def reset_command(update: Update, context: CallbackContext) -> None:
+    context.user_data.clear()
+    update.message.reply_text(
+        text="BipBot reset. What's next?",
+        reply_markup=ReplyKeyboardMarkup(menu_keyboard, one_time_keyboard=True, resize_keyboard=True),
+    )
+    return CHOOSE_TASK
 
 
 def main() -> None:
@@ -720,27 +714,37 @@ def main() -> None:
     # Get the dispatcher to register handlers
     dispatcher = updater.dispatcher
 
-    conv_handler = ConversationHandler(
+    choose_task_conversation_handler = ConversationHandler(
         entry_points=[
+            CommandHandler('reset', reset_command),
             MessageHandler(Filters.regex(r'^/WatchMatch\d+$'), watchlist_entry),
             MessageHandler(Filters.regex(r'^/UnWatchMatch\d+$'), remove_watchlist_entry),
             MessageHandler(Filters.regex(r'^/RateTitle\d+$'), rate_title_entry),
-            MessageHandler(Filters.text, start),
+            MessageHandler(Filters.text, choose_task)
+        ],
+        states={},
+        fallbacks=[],
+        map_to_parent={
+            ConversationHandler.END: ConversationHandler.END,
+            CHOOSE_TASK: CHOOSE_TASK,
+            RATE_TITLE: RATE_TITLE,
+            DOWNLOAD_MOVIE: DOWNLOAD_MOVIE,
+            CHECK_PROGRESS: CHECK_PROGRESS,
+            UPLOAD_ACTIVITY: UPLOAD_ACTIVITY,
+            REGISTER_USER: REGISTER_USER,
+        }
+    )
+
+    download_movie_conversation_handler = ConversationHandler(
+        entry_points=[
+            MessageHandler(
+                Filters.regex('^([tT]{2})?\d+$'), parse_imdb_id
+            ),
+            MessageHandler(
+                Filters.text, parse_imdb_text
+            ),
         ],
         states={
-            CHOOSE_TASK: [
-                MessageHandler(
-                    Filters.text, choose_task
-                )
-            ],
-            IDENTIFY_MOVIE: [
-                MessageHandler(
-                    Filters.regex('^([tT]{2})?\d+$'), parse_imdb_id
-                ),
-                MessageHandler(
-                    Filters.text, parse_imdb_text
-                ),
-            ],
             CHOOSE_MULTIPLE: [
                 MessageHandler(
                     Filters.text, choose_multiple
@@ -766,64 +770,49 @@ def main() -> None:
                     download_torrent
                 )
             ],
-            CHECK_RIDDLE_RESPONSE: [
-                MessageHandler(
-                    Filters.text, check_riddle
-                )
-            ],
-            CHECK_EMAIL: [
-                MessageHandler(
-                    Filters.regex('[^@]+@[^@]+\.[^@]+'), check_email
-                ),
-                MessageHandler(
-                    Filters.text, wrong_input,
-                ),
-            ],
-            GIVE_IMDB: [
-                MessageHandler(
-                    Filters.text, give_imdb,
-                ),
-            ],
-            CHECK_IMDB: [
-                MessageHandler(
-                    Filters.regex('^[u]?[r]?\d+$'), check_imdb
-                ),
-                MessageHandler(
-                    Filters.regex('fuck it'), check_imdb
-                ),
-                MessageHandler(
-                    Filters.regex('Fuck it'), check_imdb
-                ),
-                MessageHandler(
-                    Filters.text, wrong_input
-                ),
-            ],
-            SUBMIT_RATING: [
-                MessageHandler(
-                    Filters.text, submit_rating
-                ),
-            ],
             WATCHLIST_NO_TORR: [
                 MessageHandler(
                     Filters.text, add_to_watchlist_no_torrent
                 ),
             ],
-            DOWNLOAD_PROGRESS: [
-                MessageHandler(
-                    Filters.text, get_download_progress
-                ),
-                CallbackQueryHandler(
-                    get_download_progress
-                )
-            ],
-            RATE_OR_NOT_TO_RATE: [
-                MessageHandler(
-                    Filters.regex("^Yes$|^No$"), netflix_rate_or_not
-                ),
-                MessageHandler(
-                    Filters.text, netflix_no_rate_option
-                ),
-            ],
+        },
+        fallbacks=[MessageHandler(Filters.command, test)],
+        map_to_parent={
+            ConversationHandler.END: ConversationHandler.END,
+            DOWNLOAD_MOVIE: DOWNLOAD_MOVIE,
+            CHOOSE_TASK: CHOOSE_TASK,
+        }
+    )
+
+    check_progress_conversation_handler = ConversationHandler(
+        entry_points=[
+            MessageHandler(
+                Filters.text, get_download_progress
+            ),
+            CallbackQueryHandler(
+                get_download_progress
+            )
+        ],
+        states={},
+        fallbacks=[],
+        map_to_parent={
+            ConversationHandler.END: ConversationHandler.END,
+            CHOOSE_TASK: CHOOSE_TASK,
+            CHECK_PROGRESS: CHECK_PROGRESS,
+        }
+    )
+
+    upload_activity_conversation_handler = ConversationHandler(
+        entry_points=[
+            CommandHandler('reset', reset_command),
+            MessageHandler(
+                Filters.regex("^Yes$|^No$"), netflix_rate_or_not
+            ),
+            MessageHandler(
+                Filters.text, netflix_no_rate_option
+            ),
+        ],
+        states={
             NETFLIX_CSV: [
                 MessageHandler(
                     Filters.document, netflix_csv
@@ -837,10 +826,93 @@ def main() -> None:
             ],
         },
         fallbacks=[],
-        per_message=False
+        map_to_parent={
+            ConversationHandler.END: ConversationHandler.END,
+            CHOOSE_TASK: CHOOSE_TASK,
+            UPLOAD_ACTIVITY: UPLOAD_ACTIVITY,
+        }
     )
 
-    dispatcher.add_handler(CommandHandler('reset', reset_command))
+    rate_title_conversation_handler = ConversationHandler(
+        entry_points=[
+            MessageHandler(
+                Filters.text, submit_rating
+            ),
+        ],
+        states={},
+        fallbacks=[],
+        map_to_parent={
+            ConversationHandler.END: ConversationHandler.END,
+            RATE_TITLE: RATE_TITLE,
+            CHOOSE_TASK: CHOOSE_TASK,
+        }
+    )
+
+    register_user_conversation_handler = ConversationHandler(
+        entry_points=[
+            CommandHandler('reset', reset_command),
+            MessageHandler(
+                Filters.text, check_riddle
+            )
+        ],
+        states={
+            CHECK_EMAIL: [
+                CommandHandler('reset', reset_command),
+                MessageHandler(
+                    Filters.regex('[^@]+@[^@]+\.[^@]+'), check_email
+                ),
+                MessageHandler(
+                    Filters.text, wrong_input,
+                ),
+            ],
+            GIVE_IMDB: [
+                MessageHandler(
+                    Filters.text, give_imdb,
+                ),
+            ],
+            CHECK_IMDB: [
+                CommandHandler('reset', reset_command),
+                MessageHandler(
+                    Filters.regex('^[u]?[r]?\d+$'), check_imdb
+                ),
+                MessageHandler(
+                    Filters.regex('fuck it'), check_imdb
+                ),
+                MessageHandler(
+                    Filters.regex('Fuck it'), check_imdb
+                ),
+                MessageHandler(
+                    Filters.text, wrong_input_imdb
+                ),
+            ],
+        },
+        fallbacks=[],
+        map_to_parent={
+            ConversationHandler.END: ConversationHandler.END,
+            REGISTER_USER: REGISTER_USER,
+            CHOOSE_TASK: CHOOSE_TASK,
+        }
+    )
+
+    conv_handler = ConversationHandler(
+        entry_points=[
+            MessageHandler(Filters.regex(r'^/WatchMatch\d+$'), watchlist_entry),
+            MessageHandler(Filters.regex(r'^/UnWatchMatch\d+$'), remove_watchlist_entry),
+            MessageHandler(Filters.regex(r'^/RateTitle\d+$'), rate_title_entry),
+            MessageHandler(Filters.text, start),
+        ],
+        states={
+            CHOOSE_TASK: [choose_task_conversation_handler],
+            DOWNLOAD_MOVIE: [download_movie_conversation_handler],
+            CHECK_PROGRESS: [check_progress_conversation_handler],
+            UPLOAD_ACTIVITY: [upload_activity_conversation_handler],
+            RATE_TITLE: [rate_title_conversation_handler],
+            REGISTER_USER: [register_user_conversation_handler],
+        },
+        fallbacks=[],
+    )
+
+    # dispatcher.add_handler(CommandHandler('reset', reset_command))
     dispatcher.add_handler(CommandHandler('help', help_command))
     dispatcher.add_handler(CommandHandler('change_watchlist', change_watchlist_command))
     dispatcher.add_handler(CommandHandler('change_newsletter', change_newsletter_command))

@@ -305,7 +305,6 @@ def get_new_imdb_titles_for_omdb():
 
 
 def get_new_imdb_titles_for_tmdb():
-    # TODO speed up this query, think of min/max id instead of anything else.
     conn = connect_db()
     refresh_interval_date = datetime.datetime.now() - datetime.timedelta(days=REVIEW_INTERVAL_REFRESH)
     subquery = select(TmdbMovie.imdb_id).where(TmdbMovie.last_update_tmdb > refresh_interval_date)
@@ -1131,7 +1130,6 @@ def get_omdb(idd):
         },
     )
     item = r.json()
-    pprint(item)
     if item['Response'] == 'False':
         logger.debug("OMDB retrieve problems")
         return {

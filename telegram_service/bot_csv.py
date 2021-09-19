@@ -95,21 +95,27 @@ def csv_download_handler(context: CallbackContext):
     my_movies = get_user_movies(user)
     enhanced = []
     # Get titles for each movie :)
-    for movie in my_movies:
-        enhanced.append(get_movie_details(movie))
-    df = pd.DataFrame(enhanced)
-    # Create an in-memory file
-    f = io.BytesIO()
-    # Write to buffer
-    df.to_csv(f)
-    # Pointer is at the end of the file so reset it to 0.
-    f.seek(0)
-    context.bot.send_document(
-        chat_id=tgram_user,
-        document=f,
-        filename='MoviesExport.csv',
-        caption="Here's your requested movie DB export.\n"
-                "Have a great day!"
-    )
+    if my_movies:
+        for movie in my_movies:
+            enhanced.append(get_movie_details(movie))
+        df = pd.DataFrame(enhanced)
+        # Create an in-memory file
+        f = io.BytesIO()
+        # Write to buffer
+        df.to_csv(f)
+        # Pointer is at the end of the file so reset it to 0.
+        f.seek(0)
+        context.bot.send_document(
+            chat_id=tgram_user,
+            document=f,
+            filename='MoviesExport.csv',
+            caption="Here's your requested movie DB export.\n"
+                    "Have a great day!"
+        )
+    else:
+        context.bot.send_message(
+            chat_id=tgram_user,
+            text="Looks like you don't have any movies yet. Nothing to fill that CSV with."
+        )
 
 
