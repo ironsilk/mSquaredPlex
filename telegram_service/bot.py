@@ -336,7 +336,6 @@ def choose_multiple(update: Update, context: CallbackContext) -> int:
         # context.user_data['pkg'] = pkg
         if pkg:
             context.user_data['pkg'] = pkg
-            # TODO fix here, captions too long, change to something else
             # https://stackoverflow.com/questions/39571474/send-long-message-with-photo-on-telegram-with-php-bot#:~:text=I%20need%20send%20to%20telegram,caption%20has%20200%20character%20limit.
             message, image = make_movie_reply(pkg)
             update.effective_message.reply_photo(
@@ -503,7 +502,7 @@ def download_torrent(update: Update, context: CallbackContext) -> int:
 def get_download_progress(update: Update, context: CallbackContext) -> int:
     user = update.effective_user['id']
     torrents = get_progress(user, logger=logger)
-    for torrent in torrents:
+    for torrent in torrents[:5]:
         update.message.reply_text(f"{torrent['TorrentName']}\n"
                                   f"Resolution: {torrent['Resolution']}\n"
                                   f"Status: {torrent['Status']}\n"

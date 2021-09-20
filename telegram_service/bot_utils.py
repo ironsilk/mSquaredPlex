@@ -27,7 +27,7 @@ def make_movie_reply(pkg):
         caption += stars
     # Description
     if pkg['ovrw']:
-        caption += pkg['ovrw'] + '\n'
+        caption += pkg['ovrw'][:100] + '...\n'
     # Trailer
     trailer = make_trailer(pkg['trailer_link'])
     if trailer:
@@ -163,7 +163,7 @@ def exclude_torrents_from_watchlist(movie_id, tg_id, torr_ids):
     update_many([{
         'id': watchlist_item['id'],
         'imdb_id': movie_id,
-        'user_id': watchlist_item['imdb_id'],  # TODO what?
+        'user_id': watchlist_item['imdb_id'],
         'excluded_torrents': new,
         'status': 'new',
     }],

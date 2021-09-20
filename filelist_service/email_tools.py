@@ -571,7 +571,35 @@ def send_email(items, cypher):
     logger.info('Nothing left to send')
 
 
-def prepare_item_for_email(item, user_telegram_id, mtls, cypher):
+def prepare_item_for_email(item, user_telegram_id):
+    # Add seen type keys
+    if item['in_my_movies']:
+        item['seen_type'] = 1  # new movie
+    else:
+        item['seen_type'] = 0  # we have this movie but here's a new torrent for it
+
+    # Convert some keys
+    item['size'] = "%.1f" % (item['size'] / 1000000000)
+    item['year'] = item['startYear']
+    item['genre'] = item['genres']
+    item['runtime'] = item['runtimeMinutes']
+    item['imdb_score'] = item['averageRating']  # TODO asta nu iese momentan
+    item['score'] = item['tmdb_score']
+    item['my_imdb_score'] = item['my_score'] if 'my_score' in item.keys() else None
+    item['seen_date'] = item['seen_date'] if 'seen_date' in item.keys() else None
+    item['resolution'] = str(get_torr_quality(item['name'])) + 'p'
+    item['trend'] = ''
+    item['id'] = str(item['id'])
+    item['freeleech'] = True if item['freeleech'] == 1 else False
+    item['trailer'] = item['trailer_link']
+
+    # Add keys for torrent API and generate AES hash for each torrent
+    item['torr_link_seed'], item['torr_link_download'] = generate_torr_links(item, user_telegram_id)
+
+    return item
+
+
+def prepare_item_for_email2(item, user_telegram_id, mtls, cypher):
     # Add seen type keys
     if item['in_my_movies']:
         item['seen_type'] = 1  # new movie
@@ -638,7 +666,7 @@ def check_in_my_movies(new_movies, email):
     return new
 
 
-def generate_torr_links(item, user_telegram_id, cypher):
+def generate_torr_links(item, user_telegram_id, cypher=None):
     def compose_link(pkg):
         # Cypher alternative
         # pkg = cypher.encrypt(json.dumps(pkg))
@@ -665,6 +693,41 @@ def generate_torr_links(item, user_telegram_id, cypher):
 
 if __name__ == '__main__':
     from dotenv import load_dotenv
+    from pprint import pprint
     load_dotenv()
+    from filelist_routine import get_latest_torrents, check_in_my_torrents, retrieve_bulk_from_dbs
+    torrents = get_latest_torrents()
+    torrents = check_in_my_torrents(torrents)
+    torrents = retrieve_bulk_from_dbs(torrents)
+    torrents = [x for x in torrents if x]
+    items = check_in_my_movies(torrents, 'mihai.vlad6@gmail.com')
+    items = [prepare_item_for_email(item, 1700) for item in items]
+
+    crt_new = 0
+    crt_tr = 0
+    crt_seen = 0
+
+    list_new = ''
+    list_trnt = ''
+    list_seen = ''
+
+    for item in items:
+        if item['seen_type'] == 0:
+            pprint(item)
+            crt_new += 1
+            all_movie = {'crt': '{0}'.format(crt_new), 'id_imdb': '{0}'.format(item['id_imdb']),
+                         'bck_color': 'F4CCCC'}
+            all_trnt = {}
+            for trnt in movie.iter('trnt'):
+                for subelem in list(movie):
+                    all_movie[subelem.tag] = subelem.text
+
+                one_trnt = {}
+                for subelem in list(trnt):
+                    one_trnt[subelem.tag] = subelem.text
+                all_trnt[trnt.attrib['id']] = one_trnt
+
+            list_new += self.generate_movie_table(movie_template_path, trnt_template_path, all_movie, all_trnt)
+
 
 
