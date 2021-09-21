@@ -243,7 +243,7 @@ def prepare_item_for_email(item, user_telegram_id):
     item['year'] = item['startYear']
     item['genre'] = item['genres']
     item['runtime'] = item['runtimeMinutes']
-    item['imdb_score'] = item['averageRating']  # TODO asta nu iese momentan
+    item['imdb_score'] = item['averageRating']
     item['score'] = item['tmdb_score']
     item['my_imdb_score'] = item['my_score'] if 'my_score' in item.keys() else None
     item['seen_date'] = item['seen_date'] if 'seen_date' in item.keys() else None
