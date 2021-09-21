@@ -5,7 +5,7 @@ import urllib.parse
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 from xml.etree.ElementTree import SubElement
-
+from itertools import groupby
 import PTN
 
 from utils import check_against_user_movies, insert_many, Torrent, get_omdb
@@ -41,6 +41,7 @@ def generate_movie_table(mprm, tprm):
     template_file = open(MOVIE_TEMPLATE_PATH, 'r')
     template = template_file.read()
     template_file.close()
+
 
     for key, value in mprm.items():
         if key in template:
@@ -251,6 +252,7 @@ def prepare_item_for_email(item, user_telegram_id):
     item['id'] = str(item['id'])
     item['freeleech'] = True if item['freeleech'] == 1 else False
     item['trailer'] = item['trailer_link']
+    del item['imdb']
 
     # Add keys for torrent API and generate AES hash for each torrent
     item['torr_link_seed'], item['torr_link_download'] = generate_torr_links(item, user_telegram_id)
@@ -324,7 +326,6 @@ def do_email(items):
                 # Group by imdb_id
                 # Sort
                 user_items.sort(key=lambda x: x['imdb_id'])
-                from itertools import groupby
 
                 new_items = []
                 for k, v in groupby(user_items, key=lambda x: x['imdb_id']):
