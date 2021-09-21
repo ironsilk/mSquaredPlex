@@ -4,7 +4,7 @@ from datetime import datetime
 import requests
 from apscheduler.schedulers.blocking import BlockingScheduler
 
-from email_tools import send_email
+from email_tools import do_email
 from utils import torr_cypher, get_movie_details, setup_logger, timing, check_against_my_torrents, \
     check_database
 
@@ -71,9 +71,10 @@ def feed_routine(cypher=torr_cypher):
 
     # get IMDB, TMDB and OMDB data for these new movies.
     new_movies = retrieve_bulk_from_dbs(new_movies)
+    new_movies = [x for x in new_movies if x]
 
     # send to user to choose
-    send_email(new_movies, cypher)
+    do_email(new_movies)
 
 
 def info_jobs():
@@ -90,6 +91,7 @@ def info_jobs():
 
 if __name__ == '__main__':
     check_database()
+    feed_routine()
 
     scheduler = BlockingScheduler(timezone=TZ)
 
