@@ -325,6 +325,11 @@ def do_email(items):
 
                 # Group by imdb_id
                 # Sort
+                for item in user_items:
+                    try:
+                        item['imdb_id'] = int(item['imdb_id'])
+                    except TypeError:
+                        pass
                 user_items.sort(key=lambda x: x['imdb_id'])
 
                 new_items = []
