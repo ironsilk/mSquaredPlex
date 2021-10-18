@@ -42,7 +42,6 @@ def generate_movie_table(mprm, tprm):
     template = template_file.read()
     template_file.close()
 
-
     for key, value in mprm.items():
         if key in template:
             template = template_replace(template, key, value)
@@ -387,13 +386,13 @@ def do_email(items):
 
                 # Insert into torrents database
                 to_insert = [{'torr_id': x['id'],
-                          'imdb_id': x['imdb_id'],
-                          'status': 'user notified (email)',
-                          'resolution': int(PTN.parse(x['name'])['resolution'][:-1]),
-                          'torr_hash': None,
-                          'requested_by_id': user['telegram_chat_id']
-                          }
-                         for x in user_items]
+                              'imdb_id': x['imdb_id'],
+                              'status': 'user notified (email)',
+                              'resolution': int(PTN.parse(x['name'])['resolution'][:-1]),
+                              'torr_hash': None,
+                              'requested_by_id': user['telegram_chat_id']
+                              }
+                             for x in user_items]
                 insert_many(to_insert, Torrent)
         return
     logger.info('Nothing left to send')
@@ -401,5 +400,3 @@ def do_email(items):
 
 if __name__ == '__main__':
     from dotenv import load_dotenv
-
-
