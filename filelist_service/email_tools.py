@@ -239,20 +239,25 @@ def prepare_item_for_email(item, user_telegram_id):
         item['seen_type'] = 0  # we have this movie but here's a new torrent for it
 
     # Convert some keys
-    item['size'] = "%.1f" % (item['size'] / 1000000000)
-    item['year'] = item['startYear']
-    item['genre'] = item['genres']
-    item['runtime'] = item['runtimeMinutes']
-    item['imdb_score'] = item['averageRating']
-    item['score'] = item['tmdb_score']
+
+    item['size'] = "%.1f" % (float(item['size']) / 1000000000) if 'size' in item.keys() else None
+    item['year'] = item['startYear'] if 'startYear' in item.keys() else None
+    item['genre'] = item['genres'] if 'genres' in item.keys() else None
+    item['runtime'] = item['runtimeMinutes'] if 'runtimeMinutes' in item.keys() else None
+    item['imdb_score'] = item['averageRating'] if 'averageRating' in item.keys() else None
+    item['score'] = item['tmdb_score'] if 'tmdb_score' in item.keys() else None
     item['my_imdb_score'] = item['my_score'] if 'my_score' in item.keys() else None
     item['seen_date'] = item['seen_date'] if 'seen_date' in item.keys() else None
-    item['resolution'] = str(get_torr_quality(item['name'])) + 'p'
+    item['resolution'] = str(get_torr_quality(item['name'])) + 'p' if 'name' in item.keys() else None
     item['trend'] = ''
     item['id'] = str(item['id'])
     item['freeleech'] = True if item['freeleech'] == 1 else False
     item['trailer'] = item['trailer_link']
-    del item['imdb']
+
+    try:
+        del item['imdb']
+    except:
+        pass
 
     # Add keys for torrent API and generate AES hash for each torrent
     item['torr_link_seed'], item['torr_link_download'] = generate_torr_links(item, user_telegram_id)
@@ -381,7 +386,7 @@ def do_email(items):
                                EMAIL_HOSTNAME, EMAIL_USER, EMAIL_PASS)
 
                 # Insert into torrents database
-                items = [{'torr_id': x['id'],
+                to_insert = [{'torr_id': x['id'],
                           'imdb_id': x['imdb_id'],
                           'status': 'user notified (email)',
                           'resolution': int(PTN.parse(x['name'])['resolution'][:-1]),
@@ -389,7 +394,7 @@ def do_email(items):
                           'requested_by_id': user['telegram_chat_id']
                           }
                          for x in user_items]
-                insert_many(items, Torrent)
+                insert_many(to_insert, Torrent)
         return
     logger.info('Nothing left to send')
 
