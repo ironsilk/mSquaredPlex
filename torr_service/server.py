@@ -31,7 +31,7 @@ api.add_route('/' + TORR_FINISHED_PATH.split('/')[-1], TORR_FINISHED())
 
 if __name__ == '__main__':
     check_database()
-    with make_server('0.0.0.0', TORR_API_PORT, api) as server:
+    with make_server('', TORR_API_PORT, api) as server:
         logger.info("TORR API Service running on port {p}".format(p=TORR_API_PORT))
         # Serve until process is killed
         server.serve_forever()
