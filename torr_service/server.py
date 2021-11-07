@@ -13,6 +13,7 @@ TORR_API_PORT = int(os.getenv('TORR_API_PORT'))
 TORR_API_PATH = os.getenv('TORR_API_PATH')
 TORR_FINISHED_PATH = os.getenv('TORR_FINISHED_PATH')
 TORR_CLEAN_ROUTINE_INTERVAL = int(os.getenv('TORR_CLEAN_ROUTINE_INTERVAL'))
+print('/' + TORR_API_PATH.split('/')[-1])
 
 logger = setup_logger('TORR_API_SERVICE')
 
@@ -25,8 +26,8 @@ scheduler.start()
 atexit.register(lambda: scheduler.shutdown())
 
 api = falcon.App()
-api.add_route('/' + TORR_API_PATH.split('/')[-1], TORRAPI)
-api.add_route('/' + TORR_FINISHED_PATH.split('/')[-1], TORR_FINISHED)
+api.add_route('/' + TORR_API_PATH.split('/')[-1], TORRAPI())
+api.add_route('/' + TORR_FINISHED_PATH.split('/')[-1], TORR_FINISHED())
 
 if __name__ == '__main__':
     check_database()
