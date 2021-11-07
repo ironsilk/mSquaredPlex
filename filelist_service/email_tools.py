@@ -381,7 +381,7 @@ def do_email(items):
 
                 if email_body:
                     logger.info('Sending email')
-                    send_email(PLEX_SERVER_NAME, EMAIL_USER, ['mihai.vlad6@gmail.com'], mail_subject, email_body, '',
+                    send_email(PLEX_SERVER_NAME, EMAIL_USER, [user['email']], mail_subject, email_body, '',
                                EMAIL_HOSTNAME, EMAIL_USER, EMAIL_PASS)
 
                 # Insert into torrents database
