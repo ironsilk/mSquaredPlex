@@ -80,7 +80,7 @@ internet so no functions will be affected.
 
 3. Recreate one service
 
-`sudo docker-compose up --build --force-recreate --no-deps -d db_service`
+`sudo docker-compose up --build --force-recreate --no-deps -d filelist_service`
 
 
 ## Known bugs:

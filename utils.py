@@ -18,7 +18,7 @@ from Crypto.Cipher import ChaCha20
 from dotenv import load_dotenv
 from plexapi.server import PlexServer
 from transmission_rpc import Client
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, ARRAY, \
+from sqlalchemy import Column, Integer, BigInteger, String, DateTime, Boolean, ForeignKey, ARRAY, \
     Float, MetaData, create_engine, select, desc, delete, inspect, func
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.dialects.postgresql import insert
@@ -101,7 +101,7 @@ META_DATA.reflect(engine)
 class User(Base):
     __tablename__ = 'user'
 
-    telegram_chat_id = Column(Integer, primary_key=True)
+    telegram_chat_id = Column(BigInteger, primary_key=True)
     telegram_name = Column(String)
     email = Column(String)
     imdb_id = Column(Integer)
