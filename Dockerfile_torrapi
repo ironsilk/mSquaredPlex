@@ -6,7 +6,7 @@ LABEL Author="Mikael"
 RUN mkdir /app
 WORKDIR /app
 
-COPY torr_service/ ./
+COPY torrent_db_refresher/ ./
 COPY utils.py ./
 
 

@@ -28,7 +28,7 @@ def sync_my_imdb():
         already_in_my_movies = get_my_movies(user)
         if not already_in_my_movies:
             already_in_my_movies = []
-        # Sync IMDB data
+        # Sync IMDB ratings
         if user['imdb_id']:
             imdb_data = get_my_imdb(user['imdb_id'])
             imdb_data = [{'imdb_id': deconvert_imdb_id(key), 'my_score': val['rating'], 'seen_date': val['date'],
@@ -37,7 +37,7 @@ def sync_my_imdb():
             insert_many(imdb_data, Movie)
 
         already_in_my_movies = get_my_movies(user) or []
-        # Sync PLEX data
+        # Sync PLEX views and ratings
         try:
             plex_data = get_user_watched_movies(user['email'])
         except Unauthorized:
@@ -48,22 +48,10 @@ def sync_my_imdb():
             for item in plex_data:
                 item['user_id'] = user['telegram_chat_id']
             insert_many(plex_data, Movie)
-        # Sync IMDB Watchlist
+        # Sync IMDB watchlist
         if user['scan_watchlist'] == 1:
             sync_watchlist(user)
         logger.info("Done.")
-
-
-def run_imdb_sync():
-    """
-    Imports all scores and seen dates from MY_IMDB to our DB
-    Adds watchlisted movies to DB in order to be picked up and searched for.
-    :return:
-    """
-    while True:
-        sync_my_imdb()
-        logger.info(f"Sleeping {MYIMDB_REFRESH_INTERVAL} minutes...")
-        time.sleep(MYIMDB_REFRESH_INTERVAL * 60)
 
 
 def get_my_imdb(profile_id):
@@ -156,6 +144,18 @@ def sync_watchlist(user):
         raise e
         logger.error(f"Watchlist sync for user {profile_id} failed. Error: {e}")
     logger.info("Done.")
+
+
+def run_imdb_sync():
+    """
+    Sync IMDB ratings given by user
+    Sync IMDB user watchlist
+    Sync PLEX user activity / ratings
+    """
+    while True:
+        sync_my_imdb()
+        logger.info(f"Sleeping {MYIMDB_REFRESH_INTERVAL} minutes...")
+        time.sleep(MYIMDB_REFRESH_INTERVAL * 60)
 
 
 if __name__ == '__main__':

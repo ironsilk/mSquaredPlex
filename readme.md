@@ -1,55 +1,47 @@
-## Functions:
-There are two **main services** in this repo:
+## Services:
 
-I. MAINSTACK
-
-II.MOVIELIB
-
-They are not codependent, MAINSTACK, which contains all essential services will run just fine without
-MOVIELIB. Both of them maintain their own **mysql DB** instance.
-
-### MAINSTACK
-
-Contains the following services:
 
 - **Telegram service** - A telegram bot which can be queried for any IMDB title, link or ID and allows
 the user to download these movies if found on filelist.
-  This service also implements a routine which retrieves from it's own database (which
-  is updated by the followin myimdb service) any movies from the user's watchlist and allows the
+  This service also implements a routine which retrieves from its own database (which
+  is updated by the following myimdb service) any movies from the user's watchlist and allows the
   user to download these movies if they are available on filelist.
   
     This service employs a simple one-time authentication routine which will
 automatically give the user acces to PLEX and to the following newsletter service.
+    
+
+    TODO rewrite the bot, logic is a bit tangled.
+    
+    TODO make another authentication system, use the built-in telegram method.
+
   
 - **MyIMDB service** - Watches the user's IMDB profile and keeps track of his rated movies and
-watchlist. Any new movie in the Watchlist gets notifications via the Telegram service while the rated movies are used
-  to filter out which new filelist movies to send via the newsletter. Each user will receive a personalised
-  newsletter depending on the movies which he has seen. This also syncs with the user's PLEX activity so any 
-  watched movie in plex will be recorded here also.
+watchlist. For any new movie in the Watchlist the user gets notifications via the Telegram service 
+while the rated movies are used to filter out which new filelist movies to send via the newsletter. 
+Each user will receive a personalised newsletter depending on the movies which he has seen. 
+This also syncs with the user's PLEX activity so any watched movie in plex will be taken into account.
   
+
 - **Newsletter service** - Gets the last 100 new filelist torrents, filters them as described in MyIMDB service and
 sends them to each user via email. 
   
+
 - **TorrAPI** - An API which receives download requests from the Telegram service or from the Newsletter service and
 communicates with the Transmission docker in order to download these movies. This service also employs a routine
-  which syncs torrent statuses with Transmission. This feature is used afterwards when a user tries to download a movie
-  which is already downloaded.
-  
+which syncs torrent statuses from Transmission to the postgres database.
 
-### MOVIELIB
 
-Contains the following services:
+## TODO
 
-- **IMDB refresher service** - Will download the dumps from IMDB and replicate the database locally. Slow and painful
-service, main reason why there are two mysql db instances. Should be ran maybe once a month.
-  
-- **OMDB/TMDB services** - Will look in the main IMDB mirrored databases and try to get info from OMDB/TMDB for all 
-movies there.
-  
-The goal for this second stack is to get a local movie database which could finally be used to make recommendations 
-based on the user's ratings or watch history. It also provides a faster response when searching for movies with 
-telegram. When the service is not running or not even configured the MAINSTACK will get all data directly from the 
-internet so no functions will be affected.
+- ask user who asked for download and didnt watch the movie before deletion and maybe confirm in with the admin.
+- Show my watchlist.
+
+
+## Wishlist
+- recommend a movie - later stages, complex.
+- Favorite a director/actor whatever and receive notifications when a new movie of his/hers is available.
+
 
 ## Deployment:
 
@@ -89,17 +81,6 @@ internet so no functions will be affected.
 All containers are set to restart `on-failiure` so no worries.
 
 
-## TODO
-
-- ask user who asked for download and didnt watch the movie before deletion
-  and maybe confirm in with the admin.
-- Show my watchlist.
-- Fix TMDB and OMDB updates, use min/max ID or something else.
-
-
-### Wishlist
-- recommend a movie - later stages, complex.
-- Favorite a director/actor whatever and receive notifications when a new movie of his/hers is available.
 
 
 ### In order to solve TRANSMISSION configuration problem:
