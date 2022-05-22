@@ -12,28 +12,28 @@ from utils import get_user_by_tgram_id, deconvert_imdb_id, update_many, get_movi
 soap_pattern = re.compile(": Season \d+:")
 
 
-def csv_upload_handler(context: CallbackContext):
+async def csv_upload_handler(context: CallbackContext):
     file_id = context.job.context['file']
     tgram_user = context.job.context['user']
     send_notifications = context.job.context['send_notifications']
-    file = context.bot.getFile(file_id)
+    file = await context.bot.getFile(file_id)
     # Create an in-memory file
     f = io.BytesIO()
-    file.download(out=f)
+    await file.download(out=f)
     # Pointer is at the end of the file so reset it to 0.
     f.seek(0)
     # To pd.df
     df = pd.read_csv(f)
     try:
         df['Date'] = pd.to_datetime(df['Date'])
-        has_ratings = 'ratings' in df.columns
+        has_ratings = 'Ratings' in df.columns
         df = df.to_dict('records')
     except Exception as e:
         # send error to user
-        context.bot.send_message(f"Encountered some problems with the CSV you gave me.\n"
-                                 f"Make sure you have 'Title' and 'Date' as required columns "
-                                 f"and the optional 'ratings' column.\n"
-                                 f"Err description: {e}")
+        await context.bot.send_message(f"Encountered some problems with the CSV you gave me.\n"
+                                       f"Make sure you have 'Title' and 'Date' as required columns "
+                                       f"and the optional 'ratings' column.\n"
+                                       f"Err description: {e}")
         return
 
     try:
@@ -67,7 +67,7 @@ def csv_upload_handler(context: CallbackContext):
                         }
                         if has_ratings:
                             item['rating_status'] = 'rated externally'
-                            item['my_score'] = movie['ratings']
+                            item['my_score'] = movie['Ratings']
                         if not send_notifications:
                             item['rating_status'] = 'refused to rate'
                         identified_movies.append(item)
@@ -79,13 +79,13 @@ def csv_upload_handler(context: CallbackContext):
                 raise e
                 pass
     update_many(identified_movies, Movie, Movie.id)
-    context.bot.send_message(text=f"CSV update successful!\n"
-                                  f"Out of {len(df)} entries in your CSV file, "
-                                  f"{len(identified_movies)} were movies while "
-                                  f"{soap_or_unidentified} were either soap episodes, "
-                                  f"series or likewise. The rest were already in your database "
-                                  f"({len(df) - len(identified_movies) - soap_or_unidentified})",
-                             chat_id=tgram_user)
+    await context.bot.send_message(text=f"CSV update successful!\n"
+                                        f"Out of {len(df)} entries in your CSV file, "
+                                        f"{len(identified_movies)} were movies while "
+                                        f"{soap_or_unidentified} were either soap episodes, "
+                                        f"series or likewise. The rest were already in your database "
+                                        f"({len(df) - len(identified_movies) - soap_or_unidentified})",
+                                   chat_id=tgram_user)
 
 
 def csv_download_handler(context: CallbackContext):

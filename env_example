@@ -1,5 +1,9 @@
 TZ=Europe/Bucharest
 
+
+# Choose whether to use plex or not
+USE_PLEX=True
+
 # PLEX docker variables
 PLEX_FILES_LOCATION=/mnt/Media/Movies&TV/plex
 PLEX_TV_LIBRARY_FOLDER=/mnt/Media/Movies&TV/TV

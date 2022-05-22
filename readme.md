@@ -9,7 +9,41 @@ the user to download these movies if found on filelist.
   
     This service employs a simple one-time authentication routine which will
 automatically give the user acces to PLEX and to the following newsletter service.
-    
+
+
+- **Telegram service** - A telegram bot with the following functionalities:
+
+    - **Download a movie** -> Present IMDB id, IMDB link or movie title.
+        Bot will match movie title with an IMDB id or loop through viable options until 
+    it finds a match and:
+        - Asks for confirmation on the match.
+        - Check in user movies database if the movie was seen before. (notifies if True)
+        - Check if the movie (in any resolution) is already downloaded. (notifies if True)
+        - Pulls available torrents for the movie
+        - If user chooses one, bot sends a download request to the transmission client
+        - If user doesn't choose any resolution bot will ask if movie should be added to 
+      watchlist. In this case the user will be notified if any resolution other than these already
+      presented becomes available.
+    - **Watchlist notification** -> When a new torrent was added for any movie in the watchlist.
+    If the user accepts, torrent is set to download, else the user will receive updates only on other
+    resolutions for that particullar movie.
+    - **Download finished notification** -> User receives notification when download is finished.
+    - **Check download progress** -> Returns a list of the status of the last 10 torrents downloaded
+        by the user.
+    - **Upload viewing activity** -> User can upload a .csv file with his viewing activity. 
+      - Table format should be `Title`, `Date` which is the default export file from Netflix. 
+      - Only movies will be picked 
+    up from the file. 
+      - For any unrated movie the user will be or not (depening on his answer to the Y/N choice) prompted 
+    to rate that specific title after the import. 
+      - If he wishes to import already rated titles the user can 
+    choose to add another column with ratings, `Ratings`. (scale 1-10). These will be automatically picked up. 
+      - Any ratings and seen dates will be overwritten. 
+      - IMDB ratings and PLEX seen dates do have prevalence and will
+    not be overwritten.
+      - User gets notified when the process is finished and how many of the entries were movies, how many
+    were soap series and how many were already in the database.
+
 
     TODO rewrite the bot, logic is a bit tangled.
     
