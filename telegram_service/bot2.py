@@ -13,7 +13,8 @@ from bot_utils import make_movie_reply, update_torr_db, \
     exclude_torrents_from_watchlist, get_movie_from_all_databases, search_imdb_title, add_to_watchlist
 from bot_watchlist import get_torrents_for_imdb_id
 from bot_csv import csv_upload_handler, csv_download_handler
-from utils import deconvert_imdb_id, send_torrent, compose_link, get_user_by_tgram_id
+from utils import deconvert_imdb_id, send_torrent, compose_link, get_user_by_tgram_id, get_my_movie_by_imdb, \
+    update_many, Movie, convert_imdb_id
 
 """
 IMPORTANT for SSL: add verify=False in
@@ -525,8 +526,130 @@ async def netflix_no_csv(update: Update, context: CallbackContext) -> int:
     return NETFLIX_CSV
 
 
+"""<< RATE A TITLE(PLEX TRIGGERED) >>"""
 
 
+@auth_wrap
+async def submit_rating(update: Update, context: CallbackContext) -> int:
+    """User receives a message from an external routine
+        If he clicks on it this function gets triggered."""
+    # TODO check if we split the message RateTitle_id how it gets displayed and
+    #  if we can use this. Check out bot_rate_title
+    # text_caps = ' '.join(context.args) to get text after command
+
+    if update.message.text in [str(x) for x in list(range(1, 11))]:
+        # Got rating
+        item = get_my_movie_by_imdb(context.user_data['pkg']['imdb'], update.effective_user['id'])
+        item['rating_status'] = 'rated in telegram'
+        item['my_score'] = int(update.message.text)
+        update_many([item], Movie, Movie.id)
+        await update.effective_message.reply_text(f"Ok, great! Here's a link if you also want to rate it on IMDB:\n"
+                                            f"https://www.imdb.com/title/"
+                                            f"{convert_imdb_id(context.user_data['pkg']['imdb'])}/")
+        return await reset(update, context)
+
+    elif update.message.text == "I've changed my mind":
+        item = get_my_movie_by_imdb(context.user_data['pkg']['imdb'], update.effective_user['id'])
+        item['rating_status'] = 'refused to rate'
+        update_many([item], Movie, Movie.id)
+        await update.effective_message.reply_text("Ok, no worries! I won't bother you about this title anymore.\n"
+                                            "Have a great day!")
+        return reset(update, context)
+    else:
+        await update.effective_message.reply_text("Please choose an option from the keyboard.")
+        return RATE_TITLE
+
+
+"""<< AUTHENTICATION >>"""
+
+
+def check_riddle(update: Update, context: CallbackContext):
+    if update.message.text.lower() == 'mellon':
+        update.effective_message.reply_photo(
+            photo=open(TELEGRAM_AUTH_APPROVE, 'rb'),
+            caption="Welcome! Just a few more steps to configure your preferences. "
+                    "First, please type in your email so that we can add you "
+                    "to our PLEX users.",
+        )
+        return CHECK_EMAIL
+    else:
+        update.effective_message.reply_text("Sorry boi, ur welcome to try again.")
+        return REGISTER_USER
+
+
+def check_email(update: Update, context: CallbackContext):
+    # Invite to PLEX server
+    email_invite = invite_friend(update.message.text)
+    if email_invite:
+        message = "Great! An invitation for PLEX has been sent to your email.\n"
+    else:
+        message = "Looks like this email is already in our PLEX users database. " \
+                  "If this is not the case, please contact the admin.\n\n"
+
+    # Continue to IMDB stuff
+    context.user_data['new_user'] = {
+        'telegram_chat_id': update.message.chat_id,
+        'telegram_name': update.effective_user.first_name,
+        'email': update.message.text,
+        'email_newsletters': True,
+        'scan_watchlist': False,
+
+    }
+    message += "Would you like to connect you IMDB account? " \
+               "In this way we'll be able to pull your movie " \
+               "ratings and warn you when you'll search for a movie " \
+               "you've already seen.\n" \
+               "We'll also scan your watchlist periodically and notify you " \
+               "when we'll be able to download any of the titles there.\n" \
+               "In the future we're planning to be able to " \
+               "give ratings here and transfer them to IMDB."
+    update.effective_message.reply_text(message, reply_markup=ReplyKeyboardMarkup(bool_keyboard,
+                                                                                  one_time_keyboard=True,
+                                                                                  resize_keyboard=True,
+                                                                                  ))
+    return GIVE_IMDB
+
+
+def give_imdb(update: Update, context: CallbackContext):
+    if update.message.text == 'Yes':
+        update.effective_message.reply_photo(
+            photo=open(TELEGRAM_IMDB_RATINGS, 'rb'),
+            caption="I'll need you to go to your IMDB account and copy here your user ID, like the one in the photo, "
+                    "ur77571297. Also make sure that your Ratings are PUBLIC and so is your Watchlist (10 pages max).\n"
+                    "If this is too much, just type 'fuck it' and skip this step.\n"
+                    "https://www.imdb.com/",
+        )
+        return CHECK_IMDB
+    else:
+        return register_user(update, context)
+
+
+def check_imdb(update: Update, context: CallbackContext):
+    if update.message.text.lower() != 'fuck it':
+        context.user_data['new_user']['scan_watchlist'] = True
+        context.user_data['new_user']['imdb_id'] = ''.join([x for x in update.message.text if x.isdigit()])
+    return register_user(update, context)
+
+
+def register_user(update: Update, context: CallbackContext):
+    global USERS
+    # Update user to database
+    update_many([context.user_data['new_user']], User, User.telegram_chat_id)
+    USERS = get_telegram_users()
+    update.effective_message.reply_text("Ok, that's it. I'll take care of the rest, from now on "
+                                        "anytime you type something i'll be here to help you out. Enjoy!\n"
+                                        "Type /help to find out more.")
+    return start(update, context)
+
+
+def wrong_input(update: Update, context: CallbackContext):
+    update.effective_message.reply_text("Wrong input, please try again.")
+    return CHECK_EMAIL
+
+
+def wrong_input_imdb(update: Update, context: CallbackContext):
+    update.effective_message.reply_text("Wrong input, please try again.")
+    return CHECK_IMDB
 
 
 
@@ -666,6 +789,70 @@ if __name__ == '__main__':
         }
     )
 
+    rate_title_conversation_handler = ConversationHandler(
+        entry_points=[
+            MessageHandler(
+                filters.TEXT, submit_rating
+            ),
+        ],
+        states={},
+        fallbacks=[],
+        map_to_parent={
+            RATE_TITLE: RATE_TITLE,
+            CHOOSE_TASK: CHOOSE_TASK,
+            RESET_CONVERSATION: RESET_CONVERSATION,
+        }
+    )
+    # TODO maybe change auth method, generate a one-time code but i would
+    #  need to know who are the admins, should add that column to the database
+    #  and probably change the auth wrapper?
+    #  What we're gonna do: Add an .env variable with ADMIN TELEGRAM ID, this will be
+    #  automatically added in the database as admin.
+    #  - Implement an /allow command followed by the invitee ID or nickname (or phone nr?)
+    #  - Restrict this command to ADMINS, maybe make the functionality available to adding
+    #  also admins, like /allow john -admin and /allow john.
+    #  telegram bot won't be able to send message so the invite is actually an allow.
+    #  the user will have to start the bot and he will be allowed to complete the login.
+    register_user_conversation_handler = ConversationHandler(
+        entry_points=[
+            CommandHandler('reset', reset),
+            MessageHandler(
+                filters.TEXT, check_riddle
+            )
+        ],
+        states={
+            CHECK_EMAIL: [
+                CommandHandler('reset', reset),
+                MessageHandler(
+                    filters.Regex('[^@]+@[^@]+\.[^@]+'), check_email
+                ),
+                MessageHandler(
+                    filters.TEXT, wrong_input,
+                ),
+            ],
+            GIVE_IMDB: [
+                MessageHandler(
+                    filters.TEXT, give_imdb,
+                ),
+            ],
+            CHECK_IMDB: [
+                CommandHandler('reset', reset),
+                MessageHandler(
+                    filters.Regex('^[u]?[r]?\d+$'), check_imdb
+                ),
+                MessageHandler(
+                    filters.TEXT, wrong_input_imdb
+                ),
+            ],
+        },
+        fallbacks=[CommandHandler('reset', reset)],
+        map_to_parent={
+            REGISTER_USER: REGISTER_USER,
+            CHOOSE_TASK: CHOOSE_TASK,
+            RESET_CONVERSATION: RESET_CONVERSATION,
+        }
+    )
+
     conversation_handler = ConversationHandler(
         entry_points=[MessageHandler(filters.TEXT, start)],
         states={
@@ -673,7 +860,8 @@ if __name__ == '__main__':
             DOWNLOAD_MOVIE: [download_movie_conversation_handler],
             CHECK_PROGRESS: [check_progress_conversation_handler],
             UPLOAD_ACTIVITY: [upload_activity_conversation_handler],
-            RATE_TITLE: [MessageHandler(filters.TEXT & (~filters.COMMAND), echo)],
+            RATE_TITLE: [rate_title_conversation_handler],
+            REGISTER_USER: [register_user_conversation_handler],
             RESET_CONVERSATION: [MessageHandler(filters.TEXT, start)]
         },
         fallbacks=[CommandHandler("reset", reset)]
