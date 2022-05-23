@@ -121,6 +121,7 @@ def get_telegram_users():
                 'telegram_name': x['telegram_name'],
                 'scan_watchlist': x['scan_watchlist'],
                 'email_newsletters': x['email_newsletters'],
+                'user_type': x['user_type'],
             }
         for x in users}
 

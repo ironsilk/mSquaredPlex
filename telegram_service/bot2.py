@@ -1,8 +1,11 @@
+import datetime
 import logging
 import os
 import re
 from functools import wraps
+from random import randint
 
+import sqlalchemy
 from telegram import InlineQueryResultArticle, InputTextMessageContent
 from telegram import Update, ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CallbackContext, CommandHandler, MessageHandler, filters, \
@@ -10,11 +13,13 @@ from telegram.ext import ApplicationBuilder, CallbackContext, CommandHandler, Me
 from transmission_rpc import TransmissionError
 from bot_get_progress import get_progress
 from bot_utils import make_movie_reply, update_torr_db, \
-    exclude_torrents_from_watchlist, get_movie_from_all_databases, search_imdb_title, add_to_watchlist
+    exclude_torrents_from_watchlist, get_movie_from_all_databases, search_imdb_title, add_to_watchlist, \
+    get_telegram_users, invite_friend
 from bot_watchlist import get_torrents_for_imdb_id
 from bot_csv import csv_upload_handler, csv_download_handler
 from utils import deconvert_imdb_id, send_torrent, compose_link, get_user_by_tgram_id, get_my_movie_by_imdb, \
-    update_many, Movie, convert_imdb_id
+    update_many, Movie, convert_imdb_id, check_database, User, get_onetimepasswords, remove_onetimepassword, \
+    insert_onetimepasswords
 
 """
 IMPORTANT for SSL: add verify=False in
@@ -29,6 +34,7 @@ logging.basicConfig(
 
 logger = logging.getLogger('MovieTimeBot')
 
+SUPERADMIN_PASSWORD = os.getenv('SUPERADMIN_PASSWORD')
 USE_PLEX = bool(os.getenv('USE_PLEX'))
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 TELEGRAM_AUTH_TEST_PATH = os.getenv('TELEGRAM_AUTH_TEST_PATH')
@@ -62,11 +68,9 @@ SUBMIT_RATING = 16
 CHECK_EMAIL, GIVE_IMDB, CHECK_IMDB = range(17, 20)
 
 # State definitions for aux functions
-RESET_CONVERSATION = 21
+# RESET_CONVERSATION = 21
 
-USERS = {
-    1700079840: None
-}
+USERS = None
 
 menu_keyboard = [
     ["📥 Download a movie"],
@@ -94,20 +98,27 @@ rate_keyboard = [
 
 def auth_wrap(f):
     @wraps(f)
-    def wrap(update: Update, context: CallbackContext):
+    async def wrap(update: Update, context: CallbackContext):
         print(f"Wrapped {f.__name__}", )
         user = update.effective_user['id']
         if user in USERS.keys():
-            # Ok boss
+            # User is registered
             result = f(update, context)
-            return result
+            print(result)
+            return await result
         else:
-            # Check this mofo
-            update.effective_message.reply_photo(
-                photo=open(TELEGRAM_AUTH_TEST_PATH, 'rb'),
-                caption="Looks like you're new here. Answer correctly and you may enter.",
-            )
-            return echo
+            if USERS:
+                # New user ask for password
+                await update.message.reply_text("Please input the password provided by the admin")
+                context.user_data['user_type'] = 'user'
+            else:
+                # No users registered, probably admin but check.
+                await update.effective_message.reply_photo(
+                    photo=open(TELEGRAM_AUTH_TEST_PATH, 'rb'),
+                    caption="Looks like you're new here. Answer correctly and you may enter.",
+                )
+                context.user_data['user_type'] = 'admin'
+            return REGISTER_USER
 
     return wrap
 
@@ -134,7 +145,7 @@ async def reset(update: Update, context: CallbackContext.DEFAULT_TYPE) -> int:
 
     await update.message.reply_text("See you next time. Type anything to get started.")
 
-    return RESET_CONVERSATION
+    return ConversationHandler.END
 
 
 @auth_wrap
@@ -172,7 +183,9 @@ async def choose_task(update: Update, context: CallbackContext) -> int:
         await update.message.reply_text("Ok, we've started the process, we'll let you know once it's done.")
         return echo
         # return download_csv(update, context)
-    return await reset(update, context)
+    message = 'Please choose one of the options.'
+    await update.message.reply_text(message)
+    return CHOOSE_TASK
 
 
 @auth_wrap
@@ -292,7 +305,7 @@ async def accept_reject_title(update: Update, context: CallbackContext) -> int:
         else:
             await update.effective_message.reply_text("These were all the hits. Sorry. Feel free to type anything "
                                                       "to start again")
-            return RESET_CONVERSATION
+            return await reset(update, context)
     elif update.message.text == 'Exit':
         return await reset(update, context)
     else:
@@ -469,12 +482,15 @@ async def get_download_progress(update: Update, context: CallbackContext) -> int
 
     user = update.effective_user['id']
     torrents = get_progress(user, logger=logger)
-    for torrent in torrents[:5]:
-        await update.message.reply_text(f"{torrent['TorrentName']}\n"
-                                        f"Resolution: {torrent['Resolution']}\n"
-                                        f"Status: {torrent['Status']}\n"
-                                        f"Progress: {torrent['Progress']}\n"
-                                        f"ETA: {torrent['ETA']}")
+    if torrents:
+        for torrent in torrents[:5]:
+            await update.message.reply_text(f"{torrent['TorrentName']}\n"
+                                            f"Resolution: {torrent['Resolution']}\n"
+                                            f"Status: {torrent['Status']}\n"
+                                            f"Progress: {torrent['Progress']}\n"
+                                            f"ETA: {torrent['ETA']}")
+    else:
+        await update.message.reply_text("No torrents to show :(.")
     return await reset(update, context)
 
 
@@ -544,8 +560,8 @@ async def submit_rating(update: Update, context: CallbackContext) -> int:
         item['my_score'] = int(update.message.text)
         update_many([item], Movie, Movie.id)
         await update.effective_message.reply_text(f"Ok, great! Here's a link if you also want to rate it on IMDB:\n"
-                                            f"https://www.imdb.com/title/"
-                                            f"{convert_imdb_id(context.user_data['pkg']['imdb'])}/")
+                                                  f"https://www.imdb.com/title/"
+                                                  f"{convert_imdb_id(context.user_data['pkg']['imdb'])}/")
         return await reset(update, context)
 
     elif update.message.text == "I've changed my mind":
@@ -553,7 +569,7 @@ async def submit_rating(update: Update, context: CallbackContext) -> int:
         item['rating_status'] = 'refused to rate'
         update_many([item], Movie, Movie.id)
         await update.effective_message.reply_text("Ok, no worries! I won't bother you about this title anymore.\n"
-                                            "Have a great day!")
+                                                  "Have a great day!")
         return reset(update, context)
     else:
         await update.effective_message.reply_text("Please choose an option from the keyboard.")
@@ -563,21 +579,42 @@ async def submit_rating(update: Update, context: CallbackContext) -> int:
 """<< AUTHENTICATION >>"""
 
 
-def check_riddle(update: Update, context: CallbackContext):
-    if update.message.text.lower() == 'mellon':
-        update.effective_message.reply_photo(
-            photo=open(TELEGRAM_AUTH_APPROVE, 'rb'),
-            caption="Welcome! Just a few more steps to configure your preferences. "
-                    "First, please type in your email so that we can add you "
-                    "to our PLEX users.",
-        )
-        return CHECK_EMAIL
+async def check_user(update: Update, context: CallbackContext):
+    if context.user_data['user_type'] == 'user':
+        onetime_passwords = get_onetimepasswords()
+        passwords = [x['password'] for x in onetime_passwords]
+        expiry_dates = [x['expiry'] for x in onetime_passwords]
+        user_types = [x['user_type'] for x in onetime_passwords]
+        try:
+            pwd = int(update.message.text)
+            if pwd in passwords and datetime.datetime.now() < expiry_dates[passwords.index(pwd)]:
+                remove_onetimepassword(pwd)
+                context.user_data['user_type'] = user_types[passwords.index(pwd)]
+                return await password_ok(update, context)
+            else:
+                await update.effective_message.reply_text("Password expired, please contact "
+                                                          "the admin and try again.")
+                return REGISTER_USER
+        except ValueError:
+            pass
     else:
-        update.effective_message.reply_text("Sorry boi, ur welcome to try again.")
-        return REGISTER_USER
+        if update.message.text.lower() == SUPERADMIN_PASSWORD:
+            return await password_ok(update, context)
+    await update.effective_message.reply_text("Incorrect password")
+    return REGISTER_USER
 
 
-def check_email(update: Update, context: CallbackContext):
+async def password_ok(update: Update, context: CallbackContext):
+    await update.effective_message.reply_photo(
+        photo=open(TELEGRAM_AUTH_APPROVE, 'rb'),
+        caption="Welcome! Just a few more steps to configure your preferences. "
+                "First, please type in your email so that we can add you "
+                "to our PLEX users.",
+    )
+    return CHECK_EMAIL
+
+
+async def check_email(update: Update, context: CallbackContext):
     # Invite to PLEX server
     email_invite = invite_friend(update.message.text)
     if email_invite:
@@ -593,9 +630,10 @@ def check_email(update: Update, context: CallbackContext):
         'email': update.message.text,
         'email_newsletters': True,
         'scan_watchlist': False,
+        'user_type': context.user_data['user_type']
 
     }
-    message += "Would you like to connect you IMDB account? " \
+    message += "Would you like to connect your IMDB account? " \
                "In this way we'll be able to pull your movie " \
                "ratings and warn you when you'll search for a movie " \
                "you've already seen.\n" \
@@ -603,16 +641,16 @@ def check_email(update: Update, context: CallbackContext):
                "when we'll be able to download any of the titles there.\n" \
                "In the future we're planning to be able to " \
                "give ratings here and transfer them to IMDB."
-    update.effective_message.reply_text(message, reply_markup=ReplyKeyboardMarkup(bool_keyboard,
-                                                                                  one_time_keyboard=True,
-                                                                                  resize_keyboard=True,
-                                                                                  ))
+    await update.effective_message.reply_text(message, reply_markup=ReplyKeyboardMarkup(bool_keyboard,
+                                                                                        one_time_keyboard=True,
+                                                                                        resize_keyboard=True,
+                                                                                        ))
     return GIVE_IMDB
 
 
-def give_imdb(update: Update, context: CallbackContext):
+async def give_imdb(update: Update, context: CallbackContext):
     if update.message.text == 'Yes':
-        update.effective_message.reply_photo(
+        await update.effective_message.reply_photo(
             photo=open(TELEGRAM_IMDB_RATINGS, 'rb'),
             caption="I'll need you to go to your IMDB account and copy here your user ID, like the one in the photo, "
                     "ur77571297. Also make sure that your Ratings are PUBLIC and so is your Watchlist (10 pages max).\n"
@@ -621,25 +659,25 @@ def give_imdb(update: Update, context: CallbackContext):
         )
         return CHECK_IMDB
     else:
-        return register_user(update, context)
+        return await register_user(update, context)
 
 
-def check_imdb(update: Update, context: CallbackContext):
+async def check_imdb(update: Update, context: CallbackContext):
     if update.message.text.lower() != 'fuck it':
         context.user_data['new_user']['scan_watchlist'] = True
         context.user_data['new_user']['imdb_id'] = ''.join([x for x in update.message.text if x.isdigit()])
-    return register_user(update, context)
+    return await register_user(update, context)
 
 
-def register_user(update: Update, context: CallbackContext):
+async def register_user(update: Update, context: CallbackContext):
     global USERS
     # Update user to database
     update_many([context.user_data['new_user']], User, User.telegram_chat_id)
     USERS = get_telegram_users()
-    update.effective_message.reply_text("Ok, that's it. I'll take care of the rest, from now on "
-                                        "anytime you type something i'll be here to help you out. Enjoy!\n"
-                                        "Type /help to find out more.")
-    return start(update, context)
+    await update.effective_message.reply_text("Ok, that's it. I'll take care of the rest, from now on "
+                                              "anytime you type something i'll be here to help you out. Enjoy!\n"
+                                              "Type /help to find out more.")
+    return await start(update, context)
 
 
 def wrong_input(update: Update, context: CallbackContext):
@@ -650,6 +688,66 @@ def wrong_input(update: Update, context: CallbackContext):
 def wrong_input_imdb(update: Update, context: CallbackContext):
     update.effective_message.reply_text("Wrong input, please try again.")
     return CHECK_IMDB
+
+
+"""<< OTHER FUNCTIONS >>"""
+
+
+@auth_wrap
+async def help_command(update: Update, context: CallbackContext) -> None:
+    """Displays info on how to use the bot."""
+
+    watchlist_status = 'MONITORING' if USERS[update.effective_user.id]['scan_watchlist'] == 1 else 'NOT MONITORING'
+    email_status = 'RECEIVING' if USERS[update.effective_user.id]['email_newsletters'] else 'NOT RECEIVING'
+    generate_password = '\n\nGENERATE CODE FOR NEW USER: run command /generate_pass. If you want the user to have ' \
+                        'admin privileges, use -admin flag (/generate_pass -admin)' if \
+        USERS[update.effective_user.id]['user_type'] == 'admin' else ' '
+    await update.message.reply_text("Type anything for the bot to start.\n\n"
+                                    f"Right now we are {watchlist_status} your watchlist. "
+                                    f"Type /change_watchlist "
+                                    "to reverse the status.\n\n"
+                                    f"Right now you are {email_status} the email newsletters. Type /change_newsletter "
+                                    "to reverse the status.\n\n"
+                                    "If you want to change your email address or your imdb ID type /update_user "
+                                    "and we'll ask you to retake the login process. Once started, you must complete "
+                                    "the entire process."
+                                    f"{generate_password}")
+    # don't change state
+    return None
+
+
+@auth_wrap
+async def generate_password(update: Update, context: CallbackContext) -> None:
+    def insert_pwd(pwd):
+        try:
+            insert_onetimepasswords(pwd)
+        except sqlalchemy.exc.IntegrityError:
+            pwd['password'] = randint(10000, 99999)
+            insert_pwd(pwd)
+        return pwd['password']
+
+    if not USERS[update.effective_user.id]['user_type'] == 'admin':
+        return None
+    else:
+        arguments = (' '.join(context.args)).strip()
+        pwd = {
+            'password': randint(10000, 99999),
+            'expiry': datetime.datetime.now() + datetime.timedelta(days=1)
+        }
+        if arguments == '-admin':
+            pwd['user_type'] = 'admin'
+        else:
+            pwd['user_type'] = 'user'
+        pwd = insert_pwd(pwd)
+        await update.message.reply_text(f"Token {pwd} available for 24 hours")
+        onetime_passwords = get_onetimepasswords()
+        return None
+
+
+
+
+
+
 
 
 
@@ -691,195 +789,126 @@ async def unknown(update: Update, context: CallbackContext.DEFAULT_TYPE):
     await context.bot.send_message(chat_id=update.effective_chat.id, text="Sorry, I didn't understand that command.")
 
 
-if __name__ == '__main__':
+def main() -> None:
+    """
+    Main function, runs bot and all other services
+    """
+
+    global USERS
+    check_database()
+    USERS = get_telegram_users()
+
     application = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
 
     download_movie_conversation_handler = ConversationHandler(
         entry_points=[
-            CommandHandler(
-                "reset", reset
-            ),
-            MessageHandler(
-                filters.Regex('^([tT]{2})?\d+$'), parse_imdb_id
-            ),
-            MessageHandler(
-                filters.TEXT, parse_imdb_text
-            ),
-        ],
+            MessageHandler(filters.Regex('^([tT]{2})?\d+$') & (~filters.COMMAND), parse_imdb_id),
+            MessageHandler(filters.TEXT & (~filters.COMMAND), parse_imdb_text)],
         states={
             CHOOSE_MULTIPLE: [
-                MessageHandler(
-                    filters.TEXT, choose_multiple
-                )
-            ],
+                MessageHandler(filters.TEXT & (~filters.COMMAND), choose_multiple)],
             CHOOSE_ONE: [
-                MessageHandler(
-                    filters.TEXT, accept_reject_title
-                )
-            ],
+                MessageHandler(filters.TEXT & (~filters.COMMAND), accept_reject_title)],
             CONFIRM_REDOWNLOAD_ACTION: [
-                MessageHandler(
-                    filters.TEXT, confirm_redownload_action
-                )
-            ],
+                MessageHandler(filters.TEXT & (~filters.COMMAND), confirm_redownload_action)],
             SEARCH_FOR_TORRENTS: [
-                MessageHandler(
-                    filters.TEXT, search_for_torrents
-                )
-            ],
+                MessageHandler(filters.TEXT & (~filters.COMMAND), search_for_torrents)],
             DOWNLOAD_TORRENT: [
-                CallbackQueryHandler(
-                    download_torrent
-                )
-            ],
+                CallbackQueryHandler(download_torrent)],
             WATCHLIST_NO_TORR: [
-                MessageHandler(
-                    filters.TEXT, add_to_watchlist_no_torrent
-                ),
-            ],
+                MessageHandler(filters.TEXT & (~filters.COMMAND), add_to_watchlist_no_torrent), ],
         },
         fallbacks=[CommandHandler("reset", reset)],
         map_to_parent={
             DOWNLOAD_MOVIE: DOWNLOAD_MOVIE,
-            RESET_CONVERSATION: RESET_CONVERSATION
+            ConversationHandler.END: ConversationHandler.END
         }
     )
 
     check_progress_conversation_handler = ConversationHandler(
         entry_points=[
-            MessageHandler(
-                filters.TEXT, get_download_progress
-            ),
-            CallbackQueryHandler(
-                get_download_progress
-            )
-        ],
+            MessageHandler(filters.TEXT, get_download_progress),
+            CallbackQueryHandler(get_download_progress)],
         states={},
         fallbacks=[],
-        map_to_parent={
-            RESET_CONVERSATION: RESET_CONVERSATION,
-        }
+        map_to_parent={}
     )
 
     upload_activity_conversation_handler = ConversationHandler(
         entry_points=[
-            CommandHandler('reset', reset),
-            MessageHandler(
-                filters.Regex("^Yes$|^No$"), netflix_rate_or_not,
-            ),
-            MessageHandler(
-                filters.TEXT, netflix_no_rate_option
-            ),
-        ],
+            MessageHandler(filters.Regex("^Yes$|^No$") & (~filters.COMMAND), netflix_rate_or_not, ),
+            MessageHandler(filters.TEXT & (~filters.COMMAND), netflix_no_rate_option), ],
         states={
             NETFLIX_CSV: [
-                CommandHandler('reset', reset),
-                MessageHandler(
-                    filters.Document.FileExtension('csv'), netflix_csv
-                ),
-                MessageHandler(
-                    filters.TEXT, netflix_no_csv
-                ),
-            ],
+                MessageHandler(filters.Document.FileExtension('csv') & (~filters.COMMAND), netflix_csv),
+                MessageHandler(filters.TEXT & (~filters.COMMAND), netflix_no_csv), ],
         },
         fallbacks=[CommandHandler("reset", reset)],
         map_to_parent={
             UPLOAD_ACTIVITY: UPLOAD_ACTIVITY,
-            RESET_CONVERSATION: RESET_CONVERSATION
+            ConversationHandler.END: ConversationHandler.END
         }
     )
 
     rate_title_conversation_handler = ConversationHandler(
         entry_points=[
-            MessageHandler(
-                filters.TEXT, submit_rating
-            ),
-        ],
+            MessageHandler(filters.TEXT & (~filters.COMMAND), submit_rating), ],
         states={},
         fallbacks=[],
         map_to_parent={
             RATE_TITLE: RATE_TITLE,
             CHOOSE_TASK: CHOOSE_TASK,
-            RESET_CONVERSATION: RESET_CONVERSATION,
+            ConversationHandler.END: ConversationHandler.END
         }
     )
-    # TODO maybe change auth method, generate a one-time code but i would
-    #  need to know who are the admins, should add that column to the database
-    #  and probably change the auth wrapper?
-    #  What we're gonna do: Add an .env variable with ADMIN TELEGRAM ID, this will be
-    #  automatically added in the database as admin.
-    #  - Implement an /allow command followed by the invitee ID or nickname (or phone nr?)
-    #  - Restrict this command to ADMINS, maybe make the functionality available to adding
-    #  also admins, like /allow john -admin and /allow john.
-    #  telegram bot won't be able to send message so the invite is actually an allow.
-    #  the user will have to start the bot and he will be allowed to complete the login.
+
     register_user_conversation_handler = ConversationHandler(
         entry_points=[
-            CommandHandler('reset', reset),
-            MessageHandler(
-                filters.TEXT, check_riddle
-            )
-        ],
+            MessageHandler(filters.TEXT & (~filters.COMMAND), check_user)],
         states={
             CHECK_EMAIL: [
-                CommandHandler('reset', reset),
-                MessageHandler(
-                    filters.Regex('[^@]+@[^@]+\.[^@]+'), check_email
-                ),
-                MessageHandler(
-                    filters.TEXT, wrong_input,
-                ),
-            ],
+                MessageHandler(filters.Regex('[^@]+@[^@]+\.[^@]+') & (~filters.COMMAND), check_email),
+                MessageHandler(filters.TEXT & (~filters.COMMAND), wrong_input, )],
             GIVE_IMDB: [
-                MessageHandler(
-                    filters.TEXT, give_imdb,
-                ),
-            ],
+                MessageHandler(filters.TEXT & (~filters.COMMAND), give_imdb, )],
             CHECK_IMDB: [
-                CommandHandler('reset', reset),
-                MessageHandler(
-                    filters.Regex('^[u]?[r]?\d+$'), check_imdb
-                ),
-                MessageHandler(
-                    filters.TEXT, wrong_input_imdb
-                ),
+                MessageHandler(filters.Regex('^[u]?[r]?\d+$') & (~filters.COMMAND), check_imdb),
+                MessageHandler(filters.TEXT & (~filters.COMMAND), wrong_input_imdb),
             ],
         },
         fallbacks=[CommandHandler('reset', reset)],
         map_to_parent={
             REGISTER_USER: REGISTER_USER,
             CHOOSE_TASK: CHOOSE_TASK,
-            RESET_CONVERSATION: RESET_CONVERSATION,
+            ConversationHandler.END: ConversationHandler.END
         }
     )
 
     conversation_handler = ConversationHandler(
-        entry_points=[MessageHandler(filters.TEXT, start)],
+        entry_points=[
+            MessageHandler(filters.TEXT & (~filters.COMMAND), start),
+        ],
         states={
-            CHOOSE_TASK: [MessageHandler(filters.TEXT, choose_task)],
+            CHOOSE_TASK: [MessageHandler(filters.TEXT & (~filters.COMMAND), choose_task)],
             DOWNLOAD_MOVIE: [download_movie_conversation_handler],
             CHECK_PROGRESS: [check_progress_conversation_handler],
             UPLOAD_ACTIVITY: [upload_activity_conversation_handler],
             RATE_TITLE: [rate_title_conversation_handler],
             REGISTER_USER: [register_user_conversation_handler],
-            RESET_CONVERSATION: [MessageHandler(filters.TEXT, start)]
         },
-        fallbacks=[CommandHandler("reset", reset)]
+        fallbacks=[
+            CommandHandler("reset", reset),
+            CommandHandler('help', help_command),
+            CommandHandler('generate_pass', generate_password),
+        ]
     )
 
-    # start_handler = CommandHandler('start', start)
-    # echo_handler = MessageHandler(filters.TEXT & (~filters.COMMAND), echo)
-    # caps_handler = CommandHandler('caps', caps)
-    # inline_caps_handler = InlineQueryHandler(inline_caps)
-    # unknown_handler = MessageHandler(filters.COMMAND, unknown)
-
     application.add_handler(conversation_handler)
-    """    
-    application.add_handler(start_handler)
-    application.add_handler(echo_handler)
-    application.add_handler(caps_handler)
-    application.add_handler(inline_caps_handler)
-    application.add_handler(unknown_handler)
-    """
-
+    application.add_handler(CommandHandler('help', help_command))
+    application.add_handler(CommandHandler('generate_pass', generate_password))
     application.run_polling()
+    # TODO: watchmatch and unwatchmatch commands and donwload progress button stuff
+
+
+if __name__ == '__main__':
+    main()

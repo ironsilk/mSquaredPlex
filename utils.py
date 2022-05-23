@@ -107,6 +107,7 @@ class User(Base):
     imdb_id = Column(Integer)
     scan_watchlist = Column(Boolean)
     email_newsletters = Column(Boolean)
+    user_type = Column(String)
     movies = relationship("Movie", back_populates="user")
     watchlist_items = relationship("Watchlist", back_populates="user")
     requested_torrents = relationship("Torrent", back_populates="requested_by")
@@ -135,6 +136,14 @@ class Torrent(Base):
     status = Column(String)
     requested_by_id = Column(Integer, ForeignKey('user.telegram_chat_id'))
     requested_by = relationship("User", back_populates="requested_torrents")
+
+
+class OneTimePassword(Base):
+    __tablename__ = 'onetimepasswords'
+
+    password = Column(Integer, primary_key=True)
+    expiry = Column(DateTime)
+    user_type = Column(String)
 
 
 class Watchlist(Base):
@@ -268,6 +277,7 @@ def check_database():
     User.__table__.create(bind=engine, checkfirst=True)
     Movie.__table__.create(bind=engine, checkfirst=True)
     Torrent.__table__.create(bind=engine, checkfirst=True)
+    OneTimePassword.__table__.create(bind=engine, checkfirst=True)
     Watchlist.__table__.create(bind=engine, checkfirst=True)
     TmdbMovie.__table__.create(bind=engine, checkfirst=True)
     OmdbMovie.__table__.create(bind=engine, checkfirst=True)
@@ -605,6 +615,25 @@ def remove_from_watchlist_except(except_items, user_imdb_id):
     with engine.connect() as conn:
         stmt = delete(Watchlist).where(Watchlist.user.has(User.imdb_id == user_imdb_id)) \
             .where(Watchlist.imdb_id.notin_(except_items))
+        result = conn.execute(stmt)
+    return result
+
+
+def get_onetimepasswords():
+    with engine.connect() as conn:
+        # return [x[0] for x in conn.execute(select(OneTimePassword)).all()]
+        return conn.execute(select(OneTimePassword)).mappings().fetchall()
+
+
+def insert_onetimepasswords(item):
+    with engine.connect() as conn:
+        stmt = insert(OneTimePassword).values([item])
+        result = conn.execute(stmt)
+    return result
+
+def remove_onetimepassword(pwd):
+    with engine.connect() as conn:
+        stmt = delete(OneTimePassword).where(OneTimePassword.password == pwd)
         result = conn.execute(stmt)
     return result
 
@@ -1221,17 +1250,12 @@ stmt = select(TmdbMovie, OmdbMovie).join(OmdbMovie, TmdbMovie.imdb_id == OmdbMov
 """
 
 if __name__ == '__main__':
-    from pprint import pprint
-    '''
-        results = get_all_imdb_movies().mappings().fetchall()
-    results = [x['tconst'] for x in results]
-    print(len(results))
-    @timing
-    def do(results):
-        for idx, x in enumerate(results):
-            y = get_omdb(x)
-            print(idx, y['response'], y)
-    do(results[:1000])
-    '''
-    get_omdb(120737)
-    get_tmdb(120737)
+    import sqlalchemy
+    try:
+        result = insert_onetimepasswords({
+                    'password': 99993,
+                    'user_type': 'user'
+                })
+    except sqlalchemy.exc.IntegrityError:
+        print('hehehe')
+    print(result.fetch())
