@@ -88,7 +88,7 @@ async def csv_upload_handler(context: CallbackContext):
                                    chat_id=tgram_user)
 
 
-def csv_download_handler(context: CallbackContext):
+async def csv_download_handler(context: CallbackContext):
     tgram_user = context.job.context['user']
     user = get_user_by_tgram_id(tgram_user)
     # Get movies from my_movies:
@@ -105,7 +105,7 @@ def csv_download_handler(context: CallbackContext):
         df.to_csv(f)
         # Pointer is at the end of the file so reset it to 0.
         f.seek(0)
-        context.bot.send_document(
+        await context.bot.send_document(
             chat_id=tgram_user,
             document=f,
             filename='MoviesExport.csv',
@@ -113,7 +113,7 @@ def csv_download_handler(context: CallbackContext):
                     "Have a great day!"
         )
     else:
-        context.bot.send_message(
+        await context.bot.send_message(
             chat_id=tgram_user,
             text="Looks like you don't have any movies yet. Nothing to fill that CSV with."
         )

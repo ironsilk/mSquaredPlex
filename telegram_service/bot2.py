@@ -15,7 +15,7 @@ from bot_get_progress import get_progress
 from bot_utils import make_movie_reply, update_torr_db, \
     exclude_torrents_from_watchlist, get_movie_from_all_databases, search_imdb_title, add_to_watchlist, \
     get_telegram_users, invite_friend
-from bot_watchlist import get_torrents_for_imdb_id
+from bot_watchlist import get_torrents_for_imdb_id, update_watchlist_item_status
 from bot_csv import csv_upload_handler, csv_download_handler
 from utils import deconvert_imdb_id, send_torrent, compose_link, get_user_by_tgram_id, get_my_movie_by_imdb, \
     update_many, Movie, convert_imdb_id, check_database, User, get_onetimepasswords, remove_onetimepassword, \
@@ -62,19 +62,17 @@ NETFLIX_CSV, UPLOAD_CSV = 13, 14
 DOWNLOAD_CSV = 15
 
 # State definitions for RATE_TITLE
-SUBMIT_RATING = 16
+CHOOSE_WHAT_TO_RATE = 16
+SUBMIT_RATING = 17
 
 # State definitions for REGISTER_USER
-CHECK_EMAIL, GIVE_IMDB, CHECK_IMDB = range(17, 20)
-
-# State definitions for aux functions
-# RESET_CONVERSATION = 21
+CHECK_EMAIL, GIVE_IMDB, CHECK_IMDB = range(18, 21)
 
 USERS = None
 
 menu_keyboard = [
     ["📥 Download a movie"],
-    ["📈 Check download progress"],
+    ["📈 Check download progress", "🌡️ Rate a title"],
     ["❤☠🤖 Upload Netflix activity", '💾 Download my movies']
 ]
 bool_keyboard = [
@@ -155,6 +153,7 @@ async def choose_task(update: Update, context: CallbackContext) -> int:
 
     if update.message.text == menu_keyboard[0][0]:
         message = 'Great, give me an IMDB id, a title or an IMDB link.'
+        context.user_data['action'] = 'download'
         await update.message.reply_text(message)
         return DOWNLOAD_MOVIE
 
@@ -162,6 +161,14 @@ async def choose_task(update: Update, context: CallbackContext) -> int:
         await update.effective_message.reply_text('Ok, retrieving data... (might be slow sometimes)')
         context.user_data['download_progress'] = 0
         return await get_download_progress(update, context)
+
+    elif update.message.text == menu_keyboard[1][1]:
+        await update.effective_message.reply_text('Do you wish to rate a new title or a seen but unrated movie?',
+                                                  reply_markup=ReplyKeyboardMarkup([['New title', 'Rate seen movies']],
+                                                                                   one_time_keyboard=True,
+                                                                                   resize_keyboard=True,
+                                                                                   ))
+        return RATE_TITLE
 
     elif update.message.text == menu_keyboard[2][0]:
         await update.message.reply_photo(photo=open(TELEGRAM_NETFLIX_PNG, 'rb'),
@@ -181,8 +188,8 @@ async def choose_task(update: Update, context: CallbackContext) -> int:
         return UPLOAD_ACTIVITY
     elif update.message.text == menu_keyboard[2][1]:
         await update.message.reply_text("Ok, we've started the process, we'll let you know once it's done.")
-        return echo
-        # return download_csv(update, context)
+
+        return await download_csv(update, context)
     message = 'Please choose one of the options.'
     await update.message.reply_text(message)
     return CHOOSE_TASK
@@ -297,7 +304,10 @@ async def accept_reject_title(update: Update, context: CallbackContext) -> int:
     """Accept, reject the match or exit"""
 
     if update.message.text == 'Yes':
-        return await check_movie_status(update, context)
+        if context.user_data['action'] == 'download':
+            return await check_movie_status(update, context)
+        else:
+            return await rating_movie_info(update, context)
     elif update.message.text == 'No':
         if context.user_data['potential_titles']:
             await update.effective_message.reply_text("Ok, trying next hit...")
@@ -393,7 +403,10 @@ async def confirm_redownload_action(update: Update, context: CallbackContext) ->
         he's aready seen it or it's already in transmission"""
 
     if update.message.text == 'Yes':
-        return await search_for_torrents(update, context)
+        if context.user_data['action'] == 'download':
+            return await search_for_torrents(update, context)
+        else:
+            return await rate_title(update, context)
     else:
         return await reset(update, context)
 
@@ -546,12 +559,56 @@ async def netflix_no_csv(update: Update, context: CallbackContext) -> int:
 
 
 @auth_wrap
+async def choose_what_to_rate(update: Update, context: CallbackContext) -> int:
+    if update.message.text == 'New title':
+        message = 'Great, give me an IMDB id, a title or an IMDB link.'
+        context.user_data['action'] = 'rate'
+        await update.message.reply_text(message)
+        return DOWNLOAD_MOVIE
+
+    elif update.message.text == 'Rate seen movies':
+        # TODO implement
+        await update.message.reply_text("Feature coming soon.")
+        return await reset(update, context)
+
+
+@auth_wrap
+async def rating_movie_info(update: Update, context: CallbackContext) -> int:
+    movie = context.user_data['pkg']
+    # Check if you've already seen it and send info
+    if movie['already_in_my_movies']:
+        message = f"Looks like you've already seen this movie"
+        if 'seen_date' in movie.keys():
+            message = message[:-1] + f" on {movie['seen_date']}"
+        if 'my_score' in movie.keys():
+            message += f"\nYour score: {movie['my_score']}"
+        await update.message.reply_text(message)
+        message = f"\nWould you like to rate it again?"
+        await update.effective_message.reply_html(message, reply_markup=ReplyKeyboardMarkup(bool_keyboard,
+                                                                                            one_time_keyboard=True,
+                                                                                            resize_keyboard=True,
+                                                                                            ))
+        return CONFIRM_REDOWNLOAD_ACTION
+
+
+@auth_wrap
+async def rate_title(update: Update, context: CallbackContext) -> int:
+    context.user_data['pkg'] = {
+        'imdb': int(update.message.text.replace('/RateTitle', '')),
+    }
+
+    message = f"Great, please choose a rating:"
+    await update.effective_message.reply_html(message, reply_markup=ReplyKeyboardMarkup(rate_keyboard,
+                                                                                        one_time_keyboard=True,
+                                                                                        resize_keyboard=True,
+                                                                                        ))
+    return SUBMIT_RATING
+
+
+@auth_wrap
 async def submit_rating(update: Update, context: CallbackContext) -> int:
     """User receives a message from an external routine
         If he clicks on it this function gets triggered."""
-    # TODO check if we split the message RateTitle_id how it gets displayed and
-    #  if we can use this. Check out bot_rate_title
-    # text_caps = ' '.join(context.args) to get text after command
 
     if update.message.text in [str(x) for x in list(range(1, 11))]:
         # Got rating
@@ -570,10 +627,10 @@ async def submit_rating(update: Update, context: CallbackContext) -> int:
         update_many([item], Movie, Movie.id)
         await update.effective_message.reply_text("Ok, no worries! I won't bother you about this title anymore.\n"
                                                   "Have a great day!")
-        return reset(update, context)
+        return await reset(update, context)
     else:
         await update.effective_message.reply_text("Please choose an option from the keyboard.")
-        return RATE_TITLE
+        return SUBMIT_RATING
 
 
 """<< AUTHENTICATION >>"""
@@ -690,6 +747,23 @@ def wrong_input_imdb(update: Update, context: CallbackContext):
     return CHECK_IMDB
 
 
+"""<< DOWNLOAD MOVIE DATABASE (CSV) >>"""
+
+
+# TODO test it
+@auth_wrap
+async def download_csv(update: Update, context: CallbackContext) -> None:
+    csv_context = {
+        'user': update.effective_user.id,
+    }
+    context.job_queue.run_once(
+        callback=csv_download_handler,
+        context=csv_context,
+        when=0
+    )
+    return None
+
+
 """<< OTHER FUNCTIONS >>"""
 
 
@@ -740,8 +814,33 @@ async def generate_password(update: Update, context: CallbackContext) -> None:
             pwd['user_type'] = 'user'
         pwd = insert_pwd(pwd)
         await update.message.reply_text(f"Token {pwd} available for 24 hours")
-        onetime_passwords = get_onetimepasswords()
         return None
+
+
+@auth_wrap
+async def update_user(update: Update, context: CallbackContext) -> None:
+    await update.message.reply_text('Type anything to get started.')
+    del USERS[update.effective_user.id]
+
+
+@auth_wrap
+async def watchlist_entry(update: Update, context: CallbackContext) -> int:
+    context.user_data['pkg'] = {
+        'imdb': int(update.message.text.replace('/WatchMatch', '')),
+    }
+    context.user_data['from_watchlist'] = True
+    await update.message.reply_text('Watchlist entry')
+    return await search_for_torrents(update, context)
+
+
+@auth_wrap
+async def remove_watchlist_entry(update: Update, context: CallbackContext) -> int:
+    movie_id = int(update.message.text.replace('/UnWatchMatch', ''))
+    update_watchlist_item_status(movie_id, update.effective_user['id'], 'closed')
+    await update.message.reply_text("Done, no more watchlist updates for this movie.")
+    return ConversationHandler.END
+
+
 
 
 
@@ -852,12 +951,14 @@ def main() -> None:
 
     rate_title_conversation_handler = ConversationHandler(
         entry_points=[
-            MessageHandler(filters.TEXT & (~filters.COMMAND), submit_rating), ],
-        states={},
+            MessageHandler(filters.TEXT & (~filters.COMMAND), choose_what_to_rate), ],
+        states={
+            SUBMIT_RATING: [
+                MessageHandler(filters.TEXT & (~filters.COMMAND), submit_rating, )],
+        },
         fallbacks=[],
         map_to_parent={
             RATE_TITLE: RATE_TITLE,
-            CHOOSE_TASK: CHOOSE_TASK,
             ConversationHandler.END: ConversationHandler.END
         }
     )
@@ -900,14 +1001,18 @@ def main() -> None:
             CommandHandler("reset", reset),
             CommandHandler('help', help_command),
             CommandHandler('generate_pass', generate_password),
+            CommandHandler('update_user', update_user),
         ]
     )
 
     application.add_handler(conversation_handler)
     application.add_handler(CommandHandler('help', help_command))
     application.add_handler(CommandHandler('generate_pass', generate_password))
+    application.add_handler(CommandHandler('update_user', update_user))
     application.run_polling()
-    # TODO: watchmatch and unwatchmatch commands and donwload progress button stuff
+    # TODO: watchmatch and unwatchmatch commands are added as fallbacks. test them?
+    # TODO: https://stackoverflow.com/questions/46301879/using-regular-expressions-in-telegram-commands
+    #  this should work, create a custom regexCommand handler and THAT should be passed as a fallback.
 
 
 if __name__ == '__main__':

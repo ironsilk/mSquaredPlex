@@ -1,16 +1,5 @@
 ## Services:
 
-
-- **Telegram service** - A telegram bot which can be queried for any IMDB title, link or ID and allows
-the user to download these movies if found on filelist.
-  This service also implements a routine which retrieves from its own database (which
-  is updated by the following myimdb service) any movies from the user's watchlist and allows the
-  user to download these movies if they are available on filelist.
-  
-    This service employs a simple one-time authentication routine which will
-automatically give the user acces to PLEX and to the following newsletter service.
-
-
 - **Telegram service** - A telegram bot with the following functionalities:
 
     - **Download a movie** -> Present IMDB id, IMDB link or movie title.
@@ -26,7 +15,7 @@ automatically give the user acces to PLEX and to the following newsletter servic
       presented becomes available.
     - **Watchlist notification** -> When a new torrent was added for any movie in the watchlist.
     If the user accepts, torrent is set to download, else the user will receive updates only on other
-    resolutions for that particullar movie.
+    resolutions for that particular movie.
     - **Download finished notification** -> User receives notification when download is finished.
     - **Check download progress** -> Returns a list of the status of the last 10 torrents downloaded
         by the user.
@@ -34,7 +23,7 @@ automatically give the user acces to PLEX and to the following newsletter servic
       - Table format should be `Title`, `Date` which is the default export file from Netflix. 
       - Only movies will be picked 
     up from the file. 
-      - For any unrated movie the user will be or not (depening on his answer to the Y/N choice) prompted 
+      - For any unrated movie the user will be or not (depending on his answer to the Y/N choice) prompted 
     to rate that specific title after the import. 
       - If he wishes to import already rated titles the user can 
     choose to add another column with ratings, `Ratings`. (scale 1-10). These will be automatically picked up. 
@@ -43,11 +32,22 @@ automatically give the user acces to PLEX and to the following newsletter servic
     not be overwritten.
       - User gets notified when the process is finished and how many of the entries were movies, how many
     were soap series and how many were already in the database.
+        
+    - **Manage users and authentication** -> User management is done through 
+      telegram.
+      - Initial authentication is done thorough the `SUPERADMIN_PASSWORD` which is mentioned in the
+  .env file. The first user starting the chat with the bot and providing that password will be registered
+  as admin.
+      - `email` is used to send an invitation and register the user to PLEX.
+      - `imdb id` is used to sync user's ratings and watchlist (if public)
+      - The admin has access to `/generate_pass` (with the optional `-admin` flag). This command
+      generates a 24-hour available token. Give the token to the person you want to join and it will 
+        serve as initial one time password for him. If the `-admin` flag is used he will be able to generate
+        tokens as well. **Has no effect on PLEX roles**.
+      - `update_user` command is available for all users allowing them to retake the login process
+        thus changing their email and/or imdb_id and other preferences.
 
 
-    TODO rewrite the bot, logic is a bit tangled.
-    
-    TODO make another authentication system, use the built-in telegram method.
 
   
 - **MyIMDB service** - Watches the user's IMDB profile and keeps track of his rated movies and
@@ -70,6 +70,7 @@ which syncs torrent statuses from Transmission to the postgres database.
 
 - ask user who asked for download and didnt watch the movie before deletion and maybe confirm in with the admin.
 - Show my watchlist.
+- Telegram roles reflect PLEX roles
 
 
 ## Wishlist
