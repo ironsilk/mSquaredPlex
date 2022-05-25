@@ -42,8 +42,8 @@ def bot_watchlist_routine(context: CallbackContext) -> None:
                 message = f"Hi there! WATCHLIST ALERT!\n"\
                           f"🎞️ {PTN.parse(torrents[0]['name'])['title']}\n"\
                           f"has {len(torrents)} download candidates\n"\
-                          f"📥 /WatchMatch{item['imdb_id']} (download)\n\n"\
-                          f"❌ /UnWatchMatch{item['imdb_id']} (forget movie)"
+                          f"📥 /WatchMatch_{item['imdb_id']} (download)\n\n"\
+                          f"❌ /UnWatchMatch_{item['imdb_id']} (forget movie)"
                 if item['is_downloaded']:
                     message += f"\n🚨 Movie aleady exists in PLEX, quality: {item['is_downloaded']}"
                 context.bot.send_message(chat_id=item['user_id'], text=message)

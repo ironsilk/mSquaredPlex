@@ -20,6 +20,7 @@ from bot_csv import csv_upload_handler, csv_download_handler
 from utils import deconvert_imdb_id, send_torrent, compose_link, get_user_by_tgram_id, get_my_movie_by_imdb, \
     update_many, Movie, convert_imdb_id, check_database, User, get_onetimepasswords, remove_onetimepassword, \
     insert_onetimepasswords
+from command_regex_handler import RegexpCommandHandler
 
 """
 IMPORTANT for SSL: add verify=False in
@@ -179,10 +180,7 @@ async def choose_task(update: Update, context: CallbackContext) -> int:
                                                  "If you want to also add ratings, create an extra column "
                                                  "named 'Ratings' and it will be picked up.\n"
                                                  "Any overlapping ratings/seen dates will be overwritten. However, "
-                                                 "IMDB ratings, seen dates and PLEX seen dates will have prevalence.\n"
-                                                 "☢️☢️!! If these titles are not rated in the CSV you'll receive "
-                                                 "notifications to rate all of them.\n\n"
-                                                 "Choose Yes/No if you want to receive these notifications",
+                                                 "IMDB ratings, seen dates and PLEX seen dates will have prevalence.\n",
                                          reply_markup=ReplyKeyboardMarkup(bool_keyboard, one_time_keyboard=True,
                                                                           resize_keyboard=True))
         return UPLOAD_ACTIVITY
@@ -555,7 +553,7 @@ async def netflix_no_csv(update: Update, context: CallbackContext) -> int:
     return NETFLIX_CSV
 
 
-"""<< RATE A TITLE(PLEX TRIGGERED) >>"""
+"""<< RATE A TITLE >>"""
 
 
 @auth_wrap
@@ -593,16 +591,20 @@ async def rating_movie_info(update: Update, context: CallbackContext) -> int:
 
 @auth_wrap
 async def rate_title(update: Update, context: CallbackContext) -> int:
-    context.user_data['pkg'] = {
-        'imdb': int(update.message.text.replace('/RateTitle', '')),
-    }
-
     message = f"Great, please choose a rating:"
     await update.effective_message.reply_html(message, reply_markup=ReplyKeyboardMarkup(rate_keyboard,
                                                                                         one_time_keyboard=True,
                                                                                         resize_keyboard=True,
                                                                                         ))
     return SUBMIT_RATING
+
+
+@auth_wrap
+async def rate_title_plex_triggered(update: Update, context: CallbackContext, passed_args) -> int:
+    context.user_data['pkg'] = {
+        'imdb': int(passed_args[0])
+    }
+    return await rate_title(update, context)
 
 
 @auth_wrap
@@ -824,9 +826,9 @@ async def update_user(update: Update, context: CallbackContext) -> None:
 
 
 @auth_wrap
-async def watchlist_entry(update: Update, context: CallbackContext) -> int:
+async def watchlist_entry(update: Update, context: CallbackContext, passed_args) -> int:
     context.user_data['pkg'] = {
-        'imdb': int(update.message.text.replace('/WatchMatch', '')),
+        'imdb': int(passed_args[0]),
     }
     context.user_data['from_watchlist'] = True
     await update.message.reply_text('Watchlist entry')
@@ -834,11 +836,36 @@ async def watchlist_entry(update: Update, context: CallbackContext) -> int:
 
 
 @auth_wrap
-async def remove_watchlist_entry(update: Update, context: CallbackContext) -> int:
-    movie_id = int(update.message.text.replace('/UnWatchMatch', ''))
+async def remove_watchlist_entry(update: Update, context: CallbackContext, passed_args) -> int:
+    movie_id = int(passed_args[0])
     update_watchlist_item_status(movie_id, update.effective_user['id'], 'closed')
     await update.message.reply_text("Done, no more watchlist updates for this movie.")
     return ConversationHandler.END
+
+
+@auth_wrap
+async def change_watchlist_command(update: Update, context: CallbackContext) -> None:
+    pkg = USERS[update.effective_user.id]
+    if pkg['scan_watchlist'] == 0:
+        pkg['scan_watchlist'] = 1
+    else:
+        pkg['scan_watchlist'] = 0
+    update_many([pkg], User, User.telegram_chat_id)
+    await update.message.reply_text("Updated your watchlist preferences.")
+
+
+@auth_wrap
+async def change_newsletter_command(update: Update, context: CallbackContext) -> None:
+    pkg = USERS[update.effective_user.id]
+    if pkg['email_newsletters'] == 0:
+        pkg['email_newsletters'] = 1
+    else:
+        pkg['email_newsletters'] = 0
+    update_many([pkg], User, User.telegram_chat_id)
+    await update.message.reply_text("Updated your newsletter preferences.")
+
+
+
 
 
 
@@ -1002,6 +1029,11 @@ def main() -> None:
             CommandHandler('help', help_command),
             CommandHandler('generate_pass', generate_password),
             CommandHandler('update_user', update_user),
+            CommandHandler('change_watchlist', change_watchlist_command),
+            CommandHandler('change_newsletter', change_newsletter_command),
+            (RegexpCommandHandler(r'RateTitle_[\d]+', rate_title_plex_triggered)),
+            (RegexpCommandHandler(r'WatchMatch_[\d]+', watchlist_entry)),
+            (RegexpCommandHandler(r'UnWatchMatch[\d]+', remove_watchlist_entry)),
         ]
     )
 
@@ -1009,10 +1041,12 @@ def main() -> None:
     application.add_handler(CommandHandler('help', help_command))
     application.add_handler(CommandHandler('generate_pass', generate_password))
     application.add_handler(CommandHandler('update_user', update_user))
+    application.add_handler(RegexpCommandHandler(r'RateTitle_[\d]+', rate_title_plex_triggered))  # TODO test
+    application.add_handler(RegexpCommandHandler(r'WatchMatch_[\d]+', watchlist_entry))  # TODO test
+    application.add_handler(RegexpCommandHandler(r'UnWatchMatch[\d]+', remove_watchlist_entry))  # TODO test
+    application.add_handler(CommandHandler('change_watchlist', change_watchlist_command))  # TODO test
+    application.add_handler(CommandHandler('change_newsletter', change_newsletter_command))  # TODO test
     application.run_polling()
-    # TODO: watchmatch and unwatchmatch commands are added as fallbacks. test them?
-    # TODO: https://stackoverflow.com/questions/46301879/using-regular-expressions-in-telegram-commands
-    #  this should work, create a custom regexCommand handler and THAT should be passed as a fallback.
 
 
 if __name__ == '__main__':

@@ -831,7 +831,7 @@ def main() -> None:
             UPLOAD_ACTIVITY: UPLOAD_ACTIVITY,
         }
     )
-    # TODO continue here
+
     rate_title_conversation_handler = ConversationHandler(
         entry_points=[
             MessageHandler(
@@ -892,7 +892,7 @@ def main() -> None:
             CHOOSE_TASK: CHOOSE_TASK,
         }
     )
-    # TODO what's left: add watchmatch and unwatchmatch
+
     conv_handler = ConversationHandler(
         entry_points=[
             MessageHandler(Filters.regex(r'^/WatchMatch\d+$'), watchlist_entry),

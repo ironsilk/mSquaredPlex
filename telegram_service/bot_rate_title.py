@@ -26,7 +26,7 @@ def bot_rate_titles(context: CallbackContext) -> None:
                 caption = f"Hi! Looks like you've watched:\n" \
                           f"{title}" \
                           f"If you want to rate it, click below!\n" \
-                          f"🦧 /RateTitle{item['imdb_id']}"
+                          f"🦧 /RateTitle_{item['imdb_id']}"
                 context.bot.send_message(chat_id=item['user_id'], text=caption)
                 update_movie_rated_status(item, 'notification sent')
             else:

@@ -13,12 +13,17 @@
         - If user doesn't choose any resolution bot will ask if movie should be added to 
       watchlist. In this case the user will be notified if any resolution other than these already
       presented becomes available.
+
     - **Watchlist notification** -> When a new torrent was added for any movie in the watchlist.
     If the user accepts, torrent is set to download, else the user will receive updates only on other
-    resolutions for that particular movie.
+    resolutions for that particular movie. These **notifications can be disabled via the /change_watchlist
+      command**.
+
     - **Download finished notification** -> User receives notification when download is finished.
+
     - **Check download progress** -> Returns a list of the status of the last 10 torrents downloaded
         by the user.
+
     - **Upload viewing activity** -> User can upload a .csv file with his viewing activity. 
       - Table format should be `Title`, `Date` which is the default export file from Netflix. 
       - Only movies will be picked 
@@ -32,6 +37,18 @@
     not be overwritten.
       - User gets notified when the process is finished and how many of the entries were movies, how many
     were soap series and how many were already in the database.
+    
+    - **Download viewing activity** -> Downloads a .csv with all user activity (imdb ids, titles, seen dates,
+      and ratings)
+    
+    - **Rate a title** -> User can rate titles via the 
+      bot.
+        - Rate a new title: Similar to download movie, user provides id, link or movie name, matches
+    the movie and rates it.
+        - Rate seen movies: Bot picks up any unrated movies from DB (after the .csv import for example)
+    and the user can rate them one by one.
+        - PLEX triggered title rate: When a PLEX user finishes watching a movie, he/she will receive a
+    telegram message asking if he wants to rate that movie.
         
     - **Manage users and authentication** -> User management is done through 
       telegram.
