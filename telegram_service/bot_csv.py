@@ -7,7 +7,7 @@ import sqlalchemy
 from telegram.ext import CallbackContext
 
 from utils import get_user_by_tgram_id, deconvert_imdb_id, update_many, get_movie_details, get_my_movie_by_imdb, \
-    get_user_movies, DB_URI, Movie
+    get_user_movies, DB_URI, Movie, update_many_multiple_pk
 
 soap_pattern = re.compile(": Season \d+:")
 
@@ -15,7 +15,6 @@ soap_pattern = re.compile(": Season \d+:")
 async def csv_upload_handler(context: CallbackContext):
     file_id = context.job.context['file']
     tgram_user = context.job.context['user']
-    send_notifications = context.job.context['send_notifications']
     file = await context.bot.getFile(file_id)
     # Create an in-memory file
     f = io.BytesIO()
@@ -24,13 +23,14 @@ async def csv_upload_handler(context: CallbackContext):
     f.seek(0)
     # To pd.df
     df = pd.read_csv(f)
+    df.drop_duplicates(subset=['Title'], keep="last", inplace=True)
     try:
         df['Date'] = pd.to_datetime(df['Date'])
         has_ratings = 'Ratings' in df.columns
         df = df.to_dict('records')
     except Exception as e:
         # send error to user
-        await context.bot.send_message(f"Encountered some problems with the CSV you gave me.\n"
+        await context.bot.send_message(chat_id=tgram_user, text=f"Encountered some problems with the CSV you gave me.\n"
                                        f"Make sure you have 'Title' and 'Date' as required columns "
                                        f"and the optional 'ratings' column.\n"
                                        f"Err description: {e}")
@@ -68,8 +68,7 @@ async def csv_upload_handler(context: CallbackContext):
                         if has_ratings:
                             item['rating_status'] = 'rated externally'
                             item['my_score'] = movie['Ratings']
-                        if not send_notifications:
-                            item['rating_status'] = 'refused to rate'
+                            item['rating_status'] = 'csv imported'
                         identified_movies.append(item)
                     else:
                         pass
@@ -78,7 +77,8 @@ async def csv_upload_handler(context: CallbackContext):
             except Exception as e:
                 raise e
                 pass
-    update_many(identified_movies, Movie, Movie.id)
+
+    update_many_multiple_pk(identified_movies, Movie, [Movie.imdb_id, Movie.user_id])
     await context.bot.send_message(text=f"CSV update successful!\n"
                                         f"Out of {len(df)} entries in your CSV file, "
                                         f"{len(identified_movies)} were movies while "

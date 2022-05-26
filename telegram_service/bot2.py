@@ -19,7 +19,7 @@ from bot_watchlist import get_torrents_for_imdb_id, update_watchlist_item_status
 from bot_csv import csv_upload_handler, csv_download_handler
 from utils import deconvert_imdb_id, send_torrent, compose_link, get_user_by_tgram_id, get_my_movie_by_imdb, \
     update_many, Movie, convert_imdb_id, check_database, User, get_onetimepasswords, remove_onetimepassword, \
-    insert_onetimepasswords
+    insert_onetimepasswords, get_movies_for_bulk_rating
 from command_regex_handler import RegexpCommandHandler
 
 """
@@ -93,16 +93,25 @@ rate_keyboard = [
     ['9', '10'],
     ["I've changed my mind"]
 ]
+rate_keyboard_bulk = [
+    ['1', '2'],
+    ['3', '4'],
+    ['5', '6'],
+    ['7', '8'],
+    ['9', '10'],
+    ["Skip this movie."],
+    ["Exit rating process."]
+]
 
 
 def auth_wrap(f):
     @wraps(f)
-    async def wrap(update: Update, context: CallbackContext):
+    async def wrap(update: Update, context: CallbackContext, *optional_args):
         print(f"Wrapped {f.__name__}", )
         user = update.effective_user['id']
         if user in USERS.keys():
             # User is registered
-            result = f(update, context)
+            result = f(update, context, *optional_args)
             print(result)
             return await result
         else:
@@ -126,13 +135,15 @@ def auth_wrap(f):
 
 
 @auth_wrap
-async def start(update: Update, context: CallbackContext) -> int:
+async def start(update: Update, context: CallbackContext, message: str = '') -> int:
     """Send a message when the command /start is issued."""
 
     user = update.effective_user
+    if not message:
+        message = f"Hi {user.mention_markdown_v2()}\!\n" \
+                  fr"Please select one of the options or type /help for more options\."
     await update.message.reply_markdown_v2(
-        f"Hi {user.mention_markdown_v2()}\!\n"
-        fr"Please select one of the options or type /help for more options\.",
+        message,
         reply_markup=ReplyKeyboardMarkup(menu_keyboard, one_time_keyboard=True, resize_keyboard=True),
     )
     return CHOOSE_TASK
@@ -181,16 +192,15 @@ async def choose_task(update: Update, context: CallbackContext) -> int:
                                                  "named 'Ratings' and it will be picked up.\n"
                                                  "Any overlapping ratings/seen dates will be overwritten. However, "
                                                  "IMDB ratings, seen dates and PLEX seen dates will have prevalence.\n",
-                                         reply_markup=ReplyKeyboardMarkup(bool_keyboard, one_time_keyboard=True,
-                                                                          resize_keyboard=True))
-        return UPLOAD_ACTIVITY
+                                         )
+        await update.message.reply_text("Now please update the .csv file.")
+        return NETFLIX_CSV
     elif update.message.text == menu_keyboard[2][1]:
-        await update.message.reply_text("Ok, we've started the process, we'll let you know once it's done.")
+        await update.message.reply_text("Ok, we've started the process, we'll let you know once it's done\.")
 
         return await download_csv(update, context)
-    message = 'Please choose one of the options.'
-    await update.message.reply_text(message)
-    return CHOOSE_TASK
+    message = 'Please choose one of the options\.'
+    return await start(update, context, message)
 
 
 @auth_wrap
@@ -277,7 +287,6 @@ async def choose_multiple(update: Update, context: CallbackContext) -> int:
         # context.user_data['pkg'] = pkg
         if pkg:
             context.user_data['pkg'] = pkg
-            # https://stackoverflow.com/questions/39571474/send-long-message-with-photo-on-telegram-with-php-bot#:~:text=I%20need%20send%20to%20telegram,caption%20has%20200%20character%20limit.
             message, image = make_movie_reply(pkg)
             await update.effective_message.reply_photo(
                 photo=image,
@@ -375,7 +384,6 @@ async def search_for_torrents(update: Update, context: CallbackContext) -> int:
                 f"🖥 Q: {str(item['resolution'])}"
                 f"🗳 S: {str(round(item['size'] / 1000000000, 2))} GB"
                 f"🌱 S/P: {str(item['seeders'])}/{str(item['leechers'])}"
-                # f"📤 [DOWNLOAD]\n"
             )
             btn = InlineKeyboardButton(btn_text, callback_data=item['id'])
             keyboard.append([btn])
@@ -429,6 +437,8 @@ async def download_torrent(update: Update, context: CallbackContext) -> int:
             logger.error(f"Error on torrent send: {e}")
             message = f"Download failed, please check logs and try again."
         await query.edit_message_text(text=message)
+        if 'from_watchlist' in context.user_data.keys():
+            return ConversationHandler.END
         return CHOOSE_TASK
     else:
         if 'from_watchlist' in context.user_data.keys():
@@ -521,21 +531,12 @@ async def netflix_rate_or_not(update: Update, context: CallbackContext) -> int:
 
 
 @auth_wrap
-async def netflix_no_rate_option(update: Update, context: CallbackContext) -> int:
-    await update.message.reply_text("Choose Yes or No, bro.")
-    return UPLOAD_ACTIVITY
-
-
-@auth_wrap
 async def netflix_csv(update: Update, context: CallbackContext) -> int:
     """Sends CSV file in order to be processed"""
-    # TODO make job not blocking (used to be not blocking but libray is not
-    #  using multithreading.
 
     csv_context = {
         'user': update.effective_user.id,
         'file': update.message.document.file_id,
-        'send_notifications': context.user_data['send_notifications'],
     }
     await update.message.reply_text("Thanks!We started the upload process, we'll let you know "
                                     "when it's done or if there's any trouble.")
@@ -565,17 +566,50 @@ async def choose_what_to_rate(update: Update, context: CallbackContext) -> int:
         return DOWNLOAD_MOVIE
 
     elif update.message.text == 'Rate seen movies':
-        # TODO implement
-        await update.message.reply_text("Feature coming soon.")
-        return await reset(update, context)
+        await update.message.reply_text("Preparing movies...")
+        context.user_data['unrated_movies'] = get_movies_for_bulk_rating(update.effective_user['id'])
+        if context.user_data['unrated_movies']:
+            return await rate_multiple(update, context)
+        else:
+            await update.message.reply_text("You have no unrated movies!")
+            return await start(update, context, "Can i help you with anything else?")
+
+
+@auth_wrap
+async def rate_multiple(update: Update, context: CallbackContext) -> int:
+    movies = context.user_data['unrated_movies']
+    if movies:
+        movie = movies.pop(0)
+        # Check again if we can find it
+        pkg = get_movie_from_all_databases(movie['imdb_id'], update.effective_user['id'])
+        if pkg:
+            context.user_data['pkg'] = pkg
+            message, image = make_movie_reply(pkg)
+            message += "\nPlease choose a rating"
+            await update.effective_message.reply_photo(
+                photo=image,
+                caption=message,
+                reply_markup=ReplyKeyboardMarkup(rate_keyboard_bulk,
+                                                 one_time_keyboard=True,
+                                                 resize_keyboard=True,
+                                                 ),
+            )
+            context.user_data['rate_origin'] = 'multiple'
+            return SUBMIT_RATING
+        else:
+            return await rate_multiple(update, context)
+    else:
+        await update.effective_message.reply_text("No more movies left, good job!")
+        return await start(update, context, "Can i help you with anything else?")
 
 
 @auth_wrap
 async def rating_movie_info(update: Update, context: CallbackContext) -> int:
+
     movie = context.user_data['pkg']
     # Check if you've already seen it and send info
     if movie['already_in_my_movies']:
-        message = f"Looks like you've already seen this movie"
+        message = f"Movie seen"
         if 'seen_date' in movie.keys():
             message = message[:-1] + f" on {movie['seen_date']}"
         if 'my_score' in movie.keys():
@@ -591,6 +625,7 @@ async def rating_movie_info(update: Update, context: CallbackContext) -> int:
 
 @auth_wrap
 async def rate_title(update: Update, context: CallbackContext) -> int:
+    context.user_data['rate_origin'] = 'simple'
     message = f"Great, please choose a rating:"
     await update.effective_message.reply_html(message, reply_markup=ReplyKeyboardMarkup(rate_keyboard,
                                                                                         one_time_keyboard=True,
@@ -602,7 +637,7 @@ async def rate_title(update: Update, context: CallbackContext) -> int:
 @auth_wrap
 async def rate_title_plex_triggered(update: Update, context: CallbackContext, passed_args) -> int:
     context.user_data['pkg'] = {
-        'imdb': int(passed_args[0])
+        'imdb': int(passed_args)
     }
     return await rate_title(update, context)
 
@@ -611,6 +646,15 @@ async def rate_title_plex_triggered(update: Update, context: CallbackContext, pa
 async def submit_rating(update: Update, context: CallbackContext) -> int:
     """User receives a message from an external routine
         If he clicks on it this function gets triggered."""
+    if context.user_data['rate_origin'] == 'simple':
+        return1_func = reset
+        message1 = "Ok, no worries! I won't bother you about this title anymore.\n" \
+                   "Have a great day!"
+        return2_func = reset
+    else:
+        return1_func = rate_multiple
+        message1 = "Ok, no worries! I won't bother you about this title anymore.\n"
+        return2_func = rate_multiple
 
     if update.message.text in [str(x) for x in list(range(1, 11))]:
         # Got rating
@@ -620,16 +664,19 @@ async def submit_rating(update: Update, context: CallbackContext) -> int:
         update_many([item], Movie, Movie.id)
         await update.effective_message.reply_text(f"Ok, great! Here's a link if you also want to rate it on IMDB:\n"
                                                   f"https://www.imdb.com/title/"
-                                                  f"{convert_imdb_id(context.user_data['pkg']['imdb'])}/")
-        return await reset(update, context)
+                                                  f"{convert_imdb_id(context.user_data['pkg']['imdb'])}/",
+                                                  disable_web_page_preview=True)
+        return await return1_func(update, context)
 
-    elif update.message.text == "I've changed my mind":
+    elif update.message.text in [rate_keyboard[-1][0], rate_keyboard_bulk[-2][0]]:
         item = get_my_movie_by_imdb(context.user_data['pkg']['imdb'], update.effective_user['id'])
         item['rating_status'] = 'refused to rate'
         update_many([item], Movie, Movie.id)
-        await update.effective_message.reply_text("Ok, no worries! I won't bother you about this title anymore.\n"
-                                                  "Have a great day!")
-        return await reset(update, context)
+        await update.effective_message.reply_text(message1)
+        return await return2_func(update, context)
+    elif update.message.text == rate_keyboard_bulk[-1][0]:
+        await update.effective_message.reply_text("Ok, your progress is saved, come back anytime.")
+        return await start(update, context)
     else:
         await update.effective_message.reply_text("Please choose an option from the keyboard.")
         return SUBMIT_RATING
@@ -733,10 +780,10 @@ async def register_user(update: Update, context: CallbackContext):
     # Update user to database
     update_many([context.user_data['new_user']], User, User.telegram_chat_id)
     USERS = get_telegram_users()
-    await update.effective_message.reply_text("Ok, that's it. I'll take care of the rest, from now on "
-                                              "anytime you type something i'll be here to help you out. Enjoy!\n"
-                                              "Type /help to find out more.")
-    return await start(update, context)
+    message = "Ok, that's it\. I'll take care of the rest, from now on " \
+              "anytime you type something i'll be here to help you out\. Enjoy!\n" \
+              "Type /help to find out more\."
+    return await start(update, context, message)
 
 
 def wrong_input(update: Update, context: CallbackContext):
@@ -752,7 +799,6 @@ def wrong_input_imdb(update: Update, context: CallbackContext):
 """<< DOWNLOAD MOVIE DATABASE (CSV) >>"""
 
 
-# TODO test it
 @auth_wrap
 async def download_csv(update: Update, context: CallbackContext) -> None:
     csv_context = {
@@ -826,7 +872,7 @@ async def update_user(update: Update, context: CallbackContext) -> None:
 
 
 @auth_wrap
-async def watchlist_entry(update: Update, context: CallbackContext, passed_args) -> int:
+async def watchlist_entry(update: Update, context: CallbackContext, *passed_args) -> int:
     context.user_data['pkg'] = {
         'imdb': int(passed_args[0]),
     }
@@ -836,7 +882,7 @@ async def watchlist_entry(update: Update, context: CallbackContext, passed_args)
 
 
 @auth_wrap
-async def remove_watchlist_entry(update: Update, context: CallbackContext, passed_args) -> int:
+async def remove_watchlist_entry(update: Update, context: CallbackContext, *passed_args) -> int:
     movie_id = int(passed_args[0])
     update_watchlist_item_status(movie_id, update.effective_user['id'], 'closed')
     await update.message.reply_text("Done, no more watchlist updates for this movie.")
@@ -846,6 +892,7 @@ async def remove_watchlist_entry(update: Update, context: CallbackContext, passe
 @auth_wrap
 async def change_watchlist_command(update: Update, context: CallbackContext) -> None:
     pkg = USERS[update.effective_user.id]
+    pkg['telegram_chat_id'] = update.effective_user.id
     if pkg['scan_watchlist'] == 0:
         pkg['scan_watchlist'] = 1
     else:
@@ -857,62 +904,13 @@ async def change_watchlist_command(update: Update, context: CallbackContext) -> 
 @auth_wrap
 async def change_newsletter_command(update: Update, context: CallbackContext) -> None:
     pkg = USERS[update.effective_user.id]
+    pkg['telegram_chat_id'] = update.effective_user.id
     if pkg['email_newsletters'] == 0:
         pkg['email_newsletters'] = 1
     else:
         pkg['email_newsletters'] = 0
     update_many([pkg], User, User.telegram_chat_id)
     await update.message.reply_text("Updated your newsletter preferences.")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-async def echo(update: Update, context: CallbackContext.DEFAULT_TYPE):
-    await context.bot.send_message(chat_id=update.effective_chat.id, text=update.message.text)
-
-
-async def caps(update: Update, context: CallbackContext):
-    text_caps = ' '.join(context.args).upper()
-    await context.bot.send_message(chat_id=update.effective_chat.id, text=text_caps)
-
-
-async def inline_caps(update: Update, context: CallbackContext.DEFAULT_TYPE):
-    query = update.inline_query.query
-    if not query:
-        return
-    results = []
-    results.append(
-        InlineQueryResultArticle(
-            id=query.upper(),
-            title='Caps',
-            input_message_content=InputTextMessageContent(query.upper())
-        )
-    )
-    await context.bot.answer_inline_query(update.inline_query.id, results)
-
-
-async def unknown(update: Update, context: CallbackContext.DEFAULT_TYPE):
-    await context.bot.send_message(chat_id=update.effective_chat.id, text="Sorry, I didn't understand that command.")
 
 
 def main() -> None:
@@ -928,8 +926,10 @@ def main() -> None:
 
     download_movie_conversation_handler = ConversationHandler(
         entry_points=[
+            RegexpCommandHandler(r'WatchMatch_[\d]+', watchlist_entry),
             MessageHandler(filters.Regex('^([tT]{2})?\d+$') & (~filters.COMMAND), parse_imdb_id),
-            MessageHandler(filters.TEXT & (~filters.COMMAND), parse_imdb_text)],
+            MessageHandler(filters.TEXT & (~filters.COMMAND), parse_imdb_text),
+        ],
         states={
             CHOOSE_MULTIPLE: [
                 MessageHandler(filters.TEXT & (~filters.COMMAND), choose_multiple)],
@@ -946,7 +946,9 @@ def main() -> None:
         },
         fallbacks=[CommandHandler("reset", reset)],
         map_to_parent={
+            CHOOSE_TASK: CHOOSE_TASK,
             DOWNLOAD_MOVIE: DOWNLOAD_MOVIE,
+            SUBMIT_RATING: SUBMIT_RATING,
             ConversationHandler.END: ConversationHandler.END
         }
     )
@@ -960,31 +962,20 @@ def main() -> None:
         map_to_parent={}
     )
 
-    upload_activity_conversation_handler = ConversationHandler(
-        entry_points=[
-            MessageHandler(filters.Regex("^Yes$|^No$") & (~filters.COMMAND), netflix_rate_or_not, ),
-            MessageHandler(filters.TEXT & (~filters.COMMAND), netflix_no_rate_option), ],
-        states={
-            NETFLIX_CSV: [
-                MessageHandler(filters.Document.FileExtension('csv') & (~filters.COMMAND), netflix_csv),
-                MessageHandler(filters.TEXT & (~filters.COMMAND), netflix_no_csv), ],
-        },
-        fallbacks=[CommandHandler("reset", reset)],
-        map_to_parent={
-            UPLOAD_ACTIVITY: UPLOAD_ACTIVITY,
-            ConversationHandler.END: ConversationHandler.END
-        }
-    )
-
     rate_title_conversation_handler = ConversationHandler(
         entry_points=[
+            RegexpCommandHandler(r'RateTitle_[\d]+', rate_title_plex_triggered),
             MessageHandler(filters.TEXT & (~filters.COMMAND), choose_what_to_rate), ],
         states={
+            DOWNLOAD_MOVIE: [
+                download_movie_conversation_handler
+            ],
             SUBMIT_RATING: [
                 MessageHandler(filters.TEXT & (~filters.COMMAND), submit_rating, )],
         },
         fallbacks=[],
         map_to_parent={
+            CHOOSE_TASK: CHOOSE_TASK,
             RATE_TITLE: RATE_TITLE,
             ConversationHandler.END: ConversationHandler.END
         }
@@ -1014,15 +1005,21 @@ def main() -> None:
 
     conversation_handler = ConversationHandler(
         entry_points=[
+            RegexpCommandHandler(r'WatchMatch_[\d]+', watchlist_entry),
+            RegexpCommandHandler(r'RateTitle_[\d]+', rate_title_plex_triggered),
             MessageHandler(filters.TEXT & (~filters.COMMAND), start),
         ],
         states={
             CHOOSE_TASK: [MessageHandler(filters.TEXT & (~filters.COMMAND), choose_task)],
             DOWNLOAD_MOVIE: [download_movie_conversation_handler],
             CHECK_PROGRESS: [check_progress_conversation_handler],
-            UPLOAD_ACTIVITY: [upload_activity_conversation_handler],
+            NETFLIX_CSV: [
+                MessageHandler(filters.Document.FileExtension('csv') & (~filters.COMMAND), netflix_csv),
+                MessageHandler(filters.TEXT & (~filters.COMMAND), netflix_no_csv), ],
             RATE_TITLE: [rate_title_conversation_handler],
             REGISTER_USER: [register_user_conversation_handler],
+            DOWNLOAD_TORRENT: [CallbackQueryHandler(download_torrent)],
+            SUBMIT_RATING: [MessageHandler(filters.TEXT & (~filters.COMMAND), submit_rating)],
         },
         fallbacks=[
             CommandHandler("reset", reset),
@@ -1033,7 +1030,7 @@ def main() -> None:
             CommandHandler('change_newsletter', change_newsletter_command),
             (RegexpCommandHandler(r'RateTitle_[\d]+', rate_title_plex_triggered)),
             (RegexpCommandHandler(r'WatchMatch_[\d]+', watchlist_entry)),
-            (RegexpCommandHandler(r'UnWatchMatch[\d]+', remove_watchlist_entry)),
+            (RegexpCommandHandler(r'UnWatchMatch_[\d]+', remove_watchlist_entry)),
         ]
     )
 
@@ -1041,13 +1038,14 @@ def main() -> None:
     application.add_handler(CommandHandler('help', help_command))
     application.add_handler(CommandHandler('generate_pass', generate_password))
     application.add_handler(CommandHandler('update_user', update_user))
-    application.add_handler(RegexpCommandHandler(r'RateTitle_[\d]+', rate_title_plex_triggered))  # TODO test
-    application.add_handler(RegexpCommandHandler(r'WatchMatch_[\d]+', watchlist_entry))  # TODO test
-    application.add_handler(RegexpCommandHandler(r'UnWatchMatch[\d]+', remove_watchlist_entry))  # TODO test
-    application.add_handler(CommandHandler('change_watchlist', change_watchlist_command))  # TODO test
-    application.add_handler(CommandHandler('change_newsletter', change_newsletter_command))  # TODO test
+    application.add_handler(RegexpCommandHandler(r'RateTitle_[\d]+', rate_title_plex_triggered))
+    application.add_handler(RegexpCommandHandler(r'WatchMatch_[\d]+', watchlist_entry))
+    application.add_handler(RegexpCommandHandler(r'UnWatchMatch_[\d]+', remove_watchlist_entry))
+    application.add_handler(CommandHandler('change_watchlist', change_watchlist_command))
+    application.add_handler(CommandHandler('change_newsletter', change_newsletter_command))
     application.run_polling()
 
 
 if __name__ == '__main__':
+    # TODO fix requirements
     main()

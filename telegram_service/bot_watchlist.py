@@ -1,12 +1,15 @@
 import os
-
+import asyncio
 import PTN
 import requests
-from telegram.ext import CallbackContext
+from telegram import Bot
 
 from utils import update_many, convert_imdb_id, get_torr_quality, get_new_watchlist_items, \
     get_from_watchlist_by_user_telegram_id_and_imdb
-from utils import get_my_imdb_users, setup_logger, Watchlist
+from utils import setup_logger, Watchlist
+
+
+TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 
 NO_POSTER_PATH = os.getenv('NO_POSTER_PATH')
 API_URL = os.getenv('API_URL')
@@ -20,7 +23,7 @@ MOVIE_4K = os.getenv('MOVIE_4K')
 logger = setup_logger("BotWatchlist")
 
 
-def bot_watchlist_routine(context: CallbackContext) -> None:
+async def bot_watchlist_routine() -> None:
     """
     Gets newest watchlist items form database and if it finds the torrents
     for those movies it notifies the user.
@@ -46,7 +49,8 @@ def bot_watchlist_routine(context: CallbackContext) -> None:
                           f"❌ /UnWatchMatch_{item['imdb_id']} (forget movie)"
                 if item['is_downloaded']:
                     message += f"\n🚨 Movie aleady exists in PLEX, quality: {item['is_downloaded']}"
-                context.bot.send_message(chat_id=item['user_id'], text=message)
+                bot = Bot(token=TELEGRAM_TOKEN)
+                await bot.send_message(chat_id=item['user_id'], text=message)
                 update_watchlist_item_status(item['imdb_id'], item['user_id'], 'notification sent')
 
 
@@ -77,11 +81,22 @@ def get_torrents_for_imdb_id(idd):
 
 def update_watchlist_item_status(movie_id, tg_id, new_status):
     watchlist_item = get_from_watchlist_by_user_telegram_id_and_imdb(movie_id, tg_id)
-    update_many([{
-        'id': watchlist_item['id'],
-        'imdb_id': movie_id,
-        'user_id': tg_id,
-        'status': new_status,
-    }],
-        Watchlist, Watchlist.id)
+    if watchlist_item:
+        update_many([{
+            'id': watchlist_item['id'],
+            'imdb_id': movie_id,
+            'user_id': tg_id,
+            'status': new_status,
+        }],
+            Watchlist, Watchlist.id)
+
+
+def run_watchlist_dog():
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(bot_watchlist_routine())
+
+
+if __name__ == '__main__':
+    # TODO move this logic to myimdb service
+    run_watchlist_dog()
 

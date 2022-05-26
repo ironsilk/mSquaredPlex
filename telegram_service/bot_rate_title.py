@@ -1,12 +1,16 @@
-from telegram.ext import CallbackContext
+import os
 
-from bot_utils import _title_header
-from utils import setup_logger, update_many, get_unrated_movies, Movie, get_movie_details
+from telegram import Bot
+import asyncio
+from utils import setup_logger, update_many, Movie, get_movie_details, \
+    get_unrated_movies, _title_header
 
 logger = setup_logger("BotRateTitles")
 
+TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 
-def bot_rate_titles(context: CallbackContext) -> None:
+
+async def bot_rate_titles() -> None:
     """
     Gets unrated movies from the database and pings the users to
     rate them.
@@ -27,7 +31,8 @@ def bot_rate_titles(context: CallbackContext) -> None:
                           f"{title}" \
                           f"If you want to rate it, click below!\n" \
                           f"🦧 /RateTitle_{item['imdb_id']}"
-                context.bot.send_message(chat_id=item['user_id'], text=caption)
+                bot = Bot(token=TELEGRAM_TOKEN)
+                await bot.send_message(chat_id=item['user_id'], text=caption)
                 update_movie_rated_status(item, 'notification sent')
             else:
                 logger.error("")
@@ -39,5 +44,13 @@ def update_movie_rated_status(item, new_status):
     update_many([item], Movie, Movie.id)
 
 
+def run_ratetitle_dog():
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(bot_rate_titles())
+
+
 if __name__ == '__main__':
-    bot_rate_titles(None)
+    # TODO move this logic to myimdb service
+    run_ratetitle_dog()
+
+

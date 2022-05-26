@@ -3,9 +3,9 @@ import os
 import imdb
 import requests
 
-from utils import check_one_against_torrents_by_imdb, get_movie_details, get_user_by_tgram_id, get_my_imdb_users, \
-    Torrent, Watchlist, get_user_watchlist, get_from_watchlist_by_user_and_imdb, get_my_movie_by_imdb, \
-    get_from_watchlist_by_user_telegram_id_and_imdb, insert_many
+from utils import check_one_against_torrents_by_imdb, get_movie_details, get_my_imdb_users, \
+    Torrent, Watchlist, get_from_watchlist_by_user_and_imdb, get_my_movie_by_imdb, \
+    get_from_watchlist_by_user_telegram_id_and_imdb, insert_many, _title_header
 from utils import update_many, connect_plex
 from utils import deconvert_imdb_id, check_one_against_torrents_by_torr_id
 from utils import setup_logger
@@ -32,6 +32,7 @@ def make_movie_reply(pkg):
     trailer = make_trailer(pkg['trailer_link'])
     if trailer:
         caption += trailer
+    caption += '\nIs this your movie?'
     # Image
     image = get_image(pkg['poster'])
     if not caption:
@@ -45,13 +46,6 @@ def get_image(img):
         if r.status_code == 200:
             return r.content
     return open(NO_POSTER_PATH, 'rb')
-
-
-def _title_header(title, original_title, year):
-    if original_title:
-        return f"{title}\n({original_title})\nYear: {year}\n"
-    else:
-        return f"{title}\nYear: ({year})\n"
 
 
 def rating_stars(pkg):

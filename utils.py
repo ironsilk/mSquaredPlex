@@ -19,7 +19,7 @@ from dotenv import load_dotenv
 from plexapi.server import PlexServer
 from transmission_rpc import Client
 from sqlalchemy import Column, Integer, BigInteger, String, DateTime, Boolean, ForeignKey, ARRAY, \
-    Float, MetaData, create_engine, select, desc, delete, inspect, func
+    Float, MetaData, create_engine, select, desc, delete, inspect, func, or_, UniqueConstraint, ForeignKeyConstraint
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.dialects.postgresql import insert
 
@@ -123,6 +123,9 @@ class Movie(Base):
     user_id = Column(Integer, ForeignKey('user.telegram_chat_id'))
     user = relationship("User", back_populates="movies")
     rating_status = Column(String)
+
+    # movie_imdb_id_user_id_key unique constraint
+    UniqueConstraint(imdb_id, user_id)
 
 
 class Torrent(Base):
@@ -488,6 +491,15 @@ def get_unrated_movies():
         return [object_as_dict(x) for x in result.mappings().fetchall()]
 
 
+def get_movies_for_bulk_rating(telegram_id, status='csv imported'):
+    with engine.connect() as conn:
+        stmt = select(Movie).where(or_(Movie.rating_status == status, Movie.rating_status.is_(None)))\
+            .where(Movie.user.has(User.telegram_chat_id == telegram_id))
+        result = conn.execute(stmt)
+    if result:
+        return [object_as_dict(x) for x in result.mappings().fetchall()]
+
+
 def get_my_imdb_users():
     with engine.connect() as conn:
         return conn.execute(select(User)).mappings().all()
@@ -589,7 +601,7 @@ def update_many(items, table, primary_key):
         return result
 
 
-def update_many2(items, table, primary_keys):
+def update_many_multiple_pk(items, table, primary_keys):
     if items:
         with engine.connect() as conn:
             insert_statement = insert(table).values(items)
@@ -1242,6 +1254,13 @@ def try_or(func, default=None, expected_exc=(Exception,)):
         return default
 
 
+def _title_header(title, original_title, year):
+    if original_title:
+        return f"{title}\n({original_title})\nYear: {year}\n"
+    else:
+        return f"{title}\nYear: ({year})\n"
+
+
 # SQL examples and other notes:
 """
 # left join example
@@ -1250,12 +1269,9 @@ stmt = select(TmdbMovie, OmdbMovie).join(OmdbMovie, TmdbMovie.imdb_id == OmdbMov
 """
 
 if __name__ == '__main__':
-    import sqlalchemy
-    try:
-        result = insert_onetimepasswords({
-                    'password': 99993,
-                    'user_type': 'user'
-                })
-    except sqlalchemy.exc.IntegrityError:
-        print('hehehe')
-    print(result.fetch())
+    from telegram_service.bot_utils import get_movie_from_all_databases
+
+    user_movies = get_movies_for_bulk_rating(1700079840)
+    for movie in user_movies:
+        pkg = get_movie_from_all_databases(movie['imdb_id'], 1700079840)
+        print(pkg)

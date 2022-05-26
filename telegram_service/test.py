@@ -2,6 +2,8 @@ import logging
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CallbackContext, CommandHandler
 from command_regex_handler import RegexpCommandHandler
+from telegram_service.bot_rate_title import bot_rate_titles
+from telegram_service.bot_watchlist import bot_watchlist_routine
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -27,3 +29,9 @@ if __name__ == '__main__':
     application.add_handler(start_handler)
 
     application.run_polling()
+
+    job_queue = application.job_queue
+    job_queue.run_once(bot_watchlist_routine, when=1)
+    # job_queue.run_once(bot_rate_titles, when=1)
+    print('test')
+
