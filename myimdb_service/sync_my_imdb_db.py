@@ -9,6 +9,8 @@ import requests
 from bs4 import BeautifulSoup
 from plexapi.exceptions import Unauthorized
 
+from myimdb_service.bot_rate_title import run_ratetitle_dog
+from myimdb_service.bot_watchlist import run_watchlist_dog
 from myimdb_services_utils import get_my_movies, get_watchlist_intersections_ids, get_user_watched_movies
 from utils import deconvert_imdb_id, update_many, setup_logger, check_database, remove_from_watchlist_except, Movie, \
     insert_many
@@ -153,7 +155,12 @@ def run_imdb_sync():
     Sync PLEX user activity / ratings
     """
     while True:
+        # Sync the services
         sync_my_imdb()
+        # Send rating notifications from bot
+        run_ratetitle_dog()
+        # Send watchlist notifications from bot
+        run_watchlist_dog()
         logger.info(f"Sleeping {MYIMDB_REFRESH_INTERVAL} minutes...")
         time.sleep(MYIMDB_REFRESH_INTERVAL * 60)
 

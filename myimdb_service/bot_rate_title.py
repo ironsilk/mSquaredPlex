@@ -50,7 +50,6 @@ def run_ratetitle_dog():
 
 
 if __name__ == '__main__':
-    # TODO move this logic to myimdb service
     run_ratetitle_dog()
 
 
