@@ -1042,7 +1042,7 @@ def main() -> None:
     application.add_handler(RegexpCommandHandler(r'UnWatchMatch_[\d]+', remove_watchlist_entry))
     application.add_handler(CommandHandler('change_watchlist', change_watchlist_command))
     application.add_handler(CommandHandler('change_newsletter', change_newsletter_command))
-    application.run_polling()
+    application.run_polling(stop_signals=None)
 
 
 if __name__ == '__main__':
