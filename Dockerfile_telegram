@@ -1,5 +1,5 @@
 # docker build -t torrent_service . -f Dockerfile_torrent_service
-FROM python:3.9.1
+FROM python:3.10
 
 LABEL Author="Mikael"
 

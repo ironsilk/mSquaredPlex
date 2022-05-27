@@ -54,6 +54,7 @@ def get_torrents_for_user(user, get_next=0, logger=setup_logger("botUtils")):
         } for x in torrents]
         return torrents
 
+
 """
 def df_as_image(df, path=False, selected_cols=None, remove_index=True):
     'Transforms a pandas DF into a PNG'
@@ -76,6 +77,7 @@ def df_as_image(df, path=False, selected_cols=None, remove_index=True):
         return dfi.export(df_styled, path, table_conversion='matplotlib')
 """
 
+
 def df_as_pretty_text(df, selected_cols=None, remove_index=True):
     """
     Transforms a pandas DF into a nicely formated string.
@@ -95,6 +97,7 @@ def df_as_pretty_text(df, selected_cols=None, remove_index=True):
 
     rows = df.values.tolist()
     # return tabulate.tabulate(rows, cols, tablefmt='fancy_grid', floatfmt=(".2f"))
+
 
 """
 def get_progress_df(user, get_next=0, logger=setup_logger("botUtils")):
