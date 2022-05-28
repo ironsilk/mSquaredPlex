@@ -1,8 +1,10 @@
 TZ=Europe/Bucharest
+PGTZ=Europe/Bucharest
+LANG="en_US.UTF-8"
 
+#TELEGRAM access passwords
+SUPERADMIN_PASSWORD=mellon
 
-# Choose whether to use plex or not
-USE_PLEX=True
 
 # PLEX docker variables
 PLEX_FILES_LOCATION=/mnt/Media/Movies&TV/plex
@@ -10,40 +12,36 @@ PLEX_TV_LIBRARY_FOLDER=/mnt/Media/Movies&TV/TV
 PLEX_MOVIES_LIBRARY_FOLDER=/mnt/Media/Movies&TV/Movies
 
 # TRANSMISSION docker variables
+DOCKER_MODS=mikael6/just_fun:transmission_mod
 TRANSMISSION_USER=
 TRANSMISSION_PASS=
 TRANSMISSION_FILES_LOCATION=/mnt/Media/Movies&TV/transmission
 
-
 # Routine settings
-# hrs
-FLIST_ROUTINE_SLEEP_TIME=12
+# Hours of the day when to run the routine. 6,14,18 means it will run 3 times a day.
+NEWSLETTER_ROUTINE_TIMES=6,18
 
-# MYSQL PLEX settings
-MYSQL_DB_NAME=plexbuddy
-MYSQL_HOST=
-MYSQL_PORT=
-MYSQL_USER=root
-MYSQL_PASS=pass
-MYSQL_DB_LOCATION=/mnt/Media/plexBuddy
-
-# MYSQL MYIMDB settings
-MYSQL_MYIMDB_DB_NAME=myimdb
-MYSQL_MYIMDB_HOST=
-MYSQL_MYIMDB_PORT=
-MYSQL_MYIMDB_USER=
-MYSQL_MYIMDB_PASS=
-MYSQL_MYIMDB_DB_LOCATION=/mnt/Media/myImdb
+# POSTGRES PLEX settings
+POSTGRES_DB=movielib
+POSTGRES_HOST=192.168.1.99
+POSTGRES_PORT=5432
+POSTGRES_USER=mike
+POSTGRES_PASSWORD=pass
+POSTGRE_DB_LOCATION=/mnt/Media/movielib
+PGADMIN_EMAIL=
+PGADMIN_PASS=
+PGADMIN_PORT=5050
 
 # TORR settings
 API_URL=https://filelist.io/api.php
 USER=
 PASSKEY=
 
-TORR_API_HOST=localhost
+TORR_API_HOST=192.1
 TORR_API_PATH=/torr_api
+TORR_FINISHED_PATH=/torr_finished
 TORR_API_PORT=9092
-TORR_HOST=
+TORR_HOST=192.168.1.99
 # Listening path for torrent RPC service.
 TORR_PORT=9091
 TORR_USER=
@@ -55,13 +53,20 @@ TORR_SEED_FOLDER=/movies
 # days, to be used in TORR_REFRESHER, check_seeding_status
 TORR_KEEP_TIME=60
 # minutes between torrent client status checks
-TORR_CLEAN_ROUTINE_INTERVAL=15
+TORR_CLEAN_ROUTINE_INTERVAL=1
 NO_POSTER_PATH=images/no-poster.png
+
+# TELEGRAM
+TELEGRAM_TOKEN=1940395527:AAF1Orhib5d6QvtIMtiOS8WaHWZfN8IrI2Y
 TELEGRAM_AUTH_TEST_PATH=images/auth_test.png
 TELEGRAM_AUTH_APPROVE=images/approve.jpg
 TELEGRAM_IMDB_RATINGS=images/ratings.jpg
+TELEGRAM_NETFLIX_PNG=images/netflix.png
+TELEGRAM_RESET_PNG=images/reset.png
 # minutes
 TELEGRAM_WATCHLIST_ROUTINE_INTERVAL=60
+# minutes
+TELEGRAM_RATE_ROUTINE_INTERVAL=5
 MOVIE_HDRO=19
 MOVIE_4K=26
 SOAP_HD=21
@@ -75,28 +80,19 @@ PLEX_TOKEN=
 # Will also appear in emails sent
 PLEX_SERVER_NAME=
 # list of emails, separated by ", " - the space is important.
-PLEX_ADMIN_EMAILS="mihai.vlad6@gmail.com"
+PLEX_ADMIN_EMAILS=""
 # If you have multiple admins or other users which are not friends,
 # you ve got to mention their emails here unfortunately. Their name must be their email. Not tested tho, dont have
 # plex pass.
 # The account the TOKEN belongs to should always be first, AKA your account
 
-
 # TMDB & OMDB
 TMDB_API_KEY=
 OMDB_API_KEY=
-INSERT_RATE=100
-OMDB_API_LIMIT=800
 
-# For imdb DB dumps
 # minutes
-MY_IMDB_REFRESH_INTERVAL=15
-# days
-IMDB_DB_REFRESH_INTERVAL=30
-# days
-REVIEW_INTERVAL_REFRESH=180
-DUMPS_URL=https://datasets.imdbws.com/
-DUMPS_PATH=./
+MYIMDB_REFRESH_INTERVAL=1
+
 
 # EMAIL settings
 XML_TRNT_PATH=views/new_trnt.xml

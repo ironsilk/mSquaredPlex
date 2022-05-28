@@ -1,12 +1,12 @@
 # docker build -t torrent_service . -f Dockerfile_torrent_service
-FROM python:3.9.1
+FROM python:3.10
 
 LABEL Author="Mikael"
 
 RUN mkdir /app
 WORKDIR /app
 
-COPY torrent_db_refresher/ ./
+COPY transmission_utils/ ./
 COPY utils.py ./
 
 

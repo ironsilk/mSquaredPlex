@@ -1,15 +1,15 @@
-# docker build -t filelist_service . -f Dockerfile_filelist_service
-FROM python:3.9.1
+# docker build -t newsletter_service . -f Dockerfile_filelist_service
+FROM python:3.10
 
 LABEL Author="Mikael"
 
 RUN mkdir /app
 WORKDIR /app
 
-COPY filelist_service/ ./
+COPY newsletter_service/ ./
 COPY utils.py ./
 
 RUN pip install -r requirements.txt
 
 
-ENTRYPOINT ["python", "filelist_routine.py"]
+ENTRYPOINT ["python", "newsletter_routine.py"]

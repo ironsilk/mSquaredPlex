@@ -397,6 +397,3 @@ def do_email(items):
         return
     logger.info('Nothing left to send')
 
-
-if __name__ == '__main__':
-    from dotenv import load_dotenv

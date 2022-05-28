@@ -97,6 +97,5 @@ def run_watchlist_dog():
 
 
 if __name__ == '__main__':
-    # TODO move this logic to myimdb service
     run_watchlist_dog()
 

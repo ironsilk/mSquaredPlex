@@ -22,6 +22,4 @@ transmission-rpc
 typing-extensions
 urllib3
 wincertstore
-python_telegram_bot==20.0a0
-dataframe_image
-tabulate
+APScheduler

@@ -14,8 +14,8 @@ USER = os.getenv('USER')
 PASSKEY = os.getenv('PASSKEY')
 MOVIE_HDRO = os.getenv('MOVIE_HDRO')
 MOVIE_4K = os.getenv('MOVIE_4K')
-FILELIST_ROUTINE_TIMES = os.getenv('FILELIST_ROUTINE_TIMES')
-FILELIST_ROUTINE_TIMES = FILELIST_ROUTINE_TIMES.split(',')
+NEWSLETTER_ROUTINE_TIMES = os.getenv('NEWSLETTER_ROUTINE_TIMES')
+NEWSLETTER_ROUTINE_TIMES = NEWSLETTER_ROUTINE_TIMES.split(',')
 
 logger = setup_logger("FilelistRoutine")
 
@@ -91,11 +91,11 @@ def info_jobs():
 
 if __name__ == '__main__':
     check_database()
-    # feed_routine()
+    feed_routine()
 
     scheduler = BlockingScheduler(timezone=TZ)
 
-    for hour in FILELIST_ROUTINE_TIMES:
+    for hour in NEWSLETTER_ROUTINE_TIMES:
 
         scheduler.add_job(feed_routine, 'cron', hour=int(hour), id=f"Filelist Routine {hour} o'clock",
                           coalesce=True, misfire_grace_time=3000000, replace_existing=True)

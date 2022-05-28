@@ -36,7 +36,7 @@ logging.basicConfig(
 logger = logging.getLogger('MovieTimeBot')
 
 SUPERADMIN_PASSWORD = os.getenv('SUPERADMIN_PASSWORD')
-USE_PLEX = bool(os.getenv('USE_PLEX'))
+
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 TELEGRAM_AUTH_TEST_PATH = os.getenv('TELEGRAM_AUTH_TEST_PATH')
 TELEGRAM_AUTH_APPROVE = os.getenv('TELEGRAM_AUTH_APPROVE')

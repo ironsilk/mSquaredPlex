@@ -2,7 +2,6 @@ import datetime
 import os
 import re
 import time
-from pprint import pprint
 
 import pandas as pd
 import requests
@@ -15,6 +14,7 @@ from myimdb_services_utils import get_my_movies, get_watchlist_intersections_ids
 from utils import deconvert_imdb_id, update_many, setup_logger, check_database, remove_from_watchlist_except, Movie, \
     insert_many
 from utils import get_my_imdb_users, Watchlist, get_user_watchlist, check_one_against_torrents_by_imdb
+from sync_torrents import sync_torrent_statuses
 
 MYIMDB_REFRESH_INTERVAL = int(os.getenv('MYIMDB_REFRESH_INTERVAL'))
 
@@ -143,8 +143,7 @@ def sync_watchlist(user):
                     item['is_downloaded'] = is_in_my_torrents[0]['resolution']
                     update_many([item], Watchlist, Watchlist.id)
     except Exception as e:
-        raise e
-        logger.error(f"Watchlist sync for user {profile_id} failed. Error: {e}")
+        logger.error(f"Watchlist sync for user {user['email']} failed. Error: {e}")
     logger.info("Done.")
 
 
@@ -157,6 +156,8 @@ def run_imdb_sync():
     while True:
         # Sync the services
         sync_my_imdb()
+        # Sync torrent statuses
+        sync_torrent_statuses()
         # Send rating notifications from bot
         run_ratetitle_dog()
         # Send watchlist notifications from bot

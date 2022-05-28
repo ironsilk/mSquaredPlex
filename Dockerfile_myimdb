@@ -1,5 +1,5 @@
 # docker build -t imdb_refresh_service . -f Dockerfile_MOVIELIB_imdb
-FROM python:3.9.1
+FROM python:3.10
 
 LABEL Author="Mikael"
 
@@ -12,4 +12,4 @@ COPY utils.py ./
 RUN pip install -r requirements.txt
 
 
-ENTRYPOINT ["python", "sync_my_imdb_db.py"]
+ENTRYPOINT ["python", "sync_services.py"]

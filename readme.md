@@ -65,34 +65,27 @@
         thus changing their email and/or imdb_id and other preferences.
 
 
+- **MyIMDB service** - Background routine with the following 
+   functions:
+    - Syncs IMDB ratings given by the user with our database.
+    - Syncs IMDB watchlist with our database.
+    - Syncs PLEX user activity / ratings with our database.
+    - Syncs transmission client torrent status wih our database.
+    - Sends notifications regarding seen PLEX movies via telegram.(after watching a movie on PLEX, the user
+       receives a notification to rate the title)
+    - Sends notifications regarding watchlist via telegram.(when a watchlist movie becomes available on 
+       filelist, the user receives a notification asking if he wants to download the movie. If not, he 
+       will continue to receive notifications for the movie **except** for the movie quality that he rejected.
+    - Defaults to 1 minute routine, can be changed via the .env variables.
 
-  
-- **MyIMDB service** - Watches the user's IMDB profile and keeps track of his rated movies and
-watchlist. For any new movie in the Watchlist the user gets notifications via the Telegram service 
-while the rated movies are used to filter out which new filelist movies to send via the newsletter. 
-Each user will receive a personalised newsletter depending on the movies which he has seen. 
-This also syncs with the user's PLEX activity so any watched movie in plex will be taken into account.
-  
 
-- **Newsletter service** - Gets the last 100 new filelist torrents, filters them as described in MyIMDB service and
-sends them to each user via email. 
+- **Newsletter service** - Gets the last 100 new filelist torrents, filters out any seen movies (for each user),
+    pulls data from IMDB, TMDB and OMDB and sends the newsletter. All torrents sent out are stored in a database
+    such as when a new torrent for an already newsletter-sent movie appears it will figure in another category.
   
 
 - **TorrAPI** - An API which receives download requests from the Telegram service or from the Newsletter service and
-communicates with the Transmission docker in order to download these movies. This service also employs a routine
-which syncs torrent statuses from Transmission to the postgres database.
-
-
-## TODO
-
-- ask user who asked for download and didnt watch the movie before deletion and maybe confirm in with the admin.
-- Show my watchlist.
-- Telegram roles reflect PLEX roles
-
-
-## Wishlist
-- recommend a movie - later stages, complex.
-- Favorite a director/actor whatever and receive notifications when a new movie of his/hers is available.
+communicates with the Transmission docker in order to download these movies.
 
 
 ## Deployment:
@@ -125,12 +118,6 @@ which syncs torrent statuses from Transmission to the postgres database.
 3. Recreate one service
 
 `sudo docker-compose up --build --force-recreate --no-deps -d filelist_service`
-
-
-## Known bugs:
-
-- There might be some errors in logs when starting up for the first time, until you login into telegram yourself.
-All containers are set to restart `on-failiure` so no worries.
 
 
 

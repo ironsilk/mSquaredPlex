@@ -8,7 +8,6 @@ import re
 import xml.etree.ElementTree as ET
 from functools import wraps
 from time import time
-from pprint import pprint
 
 import PTN
 import imdb
@@ -54,7 +53,7 @@ TORR_API_PATH = os.getenv('TORR_API_PATH')
 TORR_SEED_FOLDER = os.getenv('TORR_SEED_FOLDER')
 TORR_DOWNLOAD_FOLDER = os.getenv('TORR_DOWNLOAD_FOLDER')
 
-REVIEW_INTERVAL_REFRESH = int(os.getenv('REVIEW_INTERVAL_REFRESH'))
+REVIEW_INTERVAL_REFRESH = os.getenv('REVIEW_INTERVAL_REFRESH')
 
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 
@@ -310,7 +309,7 @@ def get_omdb_api_limit():
 
 def get_new_imdb_titles_for_omdb():
     conn = connect_db()
-    refresh_interval_date = datetime.datetime.now() - datetime.timedelta(days=REVIEW_INTERVAL_REFRESH)
+    refresh_interval_date = datetime.datetime.now() - datetime.timedelta(days=int(REVIEW_INTERVAL_REFRESH))
     subquery = select(OmdbMovie.imdb_id).where(OmdbMovie.last_update_omdb > refresh_interval_date)
     stmt = select(TitleBasics.tconst).where(TitleBasics.tconst.not_in(subquery))
     stmt = stmt.order_by(desc(TitleBasics.tconst))
@@ -319,7 +318,7 @@ def get_new_imdb_titles_for_omdb():
 
 def get_new_imdb_titles_for_tmdb():
     conn = connect_db()
-    refresh_interval_date = datetime.datetime.now() - datetime.timedelta(days=REVIEW_INTERVAL_REFRESH)
+    refresh_interval_date = datetime.datetime.now() - datetime.timedelta(days=int(REVIEW_INTERVAL_REFRESH))
     subquery = select(TmdbMovie.imdb_id).where(TmdbMovie.last_update_tmdb > refresh_interval_date)
 
     stmt = select(TitleBasics.tconst).where(TitleBasics.tconst.not_in(subquery))
