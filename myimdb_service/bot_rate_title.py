@@ -35,7 +35,7 @@ async def bot_rate_titles() -> None:
                 await bot.send_message(chat_id=item['user_id'], text=caption)
                 update_movie_rated_status(item, 'notification sent')
             else:
-                logger.error("")
+                logger.error("No package received?")
 
 
 def update_movie_rated_status(item, new_status):

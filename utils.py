@@ -406,7 +406,9 @@ def get_movie_details(item):
     except AttributeError:
         return None
     # Search in local_db
+    print(imdb_id_number)
     new_keys = get_movie_imdb(imdb_id_number)
+    print(new_keys)
     # Search online if TMDB, OMDB not found in local DB
     if not new_keys:
         return None
@@ -417,7 +419,7 @@ def get_movie_details(item):
 
 
 def get_movie_imdb(imdb_id):
-    ia = imdb.IMDb('s3', DB_URI)
+    ia = imdb.IMDb()
     try:
         movie = ia.get_movie(imdb_id)
         for key in ['cast', 'genres', 'kind', 'rating', 'title', 'original title', 'year',
@@ -442,7 +444,6 @@ def get_movie_imdb(imdb_id):
         }
 
     except Exception as e:
-        raise e
         logger.error(f"IMDB fetch error: {e}")
         return None
     return item
@@ -1275,9 +1276,5 @@ stmt = select(TmdbMovie, OmdbMovie).join(OmdbMovie, TmdbMovie.imdb_id == OmdbMov
 """
 
 if __name__ == '__main__':
-    from telegram_service.bot_utils import get_movie_from_all_databases
-
-    user_movies = get_movies_for_bulk_rating(1700079840)
-    for movie in user_movies:
-        pkg = get_movie_from_all_databases(movie['imdb_id'], 1700079840)
-        print(pkg)
+    pkg = {'id': 54, 'imdb_id': 110912, 'my_score': None, 'seen_date': datetime.datetime(2021, 9, 2, 9, 0, 43), 'user_id': 1700079840, 'rating_status': None}
+    get_movie_details(pkg)
