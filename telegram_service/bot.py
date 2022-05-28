@@ -780,7 +780,7 @@ async def register_user(update: Update, context: CallbackContext):
     update_many([context.user_data['new_user']], User, User.telegram_chat_id)
     USERS = get_telegram_users()
     message = "Ok, that's it\. I'll take care of the rest, from now on " \
-              "anytime you type something i'll be here to help you out\. Enjoy!\n" \
+              "anytime you type something i'll be here to help you out\. Enjoy\!\n" \
               "Type /help to find out more\."
     return await start(update, context, message)
 

@@ -81,7 +81,7 @@ services:
         condition: service_healthy
 
   filelist_service:
-    container_name: MOVIELIB_Filelist
+    container_name: MOVIELIB_Newsletter
     network_mode: host
     build:
       context: ./
