@@ -1,8 +1,8 @@
 version: '2.1'
 services:
-  movielib_db:
+  postgres_db:
     image: postgres
-    container_name: MOVIELIB_DB
+    container_name: MOVIELIB_postgres
     env_file:
       - .env
     ports:
@@ -77,7 +77,7 @@ services:
       - .env
     restart: on-failure
     depends_on:
-      movielib_db:
+      postgres_db:
         condition: service_healthy
 
   filelist_service:
@@ -90,7 +90,7 @@ services:
       - .env
     restart: on-failure
     depends_on:
-      movielib_db:
+      postgres_db:
         condition: service_healthy
 
   torrent_service:
@@ -103,7 +103,7 @@ services:
       - .env
     restart: on-failure
     depends_on:
-      movielib_db:
+      postgres_db:
         condition: service_healthy
 
   telegram_service:
@@ -116,5 +116,5 @@ services:
       - .env
     restart: on-failure
     depends_on:
-      movielib_db:
+      postgres_db:
         condition: service_healthy
