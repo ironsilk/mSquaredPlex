@@ -17,7 +17,7 @@ from bot_utils import make_movie_reply, update_torr_db, \
     exclude_torrents_from_watchlist, get_movie_from_all_databases, search_imdb_title, add_to_watchlist, \
     get_telegram_users, invite_friend
 from command_regex_handler import RegexpCommandHandler
-from myimdb_service.bot_watchlist import get_torrents_for_imdb_id, update_watchlist_item_status
+from bot_watchlist import get_torrents_for_imdb_id, update_watchlist_item_status
 from utils import deconvert_imdb_id, send_torrent, compose_link, get_user_by_tgram_id, get_my_movie_by_imdb, \
     update_many, Movie, convert_imdb_id, check_database, User, get_onetimepasswords, remove_onetimepassword, \
     insert_onetimepasswords, get_movies_for_bulk_rating

@@ -1,15 +1,11 @@
 # -*- coding: utf-8 -*-
-import datetime
 import os
 import urllib.parse
-import xml.etree.ElementTree as ET
-from xml.dom import minidom
-from xml.etree.ElementTree import SubElement
 from itertools import groupby
+
 import PTN
 
-from utils import check_against_user_movies, insert_many, Torrent, get_omdb
-from utils import TMDB
+from utils import check_against_user_movies, insert_many, Torrent
 from utils import get_my_imdb_users
 from utils import get_torr_quality
 from utils import setup_logger

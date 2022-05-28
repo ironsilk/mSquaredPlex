@@ -1,11 +1,9 @@
-import io
 import os
 
-# import dataframe_image as dfi
-import pandas as pd
-# import tabulate
-
 from utils import make_client, setup_logger, get_torr_name, get_requested_torrents_for_tgram_user
+
+# import dataframe_image as dfi
+# import tabulate
 
 header = ['Movie Name', 'Resolution', 'DW Status', 'DW Progress', 'ETA']
 HCTI_API_USER_ID = os.getenv('HTML_API_ID')

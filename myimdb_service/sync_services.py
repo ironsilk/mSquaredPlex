@@ -8,8 +8,8 @@ import requests
 from bs4 import BeautifulSoup
 from plexapi.exceptions import Unauthorized
 
-from myimdb_service.bot_rate_title import run_ratetitle_dog
-from myimdb_service.bot_watchlist import run_watchlist_dog
+from bot_rate_title import run_ratetitle_dog
+from bot_watchlist import run_watchlist_dog
 from myimdb_services_utils import get_my_movies, get_watchlist_intersections_ids, get_user_watched_movies
 from utils import deconvert_imdb_id, update_many, setup_logger, check_database, remove_from_watchlist_except, Movie, \
     insert_many
