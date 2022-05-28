@@ -283,6 +283,13 @@ def check_database():
     Watchlist.__table__.create(bind=engine, checkfirst=True)
     TmdbMovie.__table__.create(bind=engine, checkfirst=True)
     OmdbMovie.__table__.create(bind=engine, checkfirst=True)
+    TitleBasics.__table__.create(bind=engine, checkfirst=True)
+    NameBasics.__table__.create(bind=engine, checkfirst=True)
+    TitleAkas.__table__.create(bind=engine, checkfirst=True)
+    TitleCrew.__table__.create(bind=engine, checkfirst=True)
+    TitleEpisode.__table__.create(bind=engine, checkfirst=True)
+    TitlePrincipals.__table__.create(bind=engine, checkfirst=True)
+    TitleRatings.__table__.create(bind=engine, checkfirst=True)
 
 
 def check_movielib_database():
