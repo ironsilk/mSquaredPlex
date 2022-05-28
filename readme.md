@@ -118,6 +118,7 @@ communicates with the Transmission docker in order to download these movies.
 3. Recreate one service
 
 `sudo docker-compose up --build --force-recreate --no-deps -d filelist_service`
+`sudo docker-compose up --build --force-recreate --no-deps -d postgres_db`
 
 
 

@@ -1,6 +1,6 @@
 TZ=Europe/Bucharest
 PGTZ=Europe/Bucharest
-LANG="en_US.UTF-8"
+LANG=en_US.UTF-8
 
 #TELEGRAM access passwords
 SUPERADMIN_PASSWORD=mellon
