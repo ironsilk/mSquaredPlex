@@ -405,10 +405,8 @@ def get_movie_details(item):
         imdb_id_number = deconvert_imdb_id(item['imdb_id'])
     except AttributeError:
         return None
-    # Search in local_db
-    print(imdb_id_number)
+    # Search on IMDB
     new_keys = get_movie_imdb(imdb_id_number)
-    print(new_keys)
     # Search online if TMDB, OMDB not found in local DB
     if not new_keys:
         return None

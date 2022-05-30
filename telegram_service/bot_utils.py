@@ -174,6 +174,8 @@ def get_excluded_resolutions(movie_id, tg_id):
 
 
 def invite_friend(email, account=None, plex=None):
+    # TODO wrap in a try except here for connect_plex to make it
+    #  work without a plex server.
     if not account:
         account, plex = connect_plex()
     try:

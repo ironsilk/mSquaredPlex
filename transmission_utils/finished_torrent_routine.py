@@ -1,6 +1,7 @@
 import os
 import urllib.request
 
+# TODO check why it's not working if it's from here or from the API
 api_host = os.getenv('TORR_API_HOST')
 api_port = os.getenv('TORR_API_PORT')
 api_endpoint = os.getenv('TORR_FINISHED_PATH')

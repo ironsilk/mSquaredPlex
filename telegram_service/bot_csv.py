@@ -36,10 +36,7 @@ async def csv_upload_handler(context: CallbackContext):
                                        f"Err description: {e}")
         return
 
-    try:
-        ia = imdb.IMDb('s3', DB_URI)
-    except sqlalchemy.exc.OperationalError:
-        ia = imdb.IMDb()
+    ia = imdb.IMDb()
 
     identified_movies = []
     soap_or_unidentified = 0
