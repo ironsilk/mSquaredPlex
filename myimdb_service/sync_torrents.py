@@ -50,7 +50,7 @@ class TorrentRefresher:
             if torr_response:
                 if torr_response.status == 'seeding':
                     # Decide whether to remove it or keep it
-                    if self.check_seeding_status(torr_response):
+                    if self.check_seeding_status(torr_response, torr):
                         torr['status'] = 'seeding'
                         update_many([torr], Torrent, Torrent.id)
                         # Inform the user
@@ -100,8 +100,8 @@ class TorrentRefresher:
             self.logger.info("None found.")
         return torrents
 
-    def check_seeding_status(self, torr):
-        if (datetime.datetime.now() - torr.date_done.replace(tzinfo=None)).days < \
+    def check_seeding_status(self, torr_response, torr):
+        if (datetime.datetime.now() - torr_response.date_done.replace(tzinfo=None)).days < \
                 (TORR_KEEP_TIME + torr['extra_grace_days']):
             return True
         else:
