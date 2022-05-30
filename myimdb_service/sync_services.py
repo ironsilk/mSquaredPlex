@@ -49,6 +49,7 @@ def sync_my_imdb():
             plex_data = [x for x in plex_data if x['imdb_id'] not in already_in_my_movies]
             for item in plex_data:
                 item['user_id'] = user['telegram_chat_id']
+                item['rating_status'] = 'bulk unrated'
             insert_many(plex_data, Movie)
         # Sync IMDB watchlist
         if user['scan_watchlist'] == 1:

@@ -65,7 +65,7 @@ async def csv_upload_handler(context: CallbackContext):
                         if has_ratings:
                             item['rating_status'] = 'rated externally'
                             item['my_score'] = movie['Ratings']
-                            item['rating_status'] = 'csv imported'
+                            item['rating_status'] = 'bulk unrated'
                         identified_movies.append(item)
                     else:
                         pass

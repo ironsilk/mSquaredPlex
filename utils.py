@@ -502,7 +502,7 @@ def get_unrated_movies():
         return [object_as_dict(x) for x in result.mappings().fetchall()]
 
 
-def get_movies_for_bulk_rating(telegram_id, status='csv imported'):
+def get_movies_for_bulk_rating(telegram_id, status='bulk unrated'):
     with engine.connect() as conn:
         stmt = select(Movie).where(or_(Movie.rating_status == status, Movie.rating_status.is_(None))) \
             .where(Movie.user.has(User.telegram_chat_id == telegram_id))
