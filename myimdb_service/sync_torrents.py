@@ -1,11 +1,15 @@
+import asyncio
 import datetime
 import os
 from itertools import groupby
+from telegram import Bot
 
 from utils import timing, setup_logger, update_many, make_client, \
-    get_torrents, Torrent
+    get_torrents, Torrent, update_torrent_grace_days
 
 TORR_KEEP_TIME = int(os.getenv('TORR_KEEP_TIME'))
+TORR_REMOVE_LOW_RES = bool(os.getenv('TORR_REMOVE_LOW_RES'))
+TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 
 logger = setup_logger('TorrUtils')
 
@@ -29,15 +33,18 @@ class TorrentRefresher:
                 torr['torr_obj'] = None
         return db_torrents
 
-    def update_statuses(self):
+    async def update_statuses(self):
         self.logger.info("Updating torrent statuses...")
         # Get torrents
         torrents = self.get_torrents()
         # Remove any duplicatd torrents by IMDB ID, keep only higher resolution
-        self.logger.info("Checking for duplicate lower res movies...")
-        self.remove_low_res(torrents)
+        if TORR_REMOVE_LOW_RES:
+            self.logger.info("Checking for duplicate lower res movies...")
+            self.remove_low_res(torrents)
         # Refresh list
         torrents = self.get_torrents()
+        from pprint import pprint
+        pprint(torrents)
         for torr in torrents:
             torr_response = torr.pop('torr_obj', None)
             if torr_response:
@@ -46,12 +53,21 @@ class TorrentRefresher:
                     if self.check_seeding_status(torr_response):
                         torr['status'] = 'seeding'
                         update_many([torr], Torrent, Torrent.id)
+                        # Inform the user
+                        bot = Bot(token=TELEGRAM_TOKEN)
+                        message = f"Torrent {torr_response.name} has been downloaded!"
+                        await bot.send_message(chat_id=torr['requested_by_id'], text=message)
                     else:
-                        # remove torrent and data
-                        self.remove_torrent_and_files(torr['torr_id'])
-                        # change status
-                        torr['status'] = 'removed'
-                        update_many([torr], Torrent, Torrent.id)
+                        # Ask user if he wants it removed.
+                        bot = Bot(token=TELEGRAM_TOKEN)
+                        message = f"Torrent {torr_response.name} has been seeding " \
+                                  f"for more than {torr['extra_grace_days'] + TORR_KEEP_TIME} days. " \
+                                  f"Can we delete it? 🥺" \
+                                  f"\n🐷 /Keep_{torr['torr_id']}" \
+                                  f"\n🔪 /Remove_{torr['torr_id']}" \
+                                  f"\n🌾 /SeedForever_{torr['torr_id']}"
+                        await bot.send_message(chat_id=torr['requested_by_id'], text=message)
+                        update_torrent_grace_days(torr['torr_id'], torr['requested_by_id'], 1)
                 elif torr_response.status == 'downloading' and torr['status'] == 'requested download':
                     torr['status'] = 'downloading'
                     update_many([torr], Torrent, Torrent.id)
@@ -85,7 +101,8 @@ class TorrentRefresher:
         return torrents
 
     def check_seeding_status(self, torr):
-        if (datetime.datetime.now() - torr.date_done.replace(tzinfo=None)).days < TORR_KEEP_TIME:
+        if (datetime.datetime.now() - torr.date_done.replace(tzinfo=None)).days < \
+                (TORR_KEEP_TIME + torr['extra_grace_days']):
             return True
         else:
             return False
@@ -99,12 +116,12 @@ class TorrentRefresher:
 
 @timing
 def sync_torrent_statuses():
+    loop = asyncio.get_event_loop()
     refresher = TorrentRefresher()
-    refresher.update_statuses()
+    loop.run_until_complete(refresher.update_statuses())
     logger.info("Routine done, closing connections.")
-    return
 
 
 if __name__ == '__main__':
-    x = TorrentRefresher(setup_logger('cacat'))
+    x = TorrentRefresher()
     sync_torrent_statuses()

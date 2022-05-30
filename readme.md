@@ -102,7 +102,10 @@ communicates with the Transmission docker in order to download these movies.
    - "script-torrent-done-filename" -> "/torr_finished_routine.sh"'
    - "incomplete-dir-enabled" -> false
     
-     
+
+## CONFIGURATION
+
+1.
    
 
 ## COMMANDS

@@ -18,7 +18,8 @@ from dotenv import load_dotenv
 from plexapi.server import PlexServer
 from transmission_rpc import Client
 from sqlalchemy import Column, Integer, BigInteger, String, DateTime, Boolean, ForeignKey, ARRAY, \
-    Float, MetaData, create_engine, select, desc, delete, inspect, func, or_, UniqueConstraint, ForeignKeyConstraint
+    Float, MetaData, create_engine, select, desc, delete, inspect, func, or_, UniqueConstraint, ForeignKeyConstraint, \
+    update
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.dialects.postgresql import insert
 
@@ -138,6 +139,7 @@ class Torrent(Base):
     status = Column(String)
     requested_by_id = Column(Integer, ForeignKey('user.telegram_chat_id'))
     requested_by = relationship("User", back_populates="requested_torrents")
+    extra_grace_days = Column(Integer, default=0)
 
 
 class OneTimePassword(Base):
@@ -421,15 +423,10 @@ def get_movie_imdb(imdb_id):
     try:
         movie = ia.get_movie(imdb_id)
         for key in ['cast', 'genres', 'kind', 'rating', 'title', 'original title', 'year',
-                    'votes', 'runtimes', 'rating', 'director']:
+                    'votes', 'runtimes', 'rating']:
             if key not in movie.data.keys():
                 movie.data[key] = None
-        try:
-            cast = ', '.join([x['name'] for x in movie.data['cast'][:5]]) if movie.data['cast'] else None
-        except KeyError:
-            cast = None
         item = {
-            'cast': cast,
             'genres': ', '.join(movie.data['genres']) if movie.data['genres'] else None,
             'imdbID': movie.movieID,
             'titleType': movie.data['kind'],
@@ -440,6 +437,15 @@ def get_movie_imdb(imdb_id):
             'numVotes': movie.data['votes'],
             'runtimeMinutes': movie.data['runtimes'][0] if movie.data['runtimes'] else None
         }
+        for key in ['cast', 'directors']:
+            try:
+                item[key] = ', '.join([x['name'] for x in movie.data[key][:5]]) if movie.data[key] else None
+            except KeyError:
+                item[key] = None
+        try:
+            item['countries'] = ', '.join([x for x in movie.data['countries'][:5]]) if movie.data['countries'] else None
+        except KeyError:
+            item[key] = None
 
     except Exception as e:
         logger.error(f"IMDB fetch error: {e}")
@@ -498,7 +504,7 @@ def get_unrated_movies():
 
 def get_movies_for_bulk_rating(telegram_id, status='csv imported'):
     with engine.connect() as conn:
-        stmt = select(Movie).where(or_(Movie.rating_status == status, Movie.rating_status.is_(None)))\
+        stmt = select(Movie).where(or_(Movie.rating_status == status, Movie.rating_status.is_(None))) \
             .where(Movie.user.has(User.telegram_chat_id == telegram_id))
         result = conn.execute(stmt)
     if result:
@@ -620,6 +626,22 @@ def update_many_multiple_pk(items, table, primary_keys):
         return result
 
 
+def update_torrent_status(torr_id, status):
+    with engine.connect() as conn:
+        stmt = update(Torrent).where(Torrent.torr_id == torr_id).values(status=status)
+        result = conn.execute(stmt)
+    return result
+
+
+def update_torrent_grace_days(torr_id, telegram_id, days=TORR_KEEP_TIME):
+    with engine.connect() as conn:
+        stmt = update(Torrent).where(Torrent.torr_id == torr_id)\
+            .where(Torrent.requested_by.has(User.telegram_chat_id == telegram_id))\
+            .values(extra_grace_days=Torrent.extra_grace_days + days)
+        result = conn.execute(stmt)
+    return result
+
+
 def insert_many(items, table):
     if items:
         with engine.connect() as conn:
@@ -647,6 +669,7 @@ def insert_onetimepasswords(item):
         stmt = insert(OneTimePassword).values([item])
         result = conn.execute(stmt)
     return result
+
 
 def remove_onetimepassword(pwd):
     with engine.connect() as conn:
@@ -829,7 +852,6 @@ class TMDB(GenericMovie):
         try:
             movie = tmdb_api.Movies(self.id_tmdb)
             response = movie.info()
-        # print response
         except Exception:
             logger.debug('could not load JSON from tmdb for movie id:{}'.format(self.id_tmdb))
             return
@@ -1122,7 +1144,6 @@ class TMDB(GenericMovie):
         try:
             search = tmdb_api.Search()
             response = search.movie(query=self.search_title)
-        # print response
         except Exception:
             logger.debug('')
 
@@ -1274,5 +1295,7 @@ stmt = select(TmdbMovie, OmdbMovie).join(OmdbMovie, TmdbMovie.imdb_id == OmdbMov
 """
 
 if __name__ == '__main__':
-    pkg = {'id': 54, 'imdb_id': 110912, 'my_score': None, 'seen_date': datetime.datetime(2021, 9, 2, 9, 0, 43), 'user_id': 1700079840, 'rating_status': None}
-    get_movie_details(pkg)
+    # pkg = {'id': 54, 'imdb_id': 110912, 'my_score': None, 'seen_date': datetime.datetime(2021, 9, 2, 9, 0, 43), 'user_id': 1700079840, 'rating_status': None}
+    # get_movie_details(pkg)
+    client = make_client()
+    client.remove_torrent([361866], delete_data=True)

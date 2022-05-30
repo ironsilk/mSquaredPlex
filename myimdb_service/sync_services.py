@@ -16,7 +16,7 @@ from utils import deconvert_imdb_id, update_many, setup_logger, check_database, 
 from utils import get_my_imdb_users, Watchlist, get_user_watchlist, check_one_against_torrents_by_imdb
 from sync_torrents import sync_torrent_statuses
 
-MYIMDB_REFRESH_INTERVAL = int(os.getenv('MYIMDB_REFRESH_INTERVAL'))
+SYNC_INTERVAL = int(os.getenv('SYNC_INTERVAL'))
 
 logger = setup_logger("MyIMDBsync")
 
@@ -147,7 +147,7 @@ def sync_watchlist(user):
     logger.info("Done.")
 
 
-def run_imdb_sync():
+def run_sync():
     """
     Sync IMDB ratings given by user
     Sync IMDB user watchlist
@@ -162,10 +162,10 @@ def run_imdb_sync():
         run_ratetitle_dog()
         # Send watchlist notifications from bot
         run_watchlist_dog()
-        logger.info(f"Sleeping {MYIMDB_REFRESH_INTERVAL} minutes...")
-        time.sleep(MYIMDB_REFRESH_INTERVAL * 60)
+        logger.info(f"Sleeping {SYNC_INTERVAL} minutes...")
+        time.sleep(SYNC_INTERVAL * 60)
 
 
 if __name__ == '__main__':
     check_database()
-    run_imdb_sync()
+    run_sync()

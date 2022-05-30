@@ -32,8 +32,7 @@ TORR_DOWNLOAD_FOLDER = os.getenv('TORR_DOWNLOAD_FOLDER')
 
 logger = setup_logger('EmailSender')
 
-# TODO fix mprm_director mapping in html and check if TMDB score works correctly.
-# TODO fix download link from email.
+
 def generate_movie_table(mprm, tprm):
     template_file = open(MOVIE_TEMPLATE_PATH, 'r')
     template = template_file.read()
@@ -323,7 +322,6 @@ def do_email(items):
             user_items = check_in_my_movies(items, user['email'])
             if user_items:
                 user_items = [prepare_item_for_email(item, user['telegram_chat_id']) for item in user_items]
-
                 # Group by imdb_id
                 # Sort
                 for item in user_items:

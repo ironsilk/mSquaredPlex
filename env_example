@@ -39,7 +39,6 @@ PASSKEY=
 
 TORR_API_HOST=192.1
 TORR_API_PATH=/torr_api
-TORR_FINISHED_PATH=/torr_finished
 TORR_API_PORT=9092
 TORR_HOST=192.168.1.99
 # Listening path for torrent RPC service.

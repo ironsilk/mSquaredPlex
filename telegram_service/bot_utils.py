@@ -150,16 +150,14 @@ def update_torr_db(pkg, torr_response, tgram_id):
 
 
 def exclude_torrents_from_watchlist(movie_id, tg_id, torr_ids):
-    new = ', '.join([str(x) for x in torr_ids])
     watchlist_item = get_from_watchlist_by_user_telegram_id_and_imdb(movie_id, tg_id)
     if watchlist_item['excluded_torrents']:
-        old = watchlist_item['excluded_torrents'].split(', ')
-        new = ', '.join([str(x) for x in torr_ids if x not in old])
+        torr_ids = [x for x in torr_ids if x not in watchlist_item['excluded_torrents']]
     update_many([{
         'id': watchlist_item['id'],
         'imdb_id': movie_id,
-        'user_id': watchlist_item['imdb_id'],
-        'excluded_torrents': new,
+        'user_id': tg_id,
+        'excluded_torrents': torr_ids,
         'status': 'new',
     }],
         Watchlist, Watchlist.id)
@@ -174,11 +172,9 @@ def get_excluded_resolutions(movie_id, tg_id):
 
 
 def invite_friend(email, account=None, plex=None):
-    # TODO wrap in a try except here for connect_plex to make it
-    #  work without a plex server.
-    if not account:
-        account, plex = connect_plex()
     try:
+        if not account:
+            account, plex = connect_plex()
         account.inviteFriend(email, plex)
     except Exception as e:
         logger.error(e)

@@ -37,7 +37,7 @@ async def bot_watchlist_routine() -> None:
             torrents = get_torrents_for_imdb_id(item['imdb_id'])
             torrents = sorted(torrents, key=lambda k: k['size'])
             if item['excluded_torrents']:
-                torrents = [x for x in torrents if str(x['id']) not in item['excluded_torrents']]
+                torrents = [x for x in torrents if x['id'] not in item['excluded_torrents']]
             if item['is_downloaded']:
                 torrents = [x for x in torrents if str(x['resolution']) != item['is_downloaded']]
 

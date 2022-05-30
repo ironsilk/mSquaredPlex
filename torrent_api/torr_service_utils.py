@@ -63,37 +63,7 @@ class TORRAPI:
         resp.media = 'Torrent successfully queued for download.'
         self.logger.info(f"Torrent with id {pkg['torr_id']} and torr_name {torr_response.name} successfully queued for "
                          f"download.")
-        return
 
-
-class TORR_FINISHED:
-
-    def __init__(self):
-        self.logger = logger
-
-    @classmethod
-    def get_classname(cls):
-        return cls.__name__
-
-    def on_get(self, req, resp):
-        """Handles GET requests"""
-        pkg = req.query_string
-        if not pkg:
-            return gtfo(resp)
-        torr_name, torr_hash = pkg.split('&&&')
-        torr_name = torr_name.replace('^', ' ')
-
-        # Get users who requested this torrent
-        torr = check_one_against_torrents_by_torr_hash(torr_hash)
-        users = [x['requested_by_id'] for x in torr]
-        message = f"Your requested torrent,\n" \
-                  f"{torr_name}\n" \
-                  f"has been downloaded. 🏁"
-        for user in users:
-            resp = send_message_to_bot(user, message)
-            if not resp:
-                self.logger.erro(f"Failed to send message: {torr_name}, {user}")
-        return
 
 
 if __name__ == '__main__':

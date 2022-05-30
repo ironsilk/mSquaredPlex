@@ -39,12 +39,9 @@ services:
       - ${PLEX_MOVIES_LIBRARY_FOLDER}:/movies
     restart: unless-stopped
 
-# Docker mod should be in .env
   transmission:
+    image: lscr.io/linuxserver/transmission:latest
     container_name: MOVIELIB_Transmission
-    build:
-      context: ./
-      dockerfile: Dockerfile_transmission
     env_file:
       - .env
     environment:

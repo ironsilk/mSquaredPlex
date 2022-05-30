@@ -17,10 +17,11 @@ from bot_utils import make_movie_reply, update_torr_db, \
     exclude_torrents_from_watchlist, get_movie_from_all_databases, search_imdb_title, add_to_watchlist, \
     get_telegram_users, invite_friend
 from command_regex_handler import RegexpCommandHandler
-from bot_watchlist import get_torrents_for_imdb_id, update_watchlist_item_status
+from myimdb_service.bot_watchlist import get_torrents_for_imdb_id, update_watchlist_item_status
 from utils import deconvert_imdb_id, send_torrent, compose_link, get_user_by_tgram_id, get_my_movie_by_imdb, \
     update_many, Movie, convert_imdb_id, check_database, User, get_onetimepasswords, remove_onetimepassword, \
-    insert_onetimepasswords, get_movies_for_bulk_rating
+    insert_onetimepasswords, get_movies_for_bulk_rating, make_client, update_torrent_status, update_torrent_grace_days, \
+    get_torrent_by_torr_id_user
 
 """
 IMPORTANT for SSL: add verify=False in
@@ -463,8 +464,8 @@ async def exclude_res_from_watchlist(update: Update, context: CallbackContext) -
     movie_id = deconvert_imdb_id(torrents[0]['imdb'])
     exclude_torrents_from_watchlist(movie_id, update.effective_user['id'], [x['id'] for x in torrents])
     await update.callback_query.edit_message_text(text="Removed these torrent quality for future recommendations "
-                                                       "on this title.")
-    return await reset(update, context)
+                                                       "on this title. Type anything to get started")
+    return ConversationHandler.END
 
 
 @auth_wrap
@@ -499,7 +500,6 @@ async def add_to_watchlist_no_torrent(update: Update, context: CallbackContext) 
 @auth_wrap
 async def get_download_progress(update: Update, context: CallbackContext) -> int:
     """Return the status for the last 10 torrents for this user"""
-    # TODO maybe make it look a bit better
 
     user = update.effective_user['id']
     torrents = get_progress(user, logger=logger)
@@ -725,7 +725,8 @@ async def check_email(update: Update, context: CallbackContext):
     if email_invite:
         message = "Great! An invitation for PLEX has been sent to your email.\n"
     else:
-        message = "Looks like this email is already in our PLEX users database. " \
+        message = "Looks like either this email is already in our PLEX users database " \
+                  "OR you're not planning to use PLEX.\n" \
                   "If this is not the case, please contact the admin.\n\n"
 
     # Continue to IMDB stuff
@@ -824,6 +825,7 @@ async def help_command(update: Update, context: CallbackContext) -> None:
                         'admin privileges, use -admin flag (/generate_pass -admin)' if \
         USERS[update.effective_user.id]['user_type'] == 'admin' else ' '
     await update.message.reply_text("Type anything for the bot to start.\n\n"
+                                    "If i lose my shit just type /reset anytime.\n\n"
                                     f"Right now we are {watchlist_status} your watchlist. "
                                     f"Type /change_watchlist "
                                     "to reverse the status.\n\n"
@@ -885,6 +887,42 @@ async def remove_watchlist_entry(update: Update, context: CallbackContext, *pass
     movie_id = int(passed_args[0])
     update_watchlist_item_status(movie_id, update.effective_user['id'], 'closed')
     await update.message.reply_text("Done, no more watchlist updates for this movie.")
+    return ConversationHandler.END
+
+
+@auth_wrap
+async def keep_torrent(update: Update, context: CallbackContext, *passed_args) -> int:
+    torr_id = int(passed_args[0])
+    update_torrent_grace_days(torr_id, update.effective_user['id'])
+    await update.message.reply_text("Ok, done.")
+    return ConversationHandler.END
+
+
+@auth_wrap
+async def remove_torrent(update: Update, context: CallbackContext, *passed_args) -> int:
+    db_torr_id = int(passed_args[0])
+    # remove torrent and data
+    client = make_client()
+    torrents = client.get_torrents()
+    db_torr = get_torrent_by_torr_id_user(db_torr_id, update.effective_user['id'])
+    try:
+        torrent = [x for x in torrents if x.hashString == db_torr['torr_hash']][0]
+    except IndexError:
+        await update.message.reply_text("Error while removing torrent,\n"
+                                        "please contact admin:).")
+        return ConversationHandler.END
+    client.remove_torrent(torrent.id, delete_data=True)
+    # change status
+    update_torrent_status(db_torr_id, 'removed')
+    await update.message.reply_text("Torrent and files removed.")
+    return ConversationHandler.END
+
+
+@auth_wrap
+async def seed_forever_torrent(update: Update, context: CallbackContext, *passed_args) -> int:
+    torr_id = int(passed_args[0])
+    update_torrent_grace_days(torr_id, update.effective_user['id'], 99999)
+    await update.message.reply_text("Done, SeedMaster.")
     return ConversationHandler.END
 
 
@@ -1030,6 +1068,10 @@ def main() -> None:
             (RegexpCommandHandler(r'RateTitle_[\d]+', rate_title_plex_triggered)),
             (RegexpCommandHandler(r'WatchMatch_[\d]+', watchlist_entry)),
             (RegexpCommandHandler(r'UnWatchMatch_[\d]+', remove_watchlist_entry)),
+            (RegexpCommandHandler(r'Keep_[\d]+', keep_torrent)),
+            (RegexpCommandHandler(r'Remove_[\d]+', remove_torrent)),
+            (RegexpCommandHandler(r'SeedForever_[\d]+', seed_forever_torrent)),
+
         ]
     )
 
@@ -1040,6 +1082,9 @@ def main() -> None:
     application.add_handler(RegexpCommandHandler(r'RateTitle_[\d]+', rate_title_plex_triggered))
     application.add_handler(RegexpCommandHandler(r'WatchMatch_[\d]+', watchlist_entry))
     application.add_handler(RegexpCommandHandler(r'UnWatchMatch_[\d]+', remove_watchlist_entry))
+    application.add_handler(RegexpCommandHandler(r'Keep_[\d]+', keep_torrent))
+    application.add_handler(RegexpCommandHandler(r'Remove_[\d]+', remove_torrent))
+    application.add_handler(RegexpCommandHandler(r'SeedForever_[\d]+', seed_forever_torrent))
     application.add_handler(CommandHandler('change_watchlist', change_watchlist_command))
     application.add_handler(CommandHandler('change_newsletter', change_newsletter_command))
     application.run_polling(stop_signals=None)
