@@ -19,11 +19,11 @@ EMAIL_PASS = os.getenv('EMAIL_PASS')
 EMAIL_HOSTNAME = os.getenv('EMAIL_HOSTNAME')
 PLEX_SERVER_NAME = os.getenv('PLEX_SERVER_NAME')
 
-TORR_KEEP_TIME = int(os.getenv('TORR_KEEP_TIME'))
+TORR_KEEP_TIME = int(os.getenv('TORR_KEEP_TIME')) if os.getenv('TORR_KEEP_TIME') else 60
 TORR_HOST = os.getenv('TORR_HOST')
-TORR_PORT = int(os.getenv('TORR_PORT'))
-TORR_USER = os.getenv('TORR_USER')
-TORR_PASS = os.getenv('TORR_PASS')
+TORR_PORT = int(os.getenv('TORR_PORT')) if os.getenv('TORR_PORT') else 9091
+TRANSMISSION_USER = os.getenv('TRANSMISSION_USER')
+TRANSMISSION_PASS = os.getenv('TRANSMISSION_PASS')
 TORR_API_HOST = os.getenv('TORR_API_HOST')
 TORR_API_PORT = os.getenv('TORR_API_PORT')
 TORR_API_PATH = os.getenv('TORR_API_PATH')

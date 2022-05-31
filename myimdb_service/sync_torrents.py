@@ -7,7 +7,7 @@ from telegram import Bot
 from utils import timing, setup_logger, update_many, make_client, \
     get_torrents, Torrent, update_torrent_grace_days
 
-TORR_KEEP_TIME = int(os.getenv('TORR_KEEP_TIME'))
+TORR_KEEP_TIME = int(os.getenv('TORR_KEEP_TIME')) if os.getenv('TORR_KEEP_TIME') else 60
 TORR_REMOVE_LOW_RES = bool(os.getenv('TORR_REMOVE_LOW_RES'))
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 
@@ -43,20 +43,20 @@ class TorrentRefresher:
             self.remove_low_res(torrents)
         # Refresh list
         torrents = self.get_torrents()
-        from pprint import pprint
-        pprint(torrents)
         for torr in torrents:
             torr_response = torr.pop('torr_obj', None)
             if torr_response:
                 if torr_response.status == 'seeding':
                     # Decide whether to remove it or keep it
                     if self.check_seeding_status(torr_response, torr):
+                        # Inform the user
+                        if torr['status'] == 'downloading':
+                            bot = Bot(token=TELEGRAM_TOKEN)
+                            message = f"Torrent {torr_response.name} has been downloaded!"
+                            await bot.send_message(chat_id=torr['requested_by_id'], text=message)
+                        # Update the db
                         torr['status'] = 'seeding'
                         update_many([torr], Torrent, Torrent.id)
-                        # Inform the user
-                        bot = Bot(token=TELEGRAM_TOKEN)
-                        message = f"Torrent {torr_response.name} has been downloaded!"
-                        await bot.send_message(chat_id=torr['requested_by_id'], text=message)
                     else:
                         # Ask user if he wants it removed.
                         bot = Bot(token=TELEGRAM_TOKEN)

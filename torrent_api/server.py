@@ -8,7 +8,7 @@ from utils import setup_logger, check_database
 from torr_service_utils import TORRAPI
 
 TZ = os.getenv('TZ')
-TORR_API_PORT = int(os.getenv('TORR_API_PORT'))
+TORR_API_PORT = int(os.getenv('TORR_API_PORT')) if os.getenv('TORR_API_PORT') else 9092
 TORR_API_PATH = os.getenv('TORR_API_PATH')
 
 

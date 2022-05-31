@@ -76,6 +76,9 @@
     - Sends notifications regarding watchlist via telegram.(when a watchlist movie becomes available on 
        filelist, the user receives a notification asking if he wants to download the movie. If not, he 
        will continue to receive notifications for the movie **except** for the movie quality that he rejected.
+    - Sends notification if a torrent is seeding for more than (grace_time, default 60 days). User
+      can choose to delete it and the files, keep (for another grace_time period) or to keep
+      it forever and not ask. If user chooses none, he will be pinged daily.
     - Defaults to 1 minute routine, can be changed via the .env variables.
 
 
@@ -90,60 +93,42 @@ communicates with the Transmission docker in order to download these movies.
 
 ## Deployment:
 
-1. You'll first need an .env file in the root folder. An example has been provided as **env_example**. Careful for 
+1. Assign a local static ip to your server.
+2. (PLEX, NEWSLETTER) Get a static public domain name (free on RDS from account).
+3. (NEWSLETTER) open port 9092.
+4. (PLEX) open port 32400.
+5. (PLEX) get PLEX token: https://digiex.net/threads/plex-guide-step-by-step-getting-plex-token.15402/
+6. OMDB and TMDB API keys(are both free).
+7. Clone repo on server
+8. If you're not planning to use PLEX:
+   - Delete plex service from docker-compose.yml
+9. If you don't want the NEWSLETTER function at all:
+   - Delete the newsletter service from docker-compose.yml
+10. Create a .env file in the root folder. A template has been provided as **env_example**. Careful for 
    all `=` signs not to have spaces between key and value: `HOST=localhost` is ok while this is not: `HOST = localhost`.
-2. Git clone repo on server
-3. Run `sudo docker-compose -f docker_compose_MAINSTACK.yml up -d --build`. Flags: -d means `detached`, `--build` will 
+   Fill in everything.
+11. Run `sudo docker-compose up -d --build`. Flags: -d means `detached`, `--build` will 
    rebuild images from scratch.
-4. Haven't yet found a better way... These changes will persist during the next docker restarts but we need
-   to make them manually right now. Need to stop the `transmission container`, go where you've defined
- `TRANSMISSION_FILES_LOCATION` environment variable and change the following settings in `settings.json`:
-   - "script-torrent-done-enabled" -> true
-   - "script-torrent-done-filename" -> "/torr_finished_routine.sh"'
-   - "incomplete-dir-enabled" -> false
-    
+12. Docker-compose also contains PgAdmin (to check out the database). It can be removed.
+13. Recommend using Portrainer to manage docker containers.
 
-## CONFIGURATION
 
-1.
    
 
 ## COMMANDS
 
-1. Start all services:
+1. Start all services (rebuild them):
 
-`sudo docker-compose -f docker-compose_MAINSTACK.yml up -d --build --remove-orphans`
+`sudo docker-compose up -d --build --remove-orphans`
 
 2. Stop all services:
 
-`sudo docker-compose -f docker-compose_MAINSTACK.yml down`
+`sudo docker-compose down`
 
 3. Recreate one service
 
 `sudo docker-compose up --build --force-recreate --no-deps -d filelist_service`
 `sudo docker-compose up --build --force-recreate --no-deps -d postgres_db`
 
-
-
-
-### In order to solve TRANSMISSION configuration problem:
-
-This is not gonna be easy. https://github.com/linuxserver/docker-mods 
-
-1. Create a public repo on dockerhub, mine is mikael6/just_fun:transmission_mod
-2. `docker build -t mikael6/just_fun:transmission_mod` when you're in the folder `transmission_mod`
-3. `docker push mikael6/just_fun:transmission_mod`
-4. So right now you have a mod which is going to change the `defaults.json` used by transmission on
-startup.
-5. You need to create this container:
-
-`docker create --name=test -e PUID=1000 -e PGID=1000 -e DOCKER_MODS=mikael6/just_fun:transmission_mod --restart unless-stopped linuxserver/transmission`
-It will return a container ID
-6. `docker start {ID}` that ID. You can open a CLI into the container and use `cat defaults/settings.json` and `cat config/settings.json` to see that
-your configs have been saved.
-
-
-
-  
 
 

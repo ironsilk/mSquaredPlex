@@ -2,11 +2,9 @@ import os
 
 import falcon
 
-from utils import setup_logger, send_torrent, compose_link, update_many, check_one_against_torrents_by_torr_hash, \
-    send_message_to_bot, \
-    Torrent, get_torrent_by_torr_id_user
+from utils import setup_logger, send_torrent, compose_link, update_many, Torrent, get_torrent_by_torr_id_user
 
-TORR_KEEP_TIME = int(os.getenv('TORR_KEEP_TIME'))
+TORR_KEEP_TIME = int(os.getenv('TORR_KEEP_TIME')) if os.getenv('TORR_KEEP_TIME') else 60
 
 logger = setup_logger('TorrUtils')
 
@@ -63,7 +61,6 @@ class TORRAPI:
         resp.media = 'Torrent successfully queued for download.'
         self.logger.info(f"Torrent with id {pkg['torr_id']} and torr_name {torr_response.name} successfully queued for "
                          f"download.")
-
 
 
 if __name__ == '__main__':

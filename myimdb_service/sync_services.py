@@ -16,7 +16,7 @@ from utils import deconvert_imdb_id, update_many, setup_logger, check_database, 
 from utils import get_my_imdb_users, Watchlist, get_user_watchlist, check_one_against_torrents_by_imdb
 from sync_torrents import sync_torrent_statuses
 
-SYNC_INTERVAL = int(os.getenv('SYNC_INTERVAL'))
+SYNC_INTERVAL = int(os.getenv('SYNC_INTERVAL')) if os.getenv('SYNC_INTERVAL') else 1
 
 logger = setup_logger("MyIMDBsync")
 

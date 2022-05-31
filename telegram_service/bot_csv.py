@@ -3,11 +3,10 @@ import re
 
 import imdb
 import pandas as pd
-import sqlalchemy
 from telegram.ext import CallbackContext
 
-from utils import get_user_by_tgram_id, deconvert_imdb_id, update_many, get_movie_details, get_my_movie_by_imdb, \
-    get_user_movies, DB_URI, Movie, update_many_multiple_pk
+from utils import get_user_by_tgram_id, deconvert_imdb_id, get_movie_details, get_my_movie_by_imdb, \
+    get_user_movies, Movie, update_many_multiple_pk
 
 soap_pattern = re.compile(": Season \d+:")
 

@@ -3,7 +3,8 @@ import os
 from utils import setup_logger, connect_plex, get_plex_users, get_user_movies, check_against_user_watchlist, \
     get_user_watchlist, deconvert_imdb_id
 
-PLEX_ADMIN_EMAILS = os.getenv('PLEX_ADMIN_EMAILS').replace('"', '').replace(' ', '')
+PLEX_ADMIN_EMAILS = os.getenv('PLEX_ADMIN_EMAILS').replace('"', '').replace(' ', '') \
+    if os.getenv('PLEX_ADMIN_EMAILS') else ''
 if ',' in PLEX_ADMIN_EMAILS:
     PLEX_ADMIN_EMAILS = PLEX_ADMIN_EMAILS.split(', ')
 else:

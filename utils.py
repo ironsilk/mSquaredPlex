@@ -43,11 +43,11 @@ TMDB_V4_API_KEY = os.getenv('TMDB_V4_API_KEY')
 
 TORR_HASH_KEY = os.getenv('TORR_HASH_KEY')
 
-TORR_KEEP_TIME = int(os.getenv('TORR_KEEP_TIME'))
+TORR_KEEP_TIME = int(os.getenv('TORR_KEEP_TIME')) if os.getenv('TORR_KEEP_TIME') else 60
 TORR_HOST = os.getenv('TORR_HOST')
-TORR_PORT = int(os.getenv('TORR_PORT'))
-TORR_USER = os.getenv('TORR_USER')
-TORR_PASS = os.getenv('TORR_PASS')
+TORR_PORT = int(os.getenv('TORR_PORT')) if os.getenv('TORR_PORT') else 9091
+TRANSMISSION_USER = os.getenv('TRANSMISSION_USER')
+TRANSMISSION_PASS = os.getenv('TRANSMISSION_PASS')
 TORR_API_HOST = os.getenv('TORR_API_HOST')
 TORR_API_PORT = os.getenv('TORR_API_PORT')
 TORR_API_PATH = os.getenv('TORR_API_PATH')
@@ -1260,12 +1260,12 @@ torr_cypher = AESCipher(TORR_HASH_KEY)
 
 # TORR utils
 def make_client():
-    return Client(host=TORR_HOST, port=TORR_PORT, username=TORR_USER, password=TORR_PASS)
+    return Client(host=TORR_HOST, port=TORR_PORT, username=TRANSMISSION_USER, password=TRANSMISSION_PASS)
 
 
 def send_torrent(item, transmission_client=None):
     if not transmission_client:
-        transmission_client = Client(host=TORR_HOST, port=TORR_PORT, username=TORR_USER, password=TORR_PASS)
+        transmission_client = Client(host=TORR_HOST, port=TORR_PORT, username=TRANSMISSION_USER, password=TRANSMISSION_PASS)
     return transmission_client.add_torrent(item, download_dir=TORR_DOWNLOAD_FOLDER)
 
 
