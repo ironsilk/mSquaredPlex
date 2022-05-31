@@ -678,7 +678,14 @@ async def submit_rating(update: Update, context: CallbackContext) -> int:
 
     elif update.message.text in [rate_keyboard[-1][0], rate_keyboard_bulk[-2][0]]:
         item = get_my_movie_by_imdb(context.user_data['pkg']['imdb'], update.effective_user['id'])
-        item['rating_status'] = 'refused to rate'
+        if item:
+            item['rating_status'] = 'refused to rate'
+        else:
+            item = {
+                'imdb_id': context.user_data['pkg']['imdb'],
+                'rating_status': 'refused to rate',
+                'user_id': update.effective_user['id'],
+            }
         update_many([item], Movie, Movie.id)
         await update.effective_message.reply_text(message1)
         return await return2_func(update, context)
