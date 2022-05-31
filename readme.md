@@ -93,6 +93,9 @@ communicates with the Transmission docker in order to download these movies.
 
 ## Deployment:
 
+Requirements:
+- make sure you have `docker` and `docker-compose` installed.  
+
 1. Assign a local static ip to your server.
 2. (PLEX, NEWSLETTER) Get a static public domain name (free on RDS from account).
 3. (NEWSLETTER) open port 9092.
