@@ -42,7 +42,7 @@ def sync_my_imdb():
         # Sync PLEX views and ratings
         try:
             plex_data = get_user_watched_movies(user['email'])
-        except (Unauthorized, ConnectionError):
+        except (Unauthorized, requests.exceptions.ConnectionError):
             logger.error(f"Error retrieving PLEX data for user {user['email']}, unauthorised")
             plex_data = None
         if plex_data:
