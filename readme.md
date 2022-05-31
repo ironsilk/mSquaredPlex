@@ -1,3 +1,9 @@
+## mSquaredPlex
+
+Python-built telegram bot used to interact with PLEX, Transmission and a private torrent tracker.
+
+
+
 ## Services:
 
 - **Telegram service** - A telegram bot with the following functionalities:
