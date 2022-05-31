@@ -106,12 +106,12 @@ rate_keyboard_bulk = [
 def auth_wrap(f):
     @wraps(f)
     async def wrap(update: Update, context: CallbackContext, *optional_args):
-        print(f"Wrapped {f.__name__}", )
+        # print(f"Wrapped {f.__name__}", )
         user = update.effective_user['id']
         if user in USERS.keys():
             # User is registered
             result = f(update, context, *optional_args)
-            print(result)
+            # print(result)
             return await result
         else:
             if USERS:
@@ -308,7 +308,6 @@ async def choose_multiple(update: Update, context: CallbackContext) -> int:
 @auth_wrap
 async def accept_reject_title(update: Update, context: CallbackContext) -> int:
     """Accept, reject the match or exit"""
-
     if update.message.text == 'Yes':
         if context.user_data['action'] == 'download':
             return await check_movie_status(update, context)
@@ -608,7 +607,7 @@ async def rating_movie_info(update: Update, context: CallbackContext) -> int:
     if movie['already_in_my_movies']:
         message = f"Movie seen"
         if 'seen_date' in movie.keys():
-            message = message[:-1] + f" on {movie['seen_date']}"
+            message = message + f" on {movie['seen_date']}"
         if 'my_score' in movie.keys():
             message += f"\nYour score: {movie['my_score']}"
         await update.message.reply_text(message)
@@ -618,6 +617,8 @@ async def rating_movie_info(update: Update, context: CallbackContext) -> int:
                                                                                             resize_keyboard=True,
                                                                                             ))
         return CONFIRM_REDOWNLOAD_ACTION
+    else:
+        return await rate_title(update, context)
 
 
 @auth_wrap
@@ -656,8 +657,18 @@ async def submit_rating(update: Update, context: CallbackContext) -> int:
     if update.message.text in [str(x) for x in list(range(1, 11))]:
         # Got rating
         item = get_my_movie_by_imdb(context.user_data['pkg']['imdb'], update.effective_user['id'])
-        item['rating_status'] = 'rated in telegram'
-        item['my_score'] = int(update.message.text)
+        if item:
+            item['rating_status'] = 'rated in telegram'
+            item['my_score'] = int(update.message.text)
+            item['seen_date'] = datetime.datetime.now()
+        else:
+            item = {
+                'imdb_id': context.user_data['pkg']['imdb'],
+                'my_score': int(update.message.text),
+                'rating_status': 'rated in telegram',
+                'user_id': update.effective_user['id'],
+                'seen_date': datetime.datetime.now(),
+            }
         update_many([item], Movie, Movie.id)
         await update.effective_message.reply_text(f"Ok, great! Here's a link if you also want to rate it on IMDB:\n"
                                                   f"https://www.imdb.com/title/"

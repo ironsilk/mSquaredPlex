@@ -77,7 +77,7 @@ services:
       postgres_db:
         condition: service_healthy
 
-  filelist_service:
+  newsletter_service:
     container_name: MOVIELIB_Newsletter
     network_mode: host
     build:
