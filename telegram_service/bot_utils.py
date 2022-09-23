@@ -253,7 +253,7 @@ def add_to_watchlist(imdb_id, user, status, excluded_torrents=None):
             else:
                 to_update['excluded_torrents'] = in_watchlist['excluded_torrents']
 
-    update_many([to_update], Watchlist, [Watchlist.id])
+    update_many([to_update], Watchlist, Watchlist.id)
 
 
 if __name__ == '__main__':
