@@ -1,12 +1,12 @@
 import os
-from datetime import datetime
+from datetime import datetime, date
 
 import requests
 from apscheduler.schedulers.blocking import BlockingScheduler
 
 from email_tools import do_email
 from utils import torr_cypher, get_movie_details, setup_logger, timing, check_against_my_torrents, \
-    check_database
+    check_database, parse_torr_name
 
 TZ = os.getenv('TZ')
 API_URL = os.getenv('API_URL')
@@ -55,9 +55,16 @@ def get_latest_torrents(n=100, category=MOVIE_HDRO):
         },
     )
     if category == MOVIE_4K:
-        return [x for x in r.json() if 'Remux' in x['name']]
+        torrents = [x for x in r.json() if 'Remux' in x['name']]
+    else:
+        torrents = r.json()
+
+    # Only keep movies from last 2 years
+    # TODO this should be configurable
+    torrents = [x for x in torrents if parse_torr_name(x['name'])['year'] in [date.today().year, date.today().year - 1]]
+
     logger.info(f"Got {len(r.json())} new torrents")
-    return r.json()
+    return torrents
 
 
 @timing
@@ -90,6 +97,9 @@ def info_jobs():
 
 
 if __name__ == '__main__':
+    from pprint import pprint
+    pprint(get_latest_torrents())
+    exit()
     check_database()
     feed_routine()
 
