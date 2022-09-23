@@ -97,9 +97,6 @@ def info_jobs():
 
 
 if __name__ == '__main__':
-    from pprint import pprint
-    pprint(get_latest_torrents())
-    exit()
     check_database()
     feed_routine()
 
