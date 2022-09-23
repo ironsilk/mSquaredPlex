@@ -133,7 +133,9 @@ def sync_watchlist(user):
         if to_upload:
             insert_many(to_upload, Watchlist)
         # Remove from DB watchlist those movies which are no longer in IMDB watchlist
-        remove_from_watchlist_except(imdb_watchlist, user['imdb_id'])
+        # Commented this, it also removes added to watchlist via telegram
+        # To make it work we would need to know the source of the watchlist, not worth the effort
+        # remove_from_watchlist_except(imdb_watchlist, user['imdb_id'])
 
         # Update watchlist item status if we find a torrent already downloaded
         watchlist = get_user_watchlist(user['imdb_id'])
