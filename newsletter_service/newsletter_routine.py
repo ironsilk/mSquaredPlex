@@ -63,7 +63,7 @@ def get_latest_torrents(n=100, category=MOVIE_HDRO):
     # TODO this should be configurable
     torrents = [x for x in torrents if parse_torr_name(x['name'])['year'] in [date.today().year, date.today().year - 1]]
 
-    logger.info(f"Got {len(r.json())} new torrents")
+    logger.info(f"Got {len(torrents)} new torrents")
     return torrents
 
 
