@@ -316,7 +316,7 @@ def generate_torr_links(item, user_telegram_id, cypher=None):
 def do_email(items):
     if items:
         logger.info("Starting emailing routine")
-        users = [x for x in get_my_imdb_users() if x['email_newsletters'] == 1]
+        users = [x for x in get_my_imdb_users() if x['email_newsletters']]
         for user in users:
             # Filter for each user, with what they've seen
             user_items = check_in_my_movies(items, user['email'])
