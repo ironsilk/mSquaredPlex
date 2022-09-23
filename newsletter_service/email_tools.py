@@ -223,7 +223,7 @@ def send_email(tFromName, tFromEmail, tToList, tSubject, tBody, lFiles, tSMTP, t
         server.quit()
 
     except Exception as vErr:
-        logger.debug('[send_email] Nu am putut trimite email: ', str(vErr))
+        logger.error('[send_email] Nu am putut trimite email: ', str(vErr))
 
 
 def prepare_item_for_email(item, user_telegram_id):
