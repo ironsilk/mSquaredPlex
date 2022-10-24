@@ -1,6 +1,7 @@
 import os
 
 import imdb
+from imdb import Cinemagoer
 import requests
 
 from utils import check_one_against_torrents_by_imdb, get_movie_details, get_my_imdb_users, \
@@ -213,13 +214,19 @@ def get_movie_from_all_databases(imdb_id, telegram_id):
 def search_imdb_title(item, ia=None):
     if not ia:
         try:
-            ia = imdb.IMDb()
+            ia = Cinemagoer()
         except Exception as e:
             logger.error(e)
             return 'IMDB library error'
     try:
-        movies = ia.search_movie(item, _episodes=False)
-        # return {x.movieID: x.data for x in movies}
+        # TODO remove this ugly fix when library gets fixed
+        tries = 5
+        while tries > 0:
+            movies = ia.search_movie(item, _episodes=False)
+            if not movies:
+                tries = tries - 1
+            else:
+                break
         res = []
         for x in movies:
             if x.data['kind'] == 'movie':
@@ -258,4 +265,8 @@ def add_to_watchlist(imdb_id, user, status, excluded_torrents=None):
 
 if __name__ == '__main__':
     # print(get_movie_from_all_databases(6763664))
+    from time import sleep
+    while True:
+        print(search_imdb_title('matrix'))
+        sleep(1)
     pass
