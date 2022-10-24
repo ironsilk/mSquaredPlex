@@ -2,7 +2,7 @@ certifi
 charset-normalizer
 greenlet
 idna
-IMDbPY
+cinemagoer
 lxml
 numpy
 omdb
