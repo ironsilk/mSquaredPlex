@@ -33,10 +33,11 @@ def sync_my_imdb():
         # Sync IMDB ratings
         if user['imdb_id']:
             imdb_data = get_my_imdb(user['imdb_id'])
-            imdb_data = [{'imdb_id': deconvert_imdb_id(key), 'my_score': val['rating'], 'seen_date': val['date'],
-                          'user_id': user['telegram_chat_id'], 'rating_status': 'IMDB rated'}
-                         for key, val in imdb_data.items() if int(deconvert_imdb_id(key)) not in already_in_my_movies]
-            insert_many(imdb_data, Movie)
+            if imdb_data:
+                imdb_data = [{'imdb_id': deconvert_imdb_id(key), 'my_score': val['rating'], 'seen_date': val['date'],
+                              'user_id': user['telegram_chat_id'], 'rating_status': 'IMDB rated'}
+                             for key, val in imdb_data.items() if int(deconvert_imdb_id(key)) not in already_in_my_movies]
+                insert_many(imdb_data, Movie)
 
         already_in_my_movies = get_my_movies(user) or []
         # Sync PLEX views and ratings
