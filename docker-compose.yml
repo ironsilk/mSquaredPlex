@@ -29,6 +29,10 @@ services:
     image: ghcr.io/linuxserver/plex
     container_name: MOVIELIB_Plex
     network_mode: host
+    privileged: true
+    devices:
+      - /dev/:/dev/
+      - /devices/:/devices/
     environment:
       - PUID=1000
       - PGID=1000
@@ -48,7 +52,6 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=${TZ}
-      - TRANSMISSION_WEB_HOME=/combustion-release/
       - USER=${TRANSMISSION_USER}
       - PASS=${TRANSMISSION_PASS}
     volumes:
