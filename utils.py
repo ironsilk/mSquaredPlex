@@ -83,14 +83,15 @@ def setup_logger(name, log_file=None, level=logging.INFO):
 logger = setup_logger("PlexUtils")
 
 # DB ENGINE
-engine = create_engine(DB_URI, encoding='utf-8', echo=False)
+engine = create_engine(DB_URI, echo=False)
 
 # declarative base class
 Base = declarative_base()
 
 # MetaData
-META_DATA = MetaData(engine)
-META_DATA.reflect(engine)
+META_DATA = MetaData()
+META_DATA.bind = engine
+META_DATA.reflect(bind=engine)
 
 
 # Base = declarative_base(metadata=META_DATA)
@@ -275,9 +276,10 @@ def connect_db():
 
 
 def check_database():
-    engine = create_engine(DB_URI, encoding='utf-8', echo=False)
-    metadata = MetaData(engine)
-    metadata.create_all()
+    engine = create_engine(DB_URI, echo=False)
+    metadata = MetaData()
+    META_DATA.bind = engine
+    metadata.create_all(bind=engine)
     User.__table__.create(bind=engine, checkfirst=True)
     Movie.__table__.create(bind=engine, checkfirst=True)
     Torrent.__table__.create(bind=engine, checkfirst=True)
