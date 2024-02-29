@@ -52,7 +52,7 @@ class TORRAPI:
             resp.status = falcon.HTTP_500
             return
         # Update in torrents DB
-        db_torrent = get_torrent_by_torr_id_user(pkg['torr_id'], int(pkg['requested_by']))
+        db_torrent = get_torrent_by_torr_id_user(int(pkg['torr_id']), int(pkg['requested_by']))
         db_torrent['status'] = 'requested download'
         db_torrent['torr_hash'] = torr_response.hashString
         update_many([db_torrent], Torrent, Torrent.id)

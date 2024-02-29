@@ -83,7 +83,7 @@ def setup_logger(name, log_file=None, level=logging.INFO):
 logger = setup_logger("PlexUtils")
 
 # DB ENGINE
-engine = create_engine(DB_URI, echo=False)
+engine = create_engine(DB_URI, echo=False, isolation_level="AUTOCOMMIT")
 
 # declarative base class
 Base = declarative_base()
@@ -276,7 +276,7 @@ def connect_db():
 
 
 def check_database():
-    engine = create_engine(DB_URI, echo=False)
+    engine = create_engine(DB_URI, echo=False, isolation_level="AUTOCOMMIT")
     metadata = MetaData()
     META_DATA.bind = engine
     metadata.create_all(bind=engine)
