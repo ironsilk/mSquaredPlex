@@ -1,7 +1,7 @@
 version: '2.1'
 services:
   postgres_db:
-    image: postgres
+    image: postgres:14
     container_name: MOVIELIB_postgres
     env_file:
       - .env
@@ -41,6 +41,7 @@ services:
       - ${PLEX_FILES_LOCATION}:/config
       - ${PLEX_TV_LIBRARY_FOLDER}:/tv
       - ${PLEX_MOVIES_LIBRARY_FOLDER}:/movies
+      - ${PLEX_FLMOVIES_LIBRARY_FOLDER}:/fLibrary
     restart: unless-stopped
 
   transmission:
