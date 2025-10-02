@@ -88,8 +88,12 @@ def get_latest_torrents(n=100, category=MOVIE_HDRO):
 
     # Only keep movies from last 2 years
     # TODO this should be configurable
-    torrents = [x for x in torrents if parse_torr_name(x['name'])['year'] in [date.today().year, date.today().year - 1]]
-
+    torrents_parsed = []
+    for torrent in torrents:
+        parsed = parse_torr_name(torrent['name'])
+        if parsed and parsed.get('year', 1999) in [date.today().year, date.today().year - 1]:
+            torrent.update(parsed)
+            torrents_parsed.append(torrent)
     logger.info(f"Got {len(torrents)} new torrents")
     return torrents
 
