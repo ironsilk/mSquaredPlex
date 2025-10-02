@@ -137,16 +137,20 @@ Overview:
 - Removed features: Upload viewing activity (CSV) and Download viewing activity (CSV).
 
 Run locally:
-1. Ensure Python 3.10+ and a proper virtualenv.
-2. Install dependencies:
-   - pip install -r [telegram_service/requirements.txt](telegram_service/requirements.txt:1)
-3. Set required env:
+1. Ensure Python 3.12+.
+2. Install uv (recommended via pipx due to PEP 668):
+   - brew install pipx
+   - pipx install uv
+3. Install dependencies with uv (project uses [telegram_service/pyproject.toml](telegram_service/pyproject.toml:1)):
+   - cd telegram_service
+   - uv sync
+4. Set required env:
    - TELEGRAM_TOKEN (required)
    - NO_POSTER_PATH (e.g. path to a default poster image used by [python.get_image()](telegram_service/bot_utils.py:44))
    - Optional images used in registration UX: TELEGRAM_AUTH_TEST_PATH, TELEGRAM_AUTH_APPROVE, TELEGRAM_IMDB_RATINGS
    - Transmission/DB credentials as per utils (already covered in your .env)
-4. Start the bot:
-   - python [python](telegram_service/app.py:78)
+5. Start the bot:
+   - uv run python [python](telegram_service/app.py:78)
 
 Docker:
 - The Telegram service image is built using [Dockerfile_telegram](Dockerfile_telegram:1) and runs [python](telegram_service/app.py:78) as the entrypoint.

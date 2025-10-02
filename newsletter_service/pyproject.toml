@@ -11,7 +11,7 @@ dependencies = [
   "omdb==0.10.1",
   "pandas==2.2.1",
   "parse-torrent-title==2.8.1",
-  "parse-torrent-name==2.5.1",
+  "parse-torrent-name",
   "PlexAPI==4.15.10",
   "psycopg2-binary==2.9.9",
   "python-dotenv==1.0.1",
