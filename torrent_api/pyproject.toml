@@ -26,3 +26,11 @@ dependencies = [
 [build-system]
 requires = ["setuptools>=61", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+# Explicitly declare flat-layout modules to avoid auto-discovery errors when building the project
+py-modules = ["app", "server", "torr_service_utils", "wsgi", "utils"]
+
+[tool.setuptools.packages.find]
+# Do not auto-discover packages (none are intended in this service)
+include = []
