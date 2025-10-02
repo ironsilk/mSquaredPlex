@@ -1,19 +1,27 @@
 # docker build -t telegram_service . -f Dockerfile_telegram
-FROM python:3.10
+FROM python:3.12-slim
 
 LABEL Author="Mikael"
 
-RUN mkdir /app
 WORKDIR /app
 
+# Copy application sources (includes pyproject.toml)
 COPY telegram_service/ ./
-# Watchlist monitor logic is part of telegram_service/services/watchlist_service.py
-# Legacy myimdb_service/bot_watchlist.py is no longer copied into the container.
-
 COPY telegram_service/images ./images
 COPY utils.py ./
 
-RUN pip install -r requirements.txt
+# System build deps for optional native builds (generally wheels exist, but keep toolchain)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl build-essential gcc \
+  && rm -rf /var/lib/apt/lists/*
+
+# Install uv and prepare venv; resolve and sync dependencies from pyproject
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh && /root/.local/bin/uv --version
+RUN /root/.local/bin/uv venv && /root/.local/bin/uv lock && /root/.local/bin/uv sync --frozen
+
+# Ensure runtime uses the venv
+ENV VIRTUAL_ENV=/app/.venv
+ENV PATH="/app/.venv/bin:$PATH"
 
 # Telegram bot runs via polling; no external port required
 # EXPOSE 9092

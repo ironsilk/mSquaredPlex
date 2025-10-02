@@ -1,15 +1,25 @@
-# docker build -t newsletter_service . -f Dockerfile_filelist_service
-FROM python:3.10
+# docker build -t newsletter_service . -f Dockerfile_newsletter
+FROM python:3.12-slim
 
 LABEL Author="Mikael"
 
-RUN mkdir /app
 WORKDIR /app
 
+# Copy application sources (includes pyproject.toml)
 COPY newsletter_service/ ./
 COPY utils.py ./
 
-RUN pip install -r requirements.txt
+# System build deps for native wheels (lxml) and optional pg headers
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl build-essential gcc libxml2-dev libxslt-dev libpq-dev \
+  && rm -rf /var/lib/apt/lists/*
 
+# Install uv and create a dedicated virtualenv, then lock & sync dependencies
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh && /root/.local/bin/uv --version
+RUN /root/.local/bin/uv venv && /root/.local/bin/uv lock && /root/.local/bin/uv sync --frozen
+
+# Ensure runtime uses the venv
+ENV VIRTUAL_ENV=/app/.venv
+ENV PATH="/app/.venv/bin:$PATH"
 
 ENTRYPOINT ["python", "newsletter_routine.py"]

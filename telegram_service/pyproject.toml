@@ -1,0 +1,22 @@
+[project]
+name = "telegram_service"
+version = "0.1.0"
+description = "Telegram bot for movie library"
+requires-python = ">=3.12"
+dependencies = [
+  "aiogram==3.13.1",
+  "python-dotenv==1.0.1",
+  "requests==2.32.3",
+  "SQLAlchemy==1.4.52",
+  "psycopg2-binary==2.9.9",
+  "PlexAPI==4.15.10",
+  "transmission-rpc==7.0.3",
+  "typing_extensions==4.10.0",
+  "cinemagoer==2023.5.1",
+  "tmdbsimple==2.9.1",
+  "parse-torrent-name==2.5.1",
+  "pycryptodome==3.20.0",
+]
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"

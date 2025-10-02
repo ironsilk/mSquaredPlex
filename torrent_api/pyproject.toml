@@ -1,0 +1,28 @@
+[project]
+name = "torrent_api"
+version = "0.1.0"
+description = "Falcon-based Torrent API service"
+requires-python = ">=3.12"
+dependencies = [
+  "falcon==3.1.0",
+  "gevent==24.2.1",
+  "gunicorn==21.2.0",
+  "APScheduler==3.10.4",
+  "cinemagoer==2023.5.1",
+  "lxml==5.2.1",
+  "python-dotenv==1.0.1",
+  "requests==2.32.3",
+  "SQLAlchemy==1.4.52",
+  "psycopg2-binary==2.9.9",
+  "PlexAPI==4.15.10",
+  "transmission-rpc==7.0.3",
+  "tmdbsimple==2.9.1",
+  "typing_extensions==4.10.0",
+  "tzdata==2024.1",
+  "tzlocal==5.2",
+  "pycryptodome==3.20.0",
+  "parse-torrent-name==2.5.1",
+]
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"

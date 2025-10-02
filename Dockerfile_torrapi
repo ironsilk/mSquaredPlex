@@ -1,24 +1,30 @@
 # docker build -t torrent_service . -f Dockerfile_torrapi
-FROM python:3.10
+FROM python:3.12-slim
 
 LABEL Author="Mikael"
 
-# Install curl for HEALTHCHECK
-RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
+# Install system deps (curl for healthcheck; toolchain/libs for native builds if needed)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl build-essential gcc libxml2-dev libxslt-dev libpq-dev \
+  && rm -rf /var/lib/apt/lists/*
 
-RUN mkdir /app
 WORKDIR /app
 
 # Runtime defaults (override via environment/compose)
 ENV TORR_API_PORT=9092
 ENV TORR_API_PATH=/torr-api
 
-# Copy application sources
+# Copy application sources (includes pyproject.toml)
 COPY torrent_api/ ./
 COPY utils.py ./
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Install uv and prepare venv; lock & sync dependencies
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh && /root/.local/bin/uv --version
+RUN /root/.local/bin/uv venv && /root/.local/bin/uv lock && /root/.local/bin/uv sync --frozen
+
+# Ensure runtime uses the venv
+ENV VIRTUAL_ENV=/app/.venv
+ENV PATH="/app/.venv/bin:$PATH"
 
 # Service port
 EXPOSE 9092

@@ -1,0 +1,31 @@
+[project]
+name = "newsletter_service"
+version = "0.1.0"
+description = "Newsletter routine for movie library"
+requires-python = ">=3.12"
+dependencies = [
+  "APScheduler==3.10.4",
+  "cinemagoer==2023.5.1",
+  "lxml==5.2.1",
+  "numpy==1.26.4",
+  "omdb==0.10.1",
+  "pandas==2.2.1",
+  "parse-torrent-title==2.8.1",
+  "parse-torrent-name==2.5.1",
+  "PlexAPI==4.15.10",
+  "psycopg2-binary==2.9.9",
+  "python-dotenv==1.0.1",
+  "pytz==2024.1",
+  "requests==2.32.3",
+  "SQLAlchemy==1.4.52",
+  "tmdbsimple==2.9.1",
+  "transmission-rpc==7.0.3",
+  "typing_extensions==4.10.0",
+  "tzdata==2024.1",
+  "tzlocal==5.2",
+  "Jinja2==3.1.4",
+  "pycryptodome==3.20.0",
+]
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"

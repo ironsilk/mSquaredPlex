@@ -6,12 +6,10 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# Install build/runtime deps if needed in future
-# RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
-
-# Install Python dependencies
-COPY wha_service/requirements.txt ./wha_service/requirements.txt
-RUN pip install --no-cache-dir -r wha_service/requirements.txt
+# System build deps for optional native builds (generally wheels exist, but keep toolchain)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl build-essential gcc \
+  && rm -rf /var/lib/apt/lists/*
 
 # Copy application code and shared logic reused from telegram_service
 COPY wha_service/ ./wha_service/
@@ -19,6 +17,17 @@ COPY telegram_service/ ./telegram_service/
 COPY myimdb_service/ ./myimdb_service/
 COPY utils.py ./utils.py
 COPY bot_utils.py ./bot_utils.py
+
+# Move into service directory so uv finds pyproject.toml
+WORKDIR /app/wha_service
+
+# Install uv and prepare venv; resolve and sync dependencies
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh && /root/.local/bin/uv --version
+RUN /root/.local/bin/uv venv && /root/.local/bin/uv lock && /root/.local/bin/uv sync --frozen
+
+# Ensure runtime uses the venv
+ENV VIRTUAL_ENV=/app/wha_service/.venv
+ENV PATH="/app/wha_service/.venv/bin:$PATH"
 
 EXPOSE 8080
 

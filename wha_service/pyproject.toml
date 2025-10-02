@@ -1,0 +1,24 @@
+[project]
+name = "wha_service"
+version = "0.1.0"
+description = "FastAPI webhook stub integrating Telegram-service logic for the movie library"
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi==0.115.0",
+  "uvicorn[standard]==0.30.0",
+  "python-dotenv==1.0.1",
+  "requests==2.32.3",
+  "anyio==3.7.1",
+  "SQLAlchemy==1.4.52",
+  "psycopg2-binary==2.9.9",
+  "PlexAPI==4.15.10",
+  "transmission-rpc==7.0.3",
+  "cinemagoer==2023.5.1",
+  "tmdbsimple==2.9.1",
+  "parse-torrent-name==2.5.1",
+  "pycryptodome==3.20.0",
+  "typing_extensions==4.10.0",
+]
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
