@@ -20,3 +20,12 @@ dependencies = [
 [build-system]
 requires = ["setuptools>=61", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+# Explicitly declare modules and packages to avoid auto-discovery errors in flat layout
+py-modules = ["app", "bot", "bot_csv", "bot_get_progress", "bot_utils", "command_regex_handler", "__init__"]
+packages = ["routers", "services", "keyboards"]
+
+[tool.setuptools.packages.find]
+# Prevent inclusion of non-Python asset directories
+exclude = ["images*", "*.tests*"]
