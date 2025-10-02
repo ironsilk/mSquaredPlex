@@ -19,6 +19,33 @@ NEWSLETTER_ROUTINE_TIMES = NEWSLETTER_ROUTINE_TIMES.split(',')
 
 logger = setup_logger("FilelistRoutine")
 
+# Torrent API availability check helpers
+def _resolve_torr_api_base():
+    path = os.getenv('TORR_API_PATH') or '/torr-api'
+    base = path.strip('/')
+    return base or 'torr-api'
+
+def torr_api_is_available(timeout=3):
+    """
+    Returns True if TORR API health endpoint responds 200 OK.
+    Treats 403/503 and any exception as unavailable.
+    """
+    host = os.getenv('TORR_API_HOST') or '127.0.0.1'
+    port = os.getenv('TORR_API_PORT') or '9092'
+    base = _resolve_torr_api_base()
+    url = f"http://{host}:{port}/{base}/health"
+    try:
+        r = requests.get(url, timeout=timeout)
+        if r.status_code == 200:
+            return True
+        if r.status_code in (403, 503):
+            logger.info(f"TORR API health check returned {r.status_code}; treating as unavailable")
+            return False
+        logger.info(f"TORR API health check returned {r.status_code}; treating as unavailable")
+        return False
+    except Exception as e:
+        logger.warning(f"TORR API health check error: {e}")
+        return False
 
 # https://filelist.io/forums.php?action=viewtopic&topicid=120435
 
@@ -69,6 +96,11 @@ def get_latest_torrents(n=100, category=MOVIE_HDRO):
 
 @timing
 def feed_routine(cypher=torr_cypher):
+    # Pre-check Torrent API availability to avoid sending broken newsletter
+    if not torr_api_is_available(timeout=3):
+        logger.warning("Torrent service not accessible right now; skipping newsletter run")
+        return
+
     # fetch latest movies
     new_movies = get_latest_torrents()
 
