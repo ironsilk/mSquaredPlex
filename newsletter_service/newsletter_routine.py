@@ -10,7 +10,7 @@ from utils import torr_cypher, get_movie_details, setup_logger, timing, check_ag
 
 TZ = os.getenv('TZ')
 API_URL = os.getenv('API_URL')
-USER = os.getenv('USER')
+USER = os.getenv('FL_USER')
 PASSKEY = os.getenv('PASSKEY')
 MOVIE_HDRO = os.getenv('MOVIE_HDRO')
 MOVIE_4K = os.getenv('MOVIE_4K')

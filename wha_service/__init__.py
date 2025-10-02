@@ -1,0 +1,1 @@
+# WhatsApp service package initializer (stub mode)

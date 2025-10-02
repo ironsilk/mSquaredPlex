@@ -121,7 +121,7 @@ class Movie(Base):
     imdb_id = Column(Integer)
     my_score = Column(Integer)
     seen_date = Column(DateTime)
-    user_id = Column(Integer, ForeignKey('user.telegram_chat_id'))
+    user_id = Column(BigInteger, ForeignKey('user.telegram_chat_id', ondelete='CASCADE'))
     user = relationship("User", back_populates="movies")
     rating_status = Column(String)
 
@@ -138,7 +138,7 @@ class Torrent(Base):
     imdb_id = Column(Integer)
     resolution = Column(Integer)
     status = Column(String)
-    requested_by_id = Column(Integer, ForeignKey('user.telegram_chat_id'))
+    requested_by_id = Column(BigInteger, ForeignKey('user.telegram_chat_id', ondelete='CASCADE'))
     requested_by = relationship("User", back_populates="requested_torrents")
     extra_grace_days = Column(Integer, default=0)
 
@@ -156,7 +156,7 @@ class Watchlist(Base):
 
     id = Column(Integer, primary_key=True)
     imdb_id = Column(Integer)
-    user_id = Column(Integer, ForeignKey('user.telegram_chat_id'))
+    user_id = Column(BigInteger, ForeignKey('user.telegram_chat_id', ondelete='CASCADE'))
     user = relationship("User", back_populates="watchlist_items")
     status = Column(String)
     excluded_torrents = Column(ARRAY(Integer))
@@ -560,6 +560,25 @@ def get_user_by_tgram_id(telegram_chat_id):
         return object_as_dict(result.mappings().fetchone())
 
 
+def ensure_user_exists(telegram_chat_id: int, telegram_name: str = None, email: str = None, imdb_id: int = None):
+    """
+    Ensure a User row exists for the given Telegram chat id.
+    Upsert minimal fields; safe to call frequently.
+    """
+    # Prepare item for upsert; do not overwrite fields with None
+    item = {"telegram_chat_id": telegram_chat_id}
+    if telegram_name is not None:
+        item["telegram_name"] = telegram_name
+    if email is not None:
+        item["email"] = email
+    if imdb_id is not None:
+        item["imdb_id"] = imdb_id
+
+    # Uses update_many with primary key to perform upsert
+    update_many([item], User, User.telegram_chat_id)
+    return get_user_by_tgram_id(telegram_chat_id)
+
+
 def get_user_movies(user):
     with engine.connect() as conn:
         stmt = select(Movie).where(Movie.user.has(User.telegram_chat_id == user['telegram_chat_id']))
@@ -631,6 +650,25 @@ def update_many_multiple_pk(items, table, primary_keys):
 def update_torrent_status(torr_id, status):
     with engine.connect() as conn:
         stmt = update(Torrent).where(Torrent.torr_id == torr_id).values(status=status)
+        result = conn.execute(stmt)
+    return result
+
+
+def update_torrent_status_by_pk(db_id, status):
+    """
+    Update torrent status by primary key id as a fallback when torr_id is unavailable in row mappings.
+    """
+    with engine.connect() as conn:
+        stmt = update(Torrent).where(Torrent.id == db_id).values(status=status)
+        result = conn.execute(stmt)
+    return result
+
+def update_torrent_status_by_hash(hash_str, status):
+    """
+    Update torrent status by torrent hash as a fallback when torr_id does not match any row.
+    """
+    with engine.connect() as conn:
+        stmt = update(Torrent).where(Torrent.torr_hash == hash_str).values(status=status)
         result = conn.execute(stmt)
     return result
 

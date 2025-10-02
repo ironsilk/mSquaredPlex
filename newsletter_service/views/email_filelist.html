@@ -1,68 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<title>email</title>
-		<meta charset="utf-8">
-		<style>
-			table {
-			border: 1px solid #f0f0f0;
-			}
+  <head>
+    <title>Email</title>
+    <meta charset="utf-8">
+    <meta name="x-apple-disable-message-reformatting">
+    <meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
+    <style>
+      /* Fallback classes used by score badges */
+      .std { color: #333333; }
+      .neg { color: #ffffff; background-color: #ff0000; }
+      .poz { color: #ffffff; background-color: #008000; }
+      .prs { color: #ffffff; background-color: #000000; }
 
-			th, td {
-			  padding: 2px;
-			}
+      /* CTA buttons */
+      .btnSd, .btnDw {
+        background: #3d85c6;
+        background: -webkit-linear-gradient(#5aa0df, #2b6aa8);
+        background: linear-gradient(#5aa0df, #2b6aa8);
+        border-radius: 6px;
+        padding: 8px 14px;
+        color: #ffffff !important;
+        display: inline-block;
+        font: normal 600 13px/1 "-apple-system", "Segoe UI", "Roboto", "Arial", sans-serif;
+        text-align: center;
+        text-decoration: none;
+        text-shadow: none;
+        border: 1px solid #2b6aa8;
+      }
+      .btnSd {
+        background: -webkit-linear-gradient(#4caf50, #2c7a2c);
+        background: linear-gradient(#4caf50, #2c7a2c);
+        border-color: #2c7a2c;
+      }
 
-			.std {
-			color:			#333333;
-			}
-
-			.neg {
-			color:			#ffffff;
-			background-color: #ff0000;
-			}
-
-			.poz {
-			color:			#ffffff;
-			background-color: #008000;
-			}
-
-			.prs {
-			color:			#ffffff;
-			background-color: #000000;
-			}
-
-			.btnSd {
-			background:    #6aa84f;
-			background:    -webkit-linear-gradient(#6aa84f, #274e13);
-			background:    linear-gradient(#6aa84f, #274e13);
-			border-radius: 5px;
-			padding:       5px 10px;
-			color:         #ffffff;
-			display:       inline-block;
-			font:          normal 700 12px/1 "Calibri", sans-serif;
-			text-align:    center;
-			text-shadow:   1px 1px #000000;
-			}
-
-			.btnDw {
-			background:    #3d85c6;
-			background:    -webkit-linear-gradient(#3d85c6, #073763);
-			background:    linear-gradient(#3d85c6, #073763);
-			border-radius: 5px;
-			padding:       5px 10px;
-			color:         #ffffff;
-			display:       inline-block;
-			font:          normal 700 12px/1 "Calibri", sans-serif;
-			text-align:    center;
-			text-shadow:   1px 1px #000000;
-			}
-		</style>
-	</head>
-	<body>
-		<basefont face = "arial, verdana, sans-serif" size = "11">
-		list_new
-
-		list_trnt
-
-	</body>
+      /* Table defaults for better spacing in email clients */
+      table { border-collapse: collapse; }
+      th, td { padding: 4px; vertical-align: top; }
+    </style>
+  </head>
+  <body style="margin:0; padding:0; background:#f7f7f8; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;">
+    <div style="max-width:640px; margin:0 auto; padding:12px; font-family:-apple-system, Segoe UI, Roboto, Arial, sans-serif; color:#333;">
+      <!-- Injected pre-rendered sections -->
+      {{ list_new | safe }}
+      {{ list_trnt | safe }}
+    </div>
+  </body>
 </html>

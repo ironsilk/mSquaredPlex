@@ -1,0 +1,42 @@
+version: "3.8"
+
+services:
+  torr_api:
+    build: .
+    image: torr_api:latest
+    ports:
+      - "9092:9092"
+    environment:
+      TORR_API_PORT: 9092
+      TORR_API_PATH: /torr-api
+      TRANSMISSION_HOST: transmission
+      TRANSMISSION_PORT: 9091
+      TRANSMISSION_USER: ""
+      TRANSMISSION_PASSWORD: ""
+      ENABLE_HEARTBEAT: "1"
+      HEARTBEAT_INTERVAL_MIN: "5"
+    command: gunicorn -c gunicorn.conf.py --bind 0.0.0.0:${TORR_API_PORT:-9092} wsgi:app
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:${TORR_API_PORT:-9092}/torr-api/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    restart: unless-stopped
+    depends_on:
+      - transmission
+      - db
+
+  transmission:
+    image: linuxserver/transmission:latest
+    ports:
+      - "9091:9091"
+
+  db:
+    image: postgres:14
+    environment:
+      POSTGRES_DB: torrents
+      POSTGRES_USER: torr
+      POSTGRES_PASSWORD: torrpass
+    ports:
+      - "5432:5432"

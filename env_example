@@ -119,3 +119,14 @@ TRNT_TEMPLATE_PATH=views/_torrent.html
 EMAIL_USER=
 EMAIL_PASS=
 EMAIL_HOSTNAME=smtp.gmail.com
+### Frontend (Flask) settings ###
+# Minimal web UI credentials used by [python.login_post()](frontend/app.py:124)
+FE_USER=mike
+FE_PASS=pass
+
+# Numeric telegram_chat_id to operate on (reuse an existing Telegram user's chat id)
+# Used by [python.ensure_user_exists()](utils.py:563) and other flows in [python.app()](frontend/app.py:1)
+FE_USER_ID=
+
+# Secret key for Flask sessions; change in production
+FLASK_SECRET_KEY=change-me

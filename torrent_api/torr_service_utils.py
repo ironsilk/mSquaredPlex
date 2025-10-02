@@ -1,4 +1,6 @@
 import os
+import time
+import uuid
 
 import falcon
 
@@ -9,14 +11,13 @@ TORR_KEEP_TIME = int(os.getenv('TORR_KEEP_TIME')) if os.getenv('TORR_KEEP_TIME')
 logger = setup_logger('TorrUtils')
 
 
-def gtfo(resp):
+def gtfo(resp, message="Provide required parameters"):
     pkg = {
-        'Instructions': (
-            "Provide the key, or g t f o"
-        ),
+        'error': 'bad_request',
+        'message': message,
     }
     resp.media = pkg
-    resp.status = falcon.HTTP_500
+    resp.status = falcon.HTTP_400
     return
 
 
@@ -31,36 +32,64 @@ class TORRAPI:
 
     def on_get(self, req, resp):
         """Handles GET requests"""
-        pkg = req.query_string
-        if not pkg:
-            return gtfo(resp)
+        rid = getattr(req.context, 'request_id', str(uuid.uuid4()))
+        start = time.time()
 
-        # Try to decrypt
+        # Basic presence of query string
+        if not req.query_string:
+            return gtfo(resp, "Missing query string parameters")
+
+        # Parse params safely
         try:
-            # Cypher alternative
-            # pkg = torr_cypher.decrypt(unquote(pkg))
-            # No cypher
-            pkg = req.params
+            params = req.params
         except Exception as e:
-            self.logger.error(e)
-            return gtfo(resp)
+            self.logger.error(f"[{rid}] param parsing error: {e}")
+            return gtfo(resp, "Invalid query parameters")
+
+        # Validate required params
+        torr_id = params.get('torr_id')
+        requested_by = params.get('requested_by')
+        if torr_id is None or requested_by is None:
+            return gtfo(resp, "Required parameters: torr_id and requested_by")
+
         try:
-            torr_response = send_torrent(compose_link(pkg['torr_id']))
+            torr_id_int = int(torr_id)
+            requested_by_int = int(requested_by)
+        except Exception:
+            return gtfo(resp, "Parameters torr_id and requested_by must be integers")
+
+        # Attempt torrent queueing
+        try:
+            torr_response = send_torrent(compose_link(torr_id_int))
         except Exception as e:
-            self.logger.error(e)
-            resp.media = f"Torrent download error for torr with id {pkg['torr_id']}, check logs"
+            self.logger.error(f"[{rid}] Torrent download error for torr_id={torr_id_int}: {e}")
+            resp.media = f"Torrent download error for torr with id {torr_id_int}, check logs"
             resp.status = falcon.HTTP_500
             return
-        # Update in torrents DB
-        db_torrent = get_torrent_by_torr_id_user(int(pkg['torr_id']), int(pkg['requested_by']))
-        db_torrent['status'] = 'requested download'
-        db_torrent['torr_hash'] = torr_response.hashString
-        update_many([db_torrent], Torrent, Torrent.id)
 
-        # Give response
+        # Update in torrents DB
+        try:
+            db_torrent = get_torrent_by_torr_id_user(torr_id_int, requested_by_int)
+            if not db_torrent:
+                raise ValueError("Torrent not found in DB for given torr_id and requested_by")
+            db_torrent['status'] = 'requested download'
+            db_torrent['torr_hash'] = getattr(torr_response, 'hashString', None)
+            update_many([db_torrent], Torrent, Torrent.id)
+        except Exception as e:
+            self.logger.error(f"[{rid}] DB update error for torr_id={torr_id_int}: {e}")
+            resp.media = f"Internal error updating database for torr_id {torr_id_int}"
+            resp.status = falcon.HTTP_500
+            return
+
+        # Give response + structured logging
+        latency_ms = int((time.time() - start) * 1000)
         resp.media = 'Torrent successfully queued for download.'
-        self.logger.info(f"Torrent with id {pkg['torr_id']} and torr_name {torr_response.name} successfully queued for "
-                         f"download.")
+        self.logger.info(
+            f"[{rid}] Torrent queued torr_id={torr_id_int} "
+            f"torr_name={getattr(torr_response, 'name', None)} "
+            f"hash={getattr(torr_response, 'hashString', None)} "
+            f"latency={latency_ms}ms"
+        )
 
 
 if __name__ == '__main__':

@@ -1,117 +1,55 @@
-import io
-import re
+"""
+Deprecated: CSV import/export has been removed from the Telegram service.
+This module is retained only to prevent accidental import errors.
 
-import imdb
-import pandas as pd
-from telegram.ext import CallbackContext
+Do NOT use this module for new code.
+"""
 
-from utils import get_user_by_tgram_id, deconvert_imdb_id, get_movie_details, get_my_movie_by_imdb, \
-    get_user_movies, Movie, update_many_multiple_pk
+import logging
 
-soap_pattern = re.compile(": Season \d+:")
+_logger = logging.getLogger("BotCSVShim")
+_logger.warning(
+    "telegram_service.bot_csv is deprecated. CSV import/export has been removed."
+)
 
 
-async def csv_upload_handler(context: CallbackContext):
-    file_id = context.job.context['file']
-    tgram_user = context.job.context['user']
-    file = await context.bot.getFile(file_id)
-    # Create an in-memory file
-    f = io.BytesIO()
-    await file.download(out=f)
-    # Pointer is at the end of the file so reset it to 0.
-    f.seek(0)
-    # To pd.df
-    df = pd.read_csv(f)
-    df.drop_duplicates(subset=['Title'], keep="last", inplace=True)
+async def csv_upload_handler(*args, **kwargs):
+    """
+    Deprecated no-op. CSV upload handler removed.
+    """
     try:
-        df['Date'] = pd.to_datetime(df['Date'])
-        has_ratings = 'Ratings' in df.columns
-        df = df.to_dict('records')
-    except Exception as e:
-        # send error to user
-        await context.bot.send_message(chat_id=tgram_user, text=f"Encountered some problems with the CSV you gave me.\n"
-                                       f"Make sure you have 'Title' and 'Date' as required columns "
-                                       f"and the optional 'ratings' column.\n"
-                                       f"Err description: {e}")
-        return
-
-    ia = imdb.IMDb()
-
-    identified_movies = []
-    soap_or_unidentified = 0
-    user = get_user_by_tgram_id(tgram_user)
-    for movie in df:
-        if soap_pattern.search(movie['Title']):
-            soap_or_unidentified += 1
-        else:
+        context = kwargs.get("context") or (args[0] if args else None)
+        if context and getattr(context, "bot", None):
+            user = None
             try:
-                movies = ia.search_movie(movie['Title'], _episodes=False)
-                res = []
-                for x in movies:
-                    if 'kind' in x.data.keys():
-                        if x.data['kind'] == 'movie':
-                            x.data['id'] = x.movieID
-                            res.append(x.data)
-                            break
-                if res:
-                    my_movie = get_my_movie_by_imdb(deconvert_imdb_id(res[0]['id']), user['telegram_chat_id'])
-                    if not my_movie:
-                        item = {
-                            'seen_date': movie['Date'].to_pydatetime(),
-                            'imdb_id': deconvert_imdb_id(res[0]['id']),
-                            'user_id': user['telegram_chat_id'],
-                        }
-                        if has_ratings:
-                            item['rating_status'] = 'rated externally'
-                            item['my_score'] = movie['Ratings']
-                            item['rating_status'] = 'bulk unrated'
-                        identified_movies.append(item)
-                    else:
-                        pass
-                else:
-                    soap_or_unidentified += 1
-            except Exception as e:
-                raise e
+                user = context.job.context.get("user")
+            except Exception:
                 pass
-
-    update_many_multiple_pk(identified_movies, Movie, [Movie.imdb_id, Movie.user_id])
-    await context.bot.send_message(text=f"CSV update successful!\n"
-                                        f"Out of {len(df)} entries in your CSV file, "
-                                        f"{len(identified_movies)} were movies while "
-                                        f"{soap_or_unidentified} were either soap episodes, "
-                                        f"series or likewise. The rest were already in your database "
-                                        f"({len(df) - len(identified_movies) - soap_or_unidentified})",
-                                   chat_id=tgram_user)
+            await context.bot.send_message(
+                chat_id=user,
+                text="CSV import has been removed."
+            )
+    except Exception:
+        pass
+    return None
 
 
-async def csv_download_handler(context: CallbackContext):
-    tgram_user = context.job.context['user']
-    user = get_user_by_tgram_id(tgram_user)
-    # Get movies from my_movies:
-    my_movies = get_user_movies(user)
-    enhanced = []
-    # Get titles for each movie :)
-    if my_movies:
-        for movie in my_movies:
-            enhanced.append(get_movie_details(movie))
-        df = pd.DataFrame(enhanced)
-        # Create an in-memory file
-        f = io.BytesIO()
-        # Write to buffer
-        df.to_csv(f)
-        # Pointer is at the end of the file so reset it to 0.
-        f.seek(0)
-        await context.bot.send_document(
-            chat_id=tgram_user,
-            document=f,
-            filename='MoviesExport.csv',
-            caption="Here's your requested movie DB export.\n"
-                    "Have a great day!"
-        )
-    else:
-        await context.bot.send_message(
-            chat_id=tgram_user,
-            text="Looks like you don't have any movies yet. Nothing to fill that CSV with."
-        )
-
-
+async def csv_download_handler(*args, **kwargs):
+    """
+    Deprecated no-op. CSV download handler removed.
+    """
+    try:
+        context = kwargs.get("context") or (args[0] if args else None)
+        if context and getattr(context, "bot", None):
+            user = None
+            try:
+                user = context.job.context.get("user")
+            except Exception:
+                pass
+            await context.bot.send_message(
+                chat_id=user,
+                text="CSV export has been removed."
+            )
+    except Exception:
+        pass
+    return None

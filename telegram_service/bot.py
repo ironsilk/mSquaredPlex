@@ -11,13 +11,13 @@ from telegram.ext import ApplicationBuilder, CallbackContext, CommandHandler, Me
     ConversationHandler, CallbackQueryHandler
 from transmission_rpc import TransmissionError
 
-from bot_csv import csv_upload_handler, csv_download_handler
-from bot_get_progress import get_progress
+# removed: CSV feature import (feature deprecated)
+# removed: progress feature import
 from bot_utils import make_movie_reply, update_torr_db, \
     exclude_torrents_from_watchlist, get_movie_from_all_databases, search_imdb_title, add_to_watchlist, \
     get_telegram_users, invite_friend
 from command_regex_handler import RegexpCommandHandler
-from bot_watchlist import get_torrents_for_imdb_id, update_watchlist_item_status
+from services.watchlist_service import get_torrents_for_imdb_id, update_watchlist_item_status
 from utils import deconvert_imdb_id, send_torrent, compose_link, get_user_by_tgram_id, get_my_movie_by_imdb, \
     update_many, Movie, convert_imdb_id, check_database, User, get_onetimepasswords, remove_onetimepassword, \
     insert_onetimepasswords, get_movies_for_bulk_rating, make_client, update_torrent_status, update_torrent_grace_days, \
@@ -31,7 +31,7 @@ in self._client_kwargs = dict()
 
 # Enable logging
 logging.basicConfig(
-    format='[%(asctime)s] {%(filename)s:%(lineno)d} [%(name)s] [%(levelname)s] --> %(message)s', level=logging.INFO
+    format='[%(asctime)s] {%(filename)s:%(lineno)d} [%(name)s] [%(levelname)s] --> %(message)s', level=logging.DEBUG
 )
 
 logger = logging.getLogger('MovieTimeBot')
@@ -72,8 +72,7 @@ USERS = None
 
 menu_keyboard = [
     ["📥 Download a movie"],
-    ["📈 Check download progress", "🌡️ Rate a title"],
-    ["❤☠🤖 Upload Netflix activity", '💾 Download my movies']
+    ["🌡️ Rate a title"],
 ]
 bool_keyboard = [
     ['Yes'],
@@ -159,21 +158,17 @@ async def reset(update: Update, context: CallbackContext.DEFAULT_TYPE) -> int:
 
 @auth_wrap
 async def choose_task(update: Update, context: CallbackContext) -> int:
-    """Choose between download a movie, get download progress, upload activity
-        or download my viewing activity"""
+    """Choose between download a movie or rate a title"""
+    txt = update.message.text
+    logger.debug(f"choose_task received: {txt}")
 
-    if update.message.text == menu_keyboard[0][0]:
+    if txt == menu_keyboard[0][0]:
         message = 'Great, give me an IMDB id, a title or an IMDB link.'
         context.user_data['action'] = 'download'
         await update.message.reply_text(message)
         return DOWNLOAD_MOVIE
 
-    elif update.message.text == menu_keyboard[1][0]:
-        await update.effective_message.reply_text('Ok, retrieving data... (might be slow sometimes)')
-        context.user_data['download_progress'] = 0
-        return await get_download_progress(update, context)
-
-    elif update.message.text == menu_keyboard[1][1]:
+    elif txt == menu_keyboard[1][0]:
         await update.effective_message.reply_text('Do you wish to rate a new title or a seen but unrated movie?',
                                                   reply_markup=ReplyKeyboardMarkup([['New title', 'Rate seen movies']],
                                                                                    one_time_keyboard=True,
@@ -181,23 +176,6 @@ async def choose_task(update: Update, context: CallbackContext) -> int:
                                                                                    ))
         return RATE_TITLE
 
-    elif update.message.text == menu_keyboard[2][0]:
-        await update.message.reply_photo(photo=open(TELEGRAM_NETFLIX_PNG, 'rb'),
-                                         caption="Ok, follow the instructions, "
-                                                 "hit `Download all` and upload here the resulting .csv.\n"
-                                                 "You may add any other records to "
-                                                 "the CSV, given that you don't change the column names.\n"
-                                                 "If you want to also add ratings, create an extra column "
-                                                 "named 'Ratings' and it will be picked up.\n"
-                                                 "Any overlapping ratings/seen dates will be overwritten. However, "
-                                                 "IMDB ratings, seen dates and PLEX seen dates will have prevalence.\n",
-                                         )
-        await update.message.reply_text("Now please update the .csv file.")
-        return NETFLIX_CSV
-    elif update.message.text == menu_keyboard[2][1]:
-        await update.message.reply_text("Ok, we've started the process, we'll let you know once it's done\.")
-
-        return await download_csv(update, context)
     message = 'Please choose one of the options\.'
     return await start(update, context, message)
 
@@ -232,11 +210,14 @@ async def parse_imdb_id(update: Update, context: CallbackContext) -> int:
 async def parse_imdb_text(update: Update, context: CallbackContext) -> int:
     """Route the query if the string is a link or a title."""
 
+    q = update.message.text
+    logger.debug(f"parse_imdb_text query: {q}")
     await update.message.reply_text("Just a sec until we get data about this title...")
     # Is it a link?
     try:
         imdb_id = re.search(r"[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)",
-                            update.message.text).group(0)
+                            q).group(0)
+        logger.debug(f"Detected link: {imdb_id}")
 
         # We need number so filter out the number from the user input:
         imdb_id = ''.join([x for x in imdb_id if x.isdigit()]).lstrip('0')
@@ -244,6 +225,7 @@ async def parse_imdb_text(update: Update, context: CallbackContext) -> int:
         # Get IMDB data
         pkg = get_movie_from_all_databases(imdb_id, update.effective_user['id'])
         context.user_data['pkg'] = pkg
+        logger.debug(f"Link-resolved imdb_id={imdb_id}, pkg_imdb={pkg.get('imdb') if pkg else None}")
 
         message, image = make_movie_reply(pkg)
         await update.effective_message.reply_photo(
@@ -257,16 +239,16 @@ async def parse_imdb_text(update: Update, context: CallbackContext) -> int:
         return CHOOSE_ONE
     except AttributeError:
         # Yes but wrong link or no match
-        if 'https://' in update.message.text:
+        if 'https://' in q:
             await update.effective_message.reply_text("Couldn't find the specified ID in the link, are you"
                                                       "sure it's an IMDB link? Try pasting only the ID, as in"
                                                       "`tt0903624`.")
             return DOWNLOAD_MOVIE
         else:
-            # Test for title
-            movies = search_imdb_title(update.message.text)
+            # Title search
+            movies = search_imdb_title(q)
+            logger.debug(f"Title search results: {len(movies) if isinstance(movies, list) else movies}")
             context.user_data['potential_titles'] = movies
-
             return await choose_multiple(update, context)
 
 
@@ -275,17 +257,19 @@ async def choose_multiple(update: Update, context: CallbackContext) -> int:
     """Loop through potential movie matches"""
 
     movies = context.user_data['potential_titles']
+    logger.debug(f"choose_multiple: remaining candidates={len(movies) if isinstance(movies, list) else 'invalid'}")
     if movies:
-        if type(movies) == str:
+        if isinstance(movies, str):
             await update.effective_message.reply_text("We're having trouble with our IMDB API, please"
                                                       "insert an IMDB ID or paste a link.")
             return DOWNLOAD_MOVIE
         movie = movies.pop(0)
+        logger.debug(f"Trying candidate imdb_id={movie.get('id')} title={movie.get('title')} year={movie.get('year')}")
         # Check again if we can find it
         pkg = get_movie_from_all_databases(movie['id'], update.effective_user['id'])
-        # context.user_data['pkg'] = pkg
         if pkg:
             context.user_data['pkg'] = pkg
+            logger.debug(f"Candidate resolved to pkg_imdb={pkg.get('imdb')}")
             message, image = make_movie_reply(pkg)
             await update.effective_message.reply_photo(
                 photo=image,
@@ -297,6 +281,7 @@ async def choose_multiple(update: Update, context: CallbackContext) -> int:
             )
             return CHOOSE_ONE
         else:
+            logger.debug("Candidate not found in DB/APIs, trying next")
             return await choose_multiple(update, context)
     else:
         await update.effective_message.reply_text("Couldn't find the specified movie."
@@ -308,12 +293,14 @@ async def choose_multiple(update: Update, context: CallbackContext) -> int:
 @auth_wrap
 async def accept_reject_title(update: Update, context: CallbackContext) -> int:
     """Accept, reject the match or exit"""
-    if update.message.text == 'Yes':
+    choice = update.message.text
+    logger.debug(f"accept_reject_title: user chose '{choice}' for imdb={context.user_data.get('pkg', {}).get('imdb')}")
+    if choice == 'Yes':
         if context.user_data['action'] == 'download':
             return await check_movie_status(update, context)
         else:
             return await rating_movie_info(update, context)
-    elif update.message.text == 'No':
+    elif choice == 'No':
         if context.user_data['potential_titles']:
             await update.effective_message.reply_text("Ok, trying next hit...")
             return await choose_multiple(update, context)
@@ -321,7 +308,7 @@ async def accept_reject_title(update: Update, context: CallbackContext) -> int:
             await update.effective_message.reply_text("These were all the hits. Sorry. Feel free to type anything "
                                                       "to start again")
             return await reset(update, context)
-    elif update.message.text == 'Exit':
+    elif choice == 'Exit':
         return await reset(update, context)
     else:
         await update.effective_message.reply_text("Please choose one of the options.")
@@ -362,31 +349,26 @@ async def search_for_torrents(update: Update, context: CallbackContext) -> int:
     """Search for torrents for the given IMDB id
         Build keyboard to show them"""
 
+    imdb_num = context.user_data['pkg']['imdb']
+    logger.debug(f"search_for_torrents: querying torrents for imdb={imdb_num}")
     await update.message.reply_text('Searching for available torrents...')
-    torrents = get_torrents_for_imdb_id(context.user_data['pkg']['imdb'])
-    torrents = sorted(torrents, key=lambda k: k['size'])
+    torrents = get_torrents_for_imdb_id(imdb_num)
+    logger.debug(f"search_for_torrents: fetched {len(torrents) if torrents else 0} candidates from API")
+    torrents = sorted(torrents, key=lambda k: k.get('size', 0))
     if torrents:
-        context.user_data['pkg']['torrents'] = sorted(torrents, key=lambda k: k['size'])
+        context.user_data['pkg']['torrents'] = torrents
         keyboard = [[]]
-        """
-        # Check if we need to filter excluded resolutions
-        # Removed functionality, left here for reference or other further uses
-        if 'from_watchlist' in context.user_data.keys():
-            movie_id = deconvert_imdb_id(torrents[0]['imdb'])
-            excluded_resolutions = get_excluded_resolutions(movie_id, update.effective_user['id'])
-            torrents = [x for x in torrents if x['id'] not in excluded_resolutions]
-        """
-        for pos, item in enumerate(torrents):
-            pos += 1  # exclude 0
+        for pos, item in enumerate(torrents, start=1):
+            size_gb = round((item.get('size', 0) or 0) / 1000000000, 2)
             btn_text = (
-                f"🖥 Q: {str(item['resolution'])}"
-                f"🗳 S: {str(round(item['size'] / 1000000000, 2))} GB"
-                f"🌱 S/P: {str(item['seeders'])}/{str(item['leechers'])}"
+                f"🖥 Q: {str(item.get('resolution'))} "
+                f"🗳 S: {size_gb} GB "
+                f"🌱 S/P: {str(item.get('seeders'))}/{str(item.get('leechers'))}"
             )
-            btn = InlineKeyboardButton(btn_text, callback_data=item['id'])
+            btn = InlineKeyboardButton(btn_text, callback_data=str(item.get('id')))
             keyboard.append([btn])
         # Add button for None
-        keyboard.append([InlineKeyboardButton('None, thanks', callback_data=0)])
+        keyboard.append([InlineKeyboardButton('None, thanks', callback_data='0')])
         await update.message.reply_text(
             f"Please select one of the torrents",
             reply_markup=InlineKeyboardMarkup(keyboard, one_time_keyboard=True),
@@ -494,22 +476,7 @@ async def add_to_watchlist_no_torrent(update: Update, context: CallbackContext) 
 """<< CHECK DOWNLOAD PROGRESS >>"""
 
 
-@auth_wrap
-async def get_download_progress(update: Update, context: CallbackContext) -> int:
-    """Return the status for the last 10 torrents for this user"""
-
-    user = update.effective_user['id']
-    torrents = get_progress(user, logger=logger)
-    if torrents:
-        for torrent in torrents[:5]:
-            await update.message.reply_text(f"{torrent['TorrentName']}\n"
-                                            f"Resolution: {torrent['Resolution']}\n"
-                                            f"Status: {torrent['Status']}\n"
-                                            f"Progress: {torrent['Progress']}\n"
-                                            f"ETA: {torrent['ETA']}")
-    else:
-        await update.message.reply_text("No torrents to show :(.")
-    return await reset(update, context)
+# Removed: get_download_progress feature deprecated
 
 
 """<< UPLOAD ACTIVITY >>"""
@@ -517,37 +484,22 @@ async def get_download_progress(update: Update, context: CallbackContext) -> int
 
 @auth_wrap
 async def netflix_rate_or_not(update: Update, context: CallbackContext) -> int:
-    """User chooses to receive or not notifications for unrated titles."""
-
-    if update.message.text == 'No':
-        context.user_data['send_notifications'] = False
-    else:
-        context.user_data['send_notifications'] = True
-    await update.message.reply_text("K, now upload the .csv file please.")
+    """Deprecated: CSV import has been removed."""
+    await update.message.reply_text("CSV import has been removed.")
     return NETFLIX_CSV
 
 
 @auth_wrap
 async def netflix_csv(update: Update, context: CallbackContext) -> int:
-    """Sends CSV file in order to be processed"""
-
-    csv_context = {
-        'user': update.effective_user.id,
-        'file': update.message.document.file_id,
-    }
-    await update.message.reply_text("Thanks!We started the upload process, we'll let you know "
-                                    "when it's done or if there's any trouble.")
-    context.job_queue.run_once(
-        callback=csv_upload_handler,
-        context=csv_context,
-        when=10
-    )
-    return await reset(update, context)
+    """Deprecated: CSV import has been removed."""
+    await update.message.reply_text("CSV import has been removed.")
+    return NETFLIX_CSV
 
 
 @auth_wrap
 async def netflix_no_csv(update: Update, context: CallbackContext) -> int:
-    await update.message.reply_text("Upload the .csv or hit /reset.")
+    """Deprecated: CSV import has been removed."""
+    await update.message.reply_text("CSV import has been removed.")
     return NETFLIX_CSV
 
 
@@ -817,14 +769,8 @@ def wrong_input_imdb(update: Update, context: CallbackContext):
 
 @auth_wrap
 async def download_csv(update: Update, context: CallbackContext) -> None:
-    csv_context = {
-        'user': update.effective_user.id,
-    }
-    context.job_queue.run_once(
-        callback=csv_download_handler,
-        context=csv_context,
-        when=0
-    )
+    """Deprecated: CSV export has been removed."""
+    await update.message.reply_text("CSV import/export has been removed.")
     return None
 
 
@@ -1006,14 +952,7 @@ def main() -> None:
         }
     )
 
-    check_progress_conversation_handler = ConversationHandler(
-        entry_points=[
-            MessageHandler(filters.TEXT, get_download_progress),
-            CallbackQueryHandler(get_download_progress)],
-        states={},
-        fallbacks=[],
-        map_to_parent={}
-    )
+    # Removed: check_download_progress conversation handler deprecated
 
     rate_title_conversation_handler = ConversationHandler(
         entry_points=[
@@ -1065,10 +1004,6 @@ def main() -> None:
         states={
             CHOOSE_TASK: [MessageHandler(filters.TEXT & (~filters.COMMAND), choose_task)],
             DOWNLOAD_MOVIE: [download_movie_conversation_handler],
-            CHECK_PROGRESS: [check_progress_conversation_handler],
-            NETFLIX_CSV: [
-                MessageHandler(filters.Document.FileExtension('csv') & (~filters.COMMAND), netflix_csv),
-                MessageHandler(filters.TEXT & (~filters.COMMAND), netflix_no_csv), ],
             RATE_TITLE: [rate_title_conversation_handler],
             REGISTER_USER: [register_user_conversation_handler],
             DOWNLOAD_TORRENT: [CallbackQueryHandler(download_torrent)],

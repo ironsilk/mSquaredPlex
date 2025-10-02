@@ -30,23 +30,8 @@ Python-built telegram bot used to interact with PLEX, Transmission and a private
     - **Check download progress** -> Returns a list of the status of the last 10 torrents downloaded
         by the user.
 
-    - **Upload viewing activity** -> User can upload a .csv file with his viewing activity. 
-      - Table format should be `Title`, `Date` which is the default export file from Netflix. 
-      - Only movies will be picked 
-    up from the file. 
-      - For any unrated movie the user will be or not (depending on his answer to the Y/N choice) prompted 
-    to rate that specific title after the import. 
-      - If he wishes to import already rated titles the user can 
-    choose to add another column with ratings, `Ratings`. (scale 1-10). These will be automatically picked up. 
-      - Any ratings and seen dates will be overwritten. 
-      - IMDB ratings and PLEX seen dates do have prevalence and will
-    not be overwritten.
-      - User gets notified when the process is finished and how many of the entries were movies, how many
-    were soap series and how many were already in the database.
-    
-    - **Download viewing activity** -> Downloads a .csv with all user activity (imdb ids, titles, seen dates,
-      and ratings)
-    
+    - Removed features: Upload viewing activity and Download viewing activity (deprecated in aiogram v3 rewrite)
+      
     - **Rate a title** -> User can rate titles via the 
       bot.
         - Rate a new title: Similar to download movie, user provides id, link or movie name, matches
@@ -141,3 +126,103 @@ Requirements:
 
 
 
+
+
+## Telegram service (aiogram v3) – Usage, Commands, and Environment
+
+Overview:
+- The Telegram service has been rewritten using aiogram v3 (async-first).
+- Kept features: Download a movie, Check download progress, Rate a title.
+- Immediate notifications when a torrent completes (seeding/100%).
+- Removed features: Upload viewing activity (CSV) and Download viewing activity (CSV).
+
+Run locally:
+1. Ensure Python 3.10+ and a proper virtualenv.
+2. Install dependencies:
+   - pip install -r [telegram_service/requirements.txt](telegram_service/requirements.txt:1)
+3. Set required env:
+   - TELEGRAM_TOKEN (required)
+   - NO_POSTER_PATH (e.g. path to a default poster image used by [python.get_image()](telegram_service/bot_utils.py:44))
+   - Optional images used in registration UX: TELEGRAM_AUTH_TEST_PATH, TELEGRAM_AUTH_APPROVE, TELEGRAM_IMDB_RATINGS
+   - Transmission/DB credentials as per utils (already covered in your .env)
+4. Start the bot:
+   - python [python](telegram_service/app.py:78)
+
+Docker:
+- The Telegram service image is built using [Dockerfile_telegram](Dockerfile_telegram:1) and runs [python](telegram_service/app.py:78) as the entrypoint.
+- docker-compose service “telegram_service” uses that Dockerfile. Ensure TELEGRAM_TOKEN is provided via .env.
+
+Main entrypoint and routers:
+- App entrypoint: [python.main()](telegram_service/app.py:55)
+- Routers registered in app:
+  - Misc (/help, /reset): [python](telegram_service/routers/misc_router.py:12)
+  - Auth (/register, preference toggles, admin token): [python](telegram_service/routers/auth_router.py:1)
+  - Download flow (FSM + callbacks): [python](telegram_service/routers/download_router.py:1)
+  - Progress rendering: [python](telegram_service/routers/progress_router.py:11)
+  - Rating flows (single + bulk): [python](telegram_service/routers/rating_router.py:72)
+- Background notifier (immediate completion alerts):
+  - Scheduled in [python.main()](telegram_service/app.py:71)
+  - Logic: [python.start_notifier()](telegram_service/services/notifier_service.py:18)
+
+Telegram commands (aiogram v3):
+- /start – Show the main menu [python.start_handler()](telegram_service/app.py:36)
+- /help – Show help and preferences [python.help_command()](telegram_service/routers/misc_router.py:12)
+- /reset – Reset conversation [python.reset_command()](telegram_service/routers/misc_router.py:28)
+- /register – Begin registration (email + optional IMDB ID) [python.register_start()](telegram_service/routers/auth_router.py:28)
+- /change_watchlist – Toggle watchlist monitoring [python.change_watchlist()](telegram_service/routers/auth_router.py:132)
+- /change_newsletter – Toggle newsletter emails [python.change_newsletter()](telegram_service/routers/auth_router.py:140)
+- /generate_pass – Generate a one-time token (admin only) [python.generate_password()](telegram_service/routers/auth_router.py:148)
+
+Feature flows
+
+1) Download a movie
+- Entry: Main menu “📥 Download a movie” [python.prompt_movie_query()](telegram_service/routers/download_router.py:23)
+- Input options:
+  - IMDB id (ttNNNNNNN, e.g. tt0133093)
+  - IMDB URL (https://www.imdb.com/title/tt0133093/)
+  - Title text (“The Matrix”)
+- Resolution and send to Transmission:
+  - Movie info + poster displayed via [python.make_movie_reply()](telegram_service/bot_utils.py:19)
+  - Inline torrent list, selection handled by [python.torrent_selection()](telegram_service/routers/download_router.py:113)
+  - Transmission request and DB update via [python.perform_download()](telegram_service/services/download_service.py:75)
+
+2) Check download progress
+- Entry: Main menu “📈 Check download progress”
+- Handler: [python.check_download_progress()](telegram_service/routers/progress_router.py:11)
+- Data from [python.get_progress()](telegram_service/bot_get_progress.py:107) with TorrentName, Resolution, Status, Progress, ETA
+
+3) Rate a title
+- Entry: Main menu “🌡️ Rate a title”
+- Single title:
+  - Input IMDB id/link/title, present movie info and rating keyboard
+  - Persist rating and show IMDB link: [python.rate_submit_single()](telegram_service/routers/rating_router.py:127)
+- Bulk unrated:
+  - Process user’s unrated queue: [python.rate_choose_mode()](telegram_service/routers/rating_router.py:83), [python._rate_next_in_bulk()](telegram_service/routers/rating_router.py:175)
+  - Actions: 1–10 score, Skip this movie., Exit rating process.
+
+Notifications on completion:
+- Background task polls Transmission/DB every 60s: [python.start_notifier()](telegram_service/services/notifier_service.py:18)
+- On completion, sends a “✅ Download completed!” message and marks the torrent as “user notified (telegram)”
+
+Environment variables summary:
+- Required:
+  - TELEGRAM_TOKEN (token of the Telegram bot)
+- Optional UX images:
+  - TELEGRAM_AUTH_TEST_PATH – image used for auth prompt (legacy UX, optional)
+  - TELEGRAM_AUTH_APPROVE – image used on approval (optional)
+  - TELEGRAM_IMDB_RATINGS – image used to guide IMDB profile (optional)
+  - NO_POSTER_PATH – fallback poster image path for [python.get_image()](telegram_service/bot_utils.py:44)
+- Transmission/DB:
+  - Managed by existing .env used across services; see docker-compose service envs and [python.utils](utils.py:1)
+
+Removed/deprecated:
+- Upload viewing activity (CSV) and Download viewing activity (CSV) are deprecated in the new aiogram v3 bot; references remain only in legacy [python](telegram_service/bot.py:1) and are not used by the new entrypoint [python](telegram_service/app.py:78)
+
+Verification checklist:
+- Local:
+  - Export TELEGRAM_TOKEN, run python [python](telegram_service/app.py:78)
+  - In Telegram, use /start, then try Download/Progress/Rating flows
+- Docker:
+  - Ensure TELEGRAM_TOKEN in .env
+  - docker-compose up -d --build telegram_service
+  - Confirm the bot responds and that completion notifications arrive when torrents finish

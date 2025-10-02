@@ -68,19 +68,6 @@ services:
       - 51413:51413/udp
     restart: unless-stopped
 
-  myimdb_service:
-    container_name: MOVIELIB_myImdb
-    network_mode: host
-    build:
-      context: ./
-      dockerfile: Dockerfile_myimdb
-    env_file:
-      - .env
-    restart: on-failure
-    depends_on:
-      postgres_db:
-        condition: service_healthy
-
   newsletter_service:
     container_name: MOVIELIB_Newsletter
     network_mode: host

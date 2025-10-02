@@ -1,61 +1,87 @@
-<table style="width: 600px">
-	<tbody>
-		<tr>
-			<td style="font-size: 20px; color: #136cb2; background-color: #mprm_bck_color" colspan="2">
-				<span style="color: #666; font-size: 13px;">mprm_crt.&ensp;</span>
-				<strong>mprm_title</strong>&ensp;(mprm_year)
-			</td>
-		</tr>
-		<tr>
-			<td rowspan="5" align="center" style="font-size: 11px;">
-				<a href="https://www.imdb.com/title/ttmprm_imdb_id" target="_blank" rel="noopener">
-					<img src="mprm_poster" alt="poster" height="209" />
-				</a>
-				<br>
-				mprm_trailer
-			</td>
-		</tr>
-		<tr>
-			<td style="font-size: 11px; color: #666;">
-				<span class="">mprm_genre&ensp;</span>
-				<span style="color: #ccc;">| &ensp;mprm_rated&ensp; </span>
-				<span style="color: #ccc;">|</span>
-				<span class="">&ensp;mprm_countries&ensp;</span>
-				<span style="color: #ccc;">|</span>&ensp;mprm_runtime min.&ensp;
-			</td>
-		</tr>
-		<tr>
-			<td style="font-size: 11px; color: #666;">IMDB:
-				<span class="class_imdb_score"><strong>&ensp;mprm_imdb_score&ensp;</strong></span>
-				<span style="color: #ccc;">|</span>&ensp;TMDB:
-				<span class="class_score"><strong>&ensp;mprm_score&ensp;</strong></span>
-				<span style="color: #ccc;">|</span>&ensp;Rotten T:
-				<span class="class_rott_score"><strong>&ensp;mprm_rott_score&ensp;</strong></span>
-				<span style="color: #ccc;">|</span>&ensp;Meta C:
-				<span class="class_meta_score"><strong>&ensp;mprm_meta_score&ensp;</strong></span>
-				<span style="color: #ccc;">|</span>&ensp;mprm_seen_date
-				<span class="class_my_imdb_score"><strong>&ensp;mprm_my_imdb_score&ensp;</strong></span>
-			</td>
-		</tr>
-		<tr>
-			<td style="font-size: 10px;">mprm_ovrw</td>
-		</tr>
-		<tr>
-			<td style="font-size: 11px; color: #666;">Directors:
-				<span style="color: #333333;"><strong>&ensp;mprm_directors&ensp;</strong></span>
-				<span style="color: #ccc;">|</span>&ensp;Stars:
-				<span style="color: #333333;"><strong>&ensp;mprm_cast</strong></span>
-			</td>
-		</tr>
-		<tr>
-			<td colspan="2">
-				<table style="width: 100%; font-size: 11px; background-color: #mprm_bck_color;">
-					<tbody>
-trnt_tbody
-					</tbody>
-				</table>
-			</td>
-		</tr>
-	</tbody>
+<table role="presentation" style="width: 100%; border-collapse: collapse; margin: 12px 0; background: #ffffff; border: 1px solid #e9e9eb;">
+  <tbody>
+    <tr>
+      <td style="font-size: 20px; color: #136cb2; background-color: #{{ mprm_bck_color }}; padding: 10px 12px;" colspan="2">
+        <span style="color: #666; font-size: 13px;">{{ mprm_crt }}.&ensp;</span>
+        <strong>{{ mprm_title }}</strong>&ensp;({{ mprm_year }})
+      </td>
+    </tr>
+
+    <tr>
+      <td rowspan="5" align="center" style="font-size: 11px; width: 180px; padding: 10px;">
+        <a href="https://www.imdb.com/title/tt{{ mprm_imdb_id or mprm_id_imdb }}" target="_blank" rel="noopener">
+          <img src="{{ mprm_poster }}" alt="poster" height="209" style="display:block; border:0; outline:none; text-decoration:none;" />
+        </a>
+        <br>
+        {{ mprm_trailer | safe }}
+      </td>
+    </tr>
+
+    <tr>
+      <td style="font-size: 11px; color: #666; padding: 6px 12px 2px 8px;">
+        <span>{{ mprm_genre }}&ensp;</span>
+        <span style="color: #ccc;">| &ensp;{{ mprm_rated }}&ensp; </span>
+        <span style="color: #ccc;">|</span>
+        <span>&ensp;{{ mprm_countries }}&ensp;</span>
+        <span style="color: #ccc;">|</span>&ensp;{{ mprm_runtime }} min.&ensp;
+      </td>
+    </tr>
+
+    <tr>
+      <td style="font-size: 11px; color: #666; padding: 2px 12px 2px 8px;">IMDB:
+        <span class="{{ class_imdb_score }}"><strong>&ensp;{{ mprm_imdb_score }}&ensp;</strong></span>
+        <span style="color: #ccc;">|</span>&ensp;TMDB:
+        <span class="{{ class_score }}"><strong>&ensp;{{ mprm_score }}&ensp;</strong></span>
+        <span style="color: #ccc;">|</span>&ensp;Rotten T:
+        <span class="{{ class_rott_score }}"><strong>&ensp;{{ mprm_rott_score }}&ensp;</strong></span>
+        <span style="color: #ccc;">|</span>&ensp;Meta C:
+        <span class="{{ class_meta_score }}"><strong>&ensp;{{ mprm_meta_score }}&ensp;</strong></span>
+        <span style="color: #ccc;">|</span>&ensp;{{ mprm_seen_date }}
+        <span class="{{ class_my_imdb_score }}"><strong>&ensp;{{ mprm_my_imdb_score }}&ensp;</strong></span>
+      </td>
+    </tr>
+
+    <tr>
+      <td style="font-size: 10px; padding: 2px 12px 8px 8px; color:#333;">{{ mprm_ovrw }}</td>
+    </tr>
+
+    <tr>
+      <td style="font-size: 11px; color: #666; padding: 2px 12px 10px 8px;">Directors:
+        <span style="color: #333333;"><strong>&ensp;{{ mprm_directors or mprm_director }}&ensp;</strong></span>
+        <span style="color: #ccc;">|</span>&ensp;Stars:
+        <span style="color: #333333;"><strong>&ensp;{{ mprm_cast }}</strong></span>
+      </td>
+    </tr>
+
+    <tr>
+      <td colspan="2" style="padding: 6px 8px 12px 8px;">
+        <table role="presentation" style="width: 100%; font-size: 11px; background-color: #{{ mprm_bck_color }}; border-collapse: collapse;">
+          <tbody>
+            {% for tr in torrents %}
+            <tr>
+              <td style="text-align: center; padding: 6px;">
+                <strong>{{ tr.trnt_trend }}</strong>
+              </td>
+              <td style="text-align: right; padding: 6px;">
+                <strong>{{ tr.trnt_resolution }}</strong>
+              </td>
+              <td style="text-align: right; padding: 6px;">
+                <strong>{{ tr.trnt_sizeGb }}</strong>
+              </td>
+              <td style="text-align: center; vertical-align: middle; padding: 6px;">
+                {% if tr.trnt_freeleech %}
+                  <img src="https://filelist.io/styles/images/tags/freeleech.png" alt="freeleech" style="display:inline-block; border:0; height:16px;" />
+                {% endif %}
+              </td>
+              <td style="text-align: center; height: 38px; padding: 6px;" colspan="2">
+                <a class="btnDw" href="{{ tr.trnt_torr_link_download }}" style="display:block; width:100%; padding:10px 18px; font-size:14px;">DOWNLOAD</a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </td>
+    </tr>
+  </tbody>
 </table>
-<p></p>
+<p style="margin: 12px 0;"></p>

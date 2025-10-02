@@ -1,4 +1,4 @@
-# docker build -t torrent_service . -f Dockerfile_torrent_service
+# docker build -t telegram_service . -f Dockerfile_telegram
 FROM python:3.10
 
 LABEL Author="Mikael"
@@ -7,14 +7,21 @@ RUN mkdir /app
 WORKDIR /app
 
 COPY telegram_service/ ./
-COPY myimdb_service/bot_watchlist.py ./
+# Watchlist monitor logic is part of telegram_service/services/watchlist_service.py
+# Legacy myimdb_service/bot_watchlist.py is no longer copied into the container.
 
 COPY telegram_service/images ./images
 COPY utils.py ./
 
-
 RUN pip install -r requirements.txt
 
-EXPOSE 9092
+# Telegram bot runs via polling; no external port required
+# EXPOSE 9092
 
-ENTRYPOINT ["python", "bot.py"]
+# Configuration:
+# - WATCHLIST_SCAN_INTERVAL_SECONDS: optional, interval for background watchlist monitor (default 10800 = 3 hours)
+#   Set via docker-compose or container environment. Example:
+#   environment:
+#     - WATCHLIST_SCAN_INTERVAL_SECONDS=7200
+
+ENTRYPOINT ["python", "app.py"]

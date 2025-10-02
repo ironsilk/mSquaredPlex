@@ -5,6 +5,7 @@ from itertools import groupby
 
 import PTN
 
+from jinja2 import Environment, FileSystemLoader
 from utils import check_against_user_movies, insert_many, Torrent
 from utils import get_my_imdb_users
 from utils import get_torr_quality
@@ -34,64 +35,90 @@ logger = setup_logger('EmailSender')
 
 
 def generate_movie_table(mprm, tprm):
-    template_file = open(MOVIE_TEMPLATE_PATH, 'r')
-    template = template_file.read()
-    template_file.close()
-
-    for key, value in mprm.items():
-        if key in template:
-            template = template_replace(template, key, value)
-
-    template = template.replace('trnt_tbody', generate_trnt_table(tprm))
-
-    return template + '\n'
+    """
+    Render a single movie card with its torrent rows using Jinja2.
+    Preserves the original function signature and returns HTML string.
+    """
+    env = get_template_env()
+    template_name = os.path.basename(MOVIE_TEMPLATE_PATH) if MOVIE_TEMPLATE_PATH else '_movie.html'
+    template = env.get_template(template_name)
+    ctx = build_movie_context(mprm, tprm)
+    return template.render(**ctx) + '\n'
 
 
-def template_replace(template, key, value):
+def get_template_env():
+    """
+    Initialize Jinja2 environment to load templates from the 'views' directory.
+    Uses TEMPLATE_PATH env var to infer base dir, falls back to local views.
+    """
+    base_dir = os.path.join(os.path.dirname(__file__), os.path.dirname(TEMPLATE_PATH)) if TEMPLATE_PATH else os.path.join(os.path.dirname(__file__), 'views')
+    return Environment(loader=FileSystemLoader(base_dir), autoescape=False, trim_blocks=True, lstrip_blocks=True)
+
+def build_movie_context(mprm, tprm):
+    """
+    Build the Jinja2 context expected by _movie.html and _torrent.html.
+    Converts 'mprm_*' placeholders and computes 'class_*' badge classes.
+    Also converts tprm dict to a 'torrents' list for template iteration.
+    """
     score_list = ('imdb_score', 'score', 'rott_score', 'meta_score', 'my_imdb_score')
     genre_bad_list = ('Horror', 'Animation')
     country_bad_list = ('India', 'Bahasa indonesia', 'China')
 
-    if value != 'None' and value != False and value != 'N/A' and value is not None:
-        value = str(value)
-        if key in score_list:
-            class_value = get_key_class(key, value)
-            template = template.replace('mprm_{0}'.format(key), value)
-            template = template.replace('class_{0}'.format(key), class_value)
+    def safe_value(v):
+        return None if v in ('None', False, 'N/A', None) else str(v)
 
-        elif key == 'genre':
-            for genre in genre_bad_list:
-                if genre.lower() in value.lower():
-                    value = value.replace(genre,
-                                          '<span style="color: #ff0000;"><strong>{0}</strong></span>'.format(genre))
+    ctx = {}
 
-        elif key == 'country':
-            for country in country_bad_list:
-                if country.lower() in value.lower():
-                    value = value.replace(country,
-                                          '<span style="color: #ff0000;"><strong>{0}</strong></span>'.format(
-                                              country))
+    # Map movie parameters to mprm_* variables with formatting
+    for key, raw in (mprm or {}).items():
+        val = safe_value(raw)
 
-        elif key == 'trailer':
-            value = '<a href="{0}" target="_blank">WATCH TRAILER</a>'.format(value)
-            template = template.replace('mprm_{0}'.format(key), value)
+        # Highlight disliked genres/countries
+        if key == 'genre' and val:
+            for g in genre_bad_list:
+                if g.lower() in val.lower():
+                    val = val.replace(g, f'<span style="color: #ff0000;"><strong>{g}</strong></span>')
+        if key in ('country', 'countries') and val:
+            for c in country_bad_list:
+                if c.lower() in val.lower():
+                    val = val.replace(c, f'<span style="color: #ff0000;"><strong>{c}</strong></span>')
 
-        template = template.replace('mprm_{0}'.format(key), value)
+        # Trailer link
+        if key == 'trailer':
+            val = f'<a href="{val}" target="_blank">WATCH TRAILER</a>' if val else ''
 
-    else:
+        # Empty for personal score and seen_date
+        if key in ('my_imdb_score', 'seen_date') and not val:
+            val = ''
 
-        if key == 'my_imdb_score' or key == 'seen_date':
-            template = template.replace('mprm_{0}'.format(key), '')
-            template = template.replace('class_{0}'.format(key), '')
+        ctx[f'mprm_{key}'] = val if val is not None else ('---' if key not in ('my_imdb_score', 'seen_date', 'trailer') else '')
 
-        elif key == 'trailer':
-            template = template.replace('mprm_{0}'.format(key), '')
+    # Ensure compatibility variants
+    if 'mprm_countries' not in ctx and 'mprm_country' in ctx:
+        ctx['mprm_countries'] = ctx['mprm_country']
+    if 'mprm_directors' not in ctx and 'mprm_director' in ctx:
+        ctx['mprm_directors'] = ctx['mprm_director']
 
-        else:
-            template = template.replace('mprm_{0}'.format(key), '---')
-            template = template.replace('class_{0}'.format(key), '')
+    # Compute classes for score badges
+    for key in score_list:
+        val = ctx.get(f'mprm_{key}')
+        ctx[f'class_{key}'] = get_key_class(key, val) if val not in (None, '', '---') else ''
 
-    return template
+    # Build torrent rows list
+    torrents = []
+    for _, tr in (tprm or {}).items():
+        tr_resolution = tr.get('resolution') or (f"{get_torr_quality(tr.get('name'))}p" if tr.get('name') else None)
+        torrents.append({
+            'trnt_trend': tr.get('trend', ''),
+            'trnt_resolution': str(tr_resolution) if tr_resolution else '',
+            'trnt_sizeGb': tr.get('size'),
+            'trnt_freeleech': True if tr.get('freeleech') else False,
+            'trnt_torr_link_seed': tr.get('torr_link_seed'),
+            'trnt_torr_link_download': tr.get('torr_link_download'),
+        })
+    ctx['torrents'] = torrents
+
+    return ctx
 
 
 def get_key_class(key, value):
@@ -129,66 +156,24 @@ def get_key_class(key, value):
 
 
 def generate_trnt_table(tprm):
-    template_file = open(TRNT_TEMPLATE_PATH, 'r')
-    template = template_file.read()
-    template_file.close()
-
-    trnt_tbody = template
-    index = 0
-
-    for key, value in tprm.items():
-        if isinstance(value, dict):
-            for key2, value2 in value.items():
-                trnt_tbody = trnt_tbody.replace('trnt_id_filelist', key)
-                if value2 == True:
-                    trnt_tbody = trnt_tbody.replace('trnt_{0}'.format(key2),
-                                                    '<img src="https://filelist.io/styles/images/tags/freeleech.png" alt="freeleech" />')
-                elif value2 != 'None' and value2 != False and value2 != 'N/A' and value2 is not None:
-                    value2 = str(value2)
-                    trnt_tbody = trnt_tbody.replace('trnt_{0}'.format(key2), value2)
-
-            # replace all param without values with dash/'---'
-            for key2, value2 in value.items():
-                trnt_tbody = trnt_tbody.replace('trnt_{0}'.format(key2), '')
-
-            index += 1
-            if index < len(tprm):
-                trnt_tbody += template
-        else:
-            if key in template:
-                trnt_tbody = trnt_tbody.replace('trnt_id_filelist', key)
-                if value == True:
-                    # trnt_tbody = trnt_tbody.replace('trnt_{0}'.format(key), 'freeleech')
-                    trnt_tbody = trnt_tbody.replace('trnt_{0}'.format(key2),
-                                                    '<img src="https://filelist.io/styles/images/tags/freeleech.png" alt="freeleech" />')
-                elif value != 'None' and value != False and value != 'N/A' and value is not None:
-                    value = str(value)
-                    trnt_tbody = template.replace('trnt_{0}'.format(key), value)
-
-    return trnt_tbody
+    """
+    Deprecated: torrent rows are now rendered by Jinja2 in the movie template.
+    Kept for backward compatibility; returns empty string.
+    """
+    return ''
 
 
 def generate_email_html(list_new, list_trnt):
-    template_file = open(TEMPLATE_PATH, 'r')
-    template = template_file.read()
-    template_file.close()
-
-    email_body = template
-
+    """
+    Render the base email wrapper using Jinja2, injecting pre-rendered HTML
+    for 'list_new' and 'list_trnt'. Returns empty string if both are empty.
+    """
     if not list_new and not list_trnt:
-        email_body = ''
-    else:
-        if list_new != '':
-            email_body = email_body.replace('list_new', list_new)
-        else:
-            email_body = email_body.replace('list_new', '')
-
-        if list_trnt != '':
-            email_body = email_body.replace('list_trnt', list_trnt)
-        else:
-            email_body = email_body.replace('list_trnt', '')
-
-    return email_body
+        return ''
+    env = get_template_env()
+    template_name = os.path.basename(TEMPLATE_PATH) if TEMPLATE_PATH else 'email_filelist.html'
+    template = env.get_template(template_name)
+    return template.render(list_new=list_new or '', list_trnt=list_trnt or '')
 
 
 def send_email(tFromName, tFromEmail, tToList, tSubject, tBody, lFiles, tSMTP, tUser, tPass):
