@@ -29,6 +29,9 @@ RUN /root/.local/bin/uv venv && /root/.local/bin/uv lock && /root/.local/bin/uv 
 ENV VIRTUAL_ENV=/app/wha_service/.venv
 ENV PATH="/app/wha_service/.venv/bin:$PATH"
 
+# Return to repo root so module import path "wha_service.app" resolves to /app/wha_service/app.py
+WORKDIR /app
+
 EXPOSE 8080
 
 # Optional healthcheck (requires curl if enabled)
