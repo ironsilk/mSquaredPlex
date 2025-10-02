@@ -46,11 +46,40 @@ class HealthResource:
             diag['available'] = False
             diag['error'] = 'transmission-rpc not installed'
             return False, diag
-        host = os.getenv('TRANSMISSION_HOST', os.getenv('TR_HOST', 'localhost'))
-        port = int(os.getenv('TRANSMISSION_PORT', os.getenv('TR_PORT', '9091')))
-        username = os.getenv('TRANSMISSION_USER', os.getenv('TR_USER', ''))
-        password = os.getenv('TRANSMISSION_PASSWORD', os.getenv('TR_PASSWORD', ''))
+        # Resolve Transmission RPC connection details with broader env fallbacks
+        host = (
+            os.getenv('TRANSMISSION_HOST')
+            or os.getenv('TR_HOST')
+            or os.getenv('TORR_HOST')
+            or 'localhost'
+        )
+        port = int(
+            os.getenv('TRANSMISSION_PORT')
+            or os.getenv('TR_PORT')
+            or os.getenv('TORR_PORT')
+            or '9091'
+        )
+        username = (
+            os.getenv('TRANSMISSION_USER')
+            or os.getenv('TR_USER')
+            or os.getenv('TRANSMISSION_USERNAME')
+            or os.getenv('TR_USERNAME')
+            or ''
+        )
+        password = (
+            os.getenv('TRANSMISSION_PASSWORD')
+            or os.getenv('TR_PASSWORD')
+            or os.getenv('TRANSMISSION_PASS')
+            or os.getenv('TR_PASS')
+            or ''
+        )
         scheme = os.getenv('TRANSMISSION_SCHEME', 'http')
+
+        # Include resolved context in diagnostics
+        diag['host'] = host
+        diag['port'] = port
+        diag['scheme'] = scheme
+
         try:
             client = TransmissionClient(
                 host=host,
