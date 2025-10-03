@@ -70,32 +70,58 @@ def get_latest_torrents(n=100, category=MOVIE_HDRO):
     n default 100
     movie category default HD RO
     """
+    if not API_URL:
+        logger.error("Filelist API_URL is not configured; skipping fetch")
+        return []
+
     logger.info('Getting RSS feeds')
-    r = requests.get(
-        url=API_URL,
-        params={
-            'username': USER,
-            'passkey': PASSKEY,
-            'action': 'latest-torrents',
-            'category': category,
-            'limit': n,
-        },
-    )
+    try:
+        r = requests.get(
+            url=API_URL,
+            params={
+                'username': USER,
+                'passkey': PASSKEY,
+                'action': 'latest-torrents',
+                'category': category,
+                'limit': n,
+            },
+            timeout=7,
+        )
+    except Exception as e:
+        logger.error(f"Filelist API request failed: {e}")
+        return []
+
+    if r.status_code != 200:
+        logger.warning(f"Filelist API returned non-200 status {r.status_code}; skipping this run")
+        return []
+
+    # Safely parse JSON, guard against HTML/error pages (e.g., 403/maintenance)
+    try:
+        payload = r.json()
+    except Exception as e:
+        sample = (r.text or "")[:200].replace('\n', ' ').replace('\r', ' ')
+        logger.error(f"Filelist API returned non-JSON: {e}; sample='{sample}'")
+        return []
+
     if category == MOVIE_4K:
-        torrents = [x for x in r.json() if 'Remux' in x['name']]
+        torrents = [x for x in payload if 'Remux' in (x.get('name') or '')]
     else:
-        torrents = r.json()
+        torrents = payload
 
     # Only keep movies from last 2 years
     # TODO this should be configurable
     torrents_parsed = []
     for torrent in torrents:
-        parsed = parse_torr_name(torrent['name'])
-        if parsed and parsed.get('year', 1999) in [date.today().year, date.today().year - 1]:
-            torrent.update(parsed)
+        name = torrent.get('name') or ''
+        parsed = parse_torr_name(name)
+        year = parsed.get('year') if parsed else None
+        if year in [date.today().year, date.today().year - 1]:
+            if parsed:
+                torrent.update(parsed)
             torrents_parsed.append(torrent)
-    logger.info(f"Got {len(torrents)} new torrents")
-    return torrents
+
+    logger.info(f"Got {len(torrents_parsed)} new torrents (filtered from {len(torrents)})")
+    return torrents_parsed
 
 
 @timing
