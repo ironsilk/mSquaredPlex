@@ -45,7 +45,7 @@ services:
     restart: unless-stopped
 
   transmission:
-    image: lscr.io/linuxserver/transmission:latest
+    image: lscr.io/linuxserver/transmission:version-3.00-r8
     container_name: MOVIELIB_Transmission
     env_file:
       - .env
