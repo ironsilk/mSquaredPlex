@@ -1,48 +1,93 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Email</title>
+    <title>New movies</title>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="x-apple-disable-message-reformatting">
+    <meta name="color-scheme" content="light dark">
+    <meta name="supported-color-schemes" content="light dark">
     <meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
     <style>
-      /* Fallback classes used by score badges */
-      .std { color: #333333; }
-      .neg { color: #ffffff; background-color: #ff0000; }
-      .poz { color: #ffffff; background-color: #008000; }
-      .prs { color: #ffffff; background-color: #000000; }
+      /* Score badge pills */
+      .pill { display:inline-block; padding:2px 8px; border-radius:999px; font-weight:700; font-size:12px; line-height:1.6; }
+      .std { color:#1f2937; background:#e5e7eb; }
+      .neg { color:#ffffff; background:#dc2626; }
+      .poz { color:#ffffff; background:#16a34a; }
+      .prs { color:#ffffff; background:#111827; }
 
       /* CTA buttons */
-      .btnSd, .btnDw {
-        background: #3d85c6;
-        background: -webkit-linear-gradient(#5aa0df, #2b6aa8);
-        background: linear-gradient(#5aa0df, #2b6aa8);
-        border-radius: 6px;
-        padding: 8px 14px;
-        color: #ffffff !important;
-        display: inline-block;
-        font: normal 600 13px/1 "-apple-system", "Segoe UI", "Roboto", "Arial", sans-serif;
-        text-align: center;
-        text-decoration: none;
-        text-shadow: none;
-        border: 1px solid #2b6aa8;
+      .btnDw {
+        background:#2563eb;
+        border-radius:8px;
+        color:#ffffff !important;
+        display:inline-block;
+        font:600 14px/1 -apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+        padding:11px 18px;
+        text-align:center;
+        text-decoration:none;
       }
       .btnSd {
-        background: -webkit-linear-gradient(#4caf50, #2c7a2c);
-        background: linear-gradient(#4caf50, #2c7a2c);
-        border-color: #2c7a2c;
+        color:#2563eb !important;
+        display:inline-block;
+        font:600 13px/1 -apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+        padding:8px 10px;
+        text-decoration:none;
+      }
+      .section-h { font:700 20px/1.3 -apple-system,"Segoe UI",Roboto,Arial,sans-serif; color:#111827; margin:0; }
+
+      @media (max-width:480px) {
+        .stack { display:block !important; width:100% !important; text-align:center !important; padding:0 0 12px 0 !important; }
+        .stack img { margin:0 auto !important; }
       }
 
-      /* Table defaults for better spacing in email clients */
-      table { border-collapse: collapse; }
-      th, td { padding: 4px; vertical-align: top; }
+      @media (prefers-color-scheme: dark) {
+        body, .bg { background:#0b0f19 !important; }
+        .card { background:#111827 !important; border-color:#1f2937 !important; }
+        .t-primary { color:#f3f4f6 !important; }
+        .t-secondary { color:#9ca3af !important; }
+        .section-h { color:#f3f4f6 !important; }
+        .divider { border-color:#1f2937 !important; }
+        .std { color:#e5e7eb !important; background:#374151 !important; }
+        .prs { color:#ffffff !important; background:#000000 !important; }
+      }
     </style>
   </head>
-  <body style="margin:0; padding:0; background:#f7f7f8; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;">
-    <div style="max-width:640px; margin:0 auto; padding:12px; font-family:-apple-system, Segoe UI, Roboto, Arial, sans-serif; color:#333;">
-      <!-- Injected pre-rendered sections -->
-      {{ list_new | safe }}
-      {{ list_trnt | safe }}
+  <body class="bg" style="margin:0; padding:0; background:#f3f4f6; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;">
+    <div style="display:none; max-height:0; overflow:hidden; opacity:0; mso-hide:all;">
+      Fresh picks for your library &mdash; download them straight to Plex.&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;
     </div>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f3f4f6;" class="bg">
+      <tr>
+        <td align="center" style="padding:16px 10px;">
+          <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:100%; max-width:600px;">
+            {% if list_new %}
+            <tr>
+              <td style="padding:8px 4px 4px 4px;">
+                <p class="section-h">New movies</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                {{ list_new | safe }}
+              </td>
+            </tr>
+            {% endif %}
+            {% if list_trnt %}
+            <tr>
+              <td style="padding:16px 4px 4px 4px;">
+                <p class="section-h">New torrents for your library</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                {{ list_trnt | safe }}
+              </td>
+            </tr>
+            {% endif %}
+          </table>
+        </td>
+      </tr>
+    </table>
   </body>
 </html>

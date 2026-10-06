@@ -58,6 +58,8 @@ PASSKEY=
 
 # Your public STATIC IP here. When you hit download from email it will be sent here
 TORR_API_HOST={public ip here}
+TORR_API_INTERNAL_HOST=127.0.0.1
+TORR_API_PUBLIC_HOST={tailscale ip here}
 TORR_API_PATH=/torr_api
 TORR_API_PORT=9092
 TORR_HOST=192.168.1.99

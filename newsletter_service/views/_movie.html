@@ -1,87 +1,83 @@
-<table role="presentation" style="width: 100%; border-collapse: collapse; margin: 12px 0; background: #ffffff; border: 1px solid #e9e9eb;">
-  <tbody>
-    <tr>
-      <td style="font-size: 20px; color: #136cb2; background-color: #{{ mprm_bck_color }}; padding: 10px 12px;" colspan="2">
-        <span style="color: #666; font-size: 13px;">{{ mprm_crt }}.&ensp;</span>
-        <strong>{{ mprm_title }}</strong>&ensp;({{ mprm_year }})
-      </td>
-    </tr>
+<table role="presentation" class="card" width="100%" cellpadding="0" cellspacing="0" style="width:100%; background:#ffffff; border:1px solid #e5e7eb; border-radius:12px; margin:12px 0; overflow:hidden;">
+  <tr>
+    <td style="padding:16px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+          <!-- Poster -->
+          <td class="stack" width="150" valign="top" style="width:150px; padding-right:16px;">
+            <a href="https://www.imdb.com/title/tt{{ mprm_imdb_id or mprm_id_imdb }}" target="_blank" rel="noopener">
+              <img src="{{ mprm_poster }}" alt="{{ mprm_title }} poster" width="150" style="display:block; width:150px; max-width:150px; height:auto; border:0; border-radius:8px; outline:none; text-decoration:none;" />
+            </a>
+          </td>
 
-    <tr>
-      <td rowspan="5" align="center" style="font-size: 11px; width: 180px; padding: 10px;">
-        <a href="https://www.imdb.com/title/tt{{ mprm_imdb_id or mprm_id_imdb }}" target="_blank" rel="noopener">
-          <img src="{{ mprm_poster }}" alt="poster" height="209" style="display:block; border:0; outline:none; text-decoration:none;" />
-        </a>
-        <br>
-        {{ mprm_trailer | safe }}
-      </td>
-    </tr>
+          <!-- Details -->
+          <td class="stack" valign="top">
+            <p class="t-primary" style="margin:0 0 2px 0; font:700 19px/1.25 -apple-system,'Segoe UI',Roboto,Arial,sans-serif; color:#111827;">
+              {{ mprm_title }}
+              <span class="t-secondary" style="font-weight:500; color:#6b7280;">({{ mprm_year }})</span>
+            </p>
+            {% if mprm_crt %}
+            <p class="t-secondary" style="margin:0 0 8px 0; font:500 12px/1.4 -apple-system,'Segoe UI',Roboto,Arial,sans-serif; color:#9ca3af;">#{{ mprm_crt }}</p>
+            {% endif %}
 
-    <tr>
-      <td style="font-size: 11px; color: #666; padding: 6px 12px 2px 8px;">
-        <span>{{ mprm_genre }}&ensp;</span>
-        <span style="color: #ccc;">| &ensp;{{ mprm_rated }}&ensp; </span>
-        <span style="color: #ccc;">|</span>
-        <span>&ensp;{{ mprm_countries }}&ensp;</span>
-        <span style="color: #ccc;">|</span>&ensp;{{ mprm_runtime }} min.&ensp;
-      </td>
-    </tr>
+            <!-- Meta row -->
+            <p class="t-secondary" style="margin:0 0 10px 0; font:400 13px/1.5 -apple-system,'Segoe UI',Roboto,Arial,sans-serif; color:#6b7280;">
+              {{ mprm_genre }} &middot; {{ mprm_rated }} &middot; {{ mprm_countries }} &middot; {{ mprm_runtime }} min
+            </p>
 
-    <tr>
-      <td style="font-size: 11px; color: #666; padding: 2px 12px 2px 8px;">IMDB:
-        <span class="{{ class_imdb_score }}"><strong>&ensp;{{ mprm_imdb_score }}&ensp;</strong></span>
-        <span style="color: #ccc;">|</span>&ensp;TMDB:
-        <span class="{{ class_score }}"><strong>&ensp;{{ mprm_score }}&ensp;</strong></span>
-        <span style="color: #ccc;">|</span>&ensp;Rotten T:
-        <span class="{{ class_rott_score }}"><strong>&ensp;{{ mprm_rott_score }}&ensp;</strong></span>
-        <span style="color: #ccc;">|</span>&ensp;Meta C:
-        <span class="{{ class_meta_score }}"><strong>&ensp;{{ mprm_meta_score }}&ensp;</strong></span>
-        <span style="color: #ccc;">|</span>&ensp;{{ mprm_seen_date }}
-        <span class="{{ class_my_imdb_score }}"><strong>&ensp;{{ mprm_my_imdb_score }}&ensp;</strong></span>
-      </td>
-    </tr>
+            <!-- Score pills -->
+            <p style="margin:0 0 10px 0; font:400 12px/2 -apple-system,'Segoe UI',Roboto,Arial,sans-serif;">
+              {% if class_imdb_score %}<span class="t-secondary" style="color:#6b7280;">IMDb</span> <span class="pill {{ class_imdb_score }}">{{ mprm_imdb_score }}</span>&nbsp;&nbsp;{% endif %}
+              {% if class_score %}<span class="t-secondary" style="color:#6b7280;">TMDB</span> <span class="pill {{ class_score }}">{{ mprm_score }}</span>&nbsp;&nbsp;{% endif %}
+              {% if class_rott_score %}<span class="t-secondary" style="color:#6b7280;">RT</span> <span class="pill {{ class_rott_score }}">{{ mprm_rott_score }}</span>&nbsp;&nbsp;{% endif %}
+              {% if class_meta_score %}<span class="t-secondary" style="color:#6b7280;">Meta</span> <span class="pill {{ class_meta_score }}">{{ mprm_meta_score }}</span>&nbsp;&nbsp;{% endif %}
+              {% if class_my_imdb_score %}<span class="t-secondary" style="color:#6b7280;">You</span> <span class="pill {{ class_my_imdb_score }}">{{ mprm_my_imdb_score }}</span>{% endif %}
+            </p>
 
-    <tr>
-      <td style="font-size: 10px; padding: 2px 12px 8px 8px; color:#333;">{{ mprm_ovrw }}</td>
-    </tr>
+            <!-- Overview -->
+            <p class="t-primary" style="margin:0 0 10px 0; font:400 13px/1.55 -apple-system,'Segoe UI',Roboto,Arial,sans-serif; color:#374151;">{{ mprm_ovrw }}</p>
 
-    <tr>
-      <td style="font-size: 11px; color: #666; padding: 2px 12px 10px 8px;">Directors:
-        <span style="color: #333333;"><strong>&ensp;{{ mprm_directors or mprm_director }}&ensp;</strong></span>
-        <span style="color: #ccc;">|</span>&ensp;Stars:
-        <span style="color: #333333;"><strong>&ensp;{{ mprm_cast }}</strong></span>
-      </td>
-    </tr>
+            <!-- Directors / Stars -->
+            <p class="t-secondary" style="margin:0 0 6px 0; font:400 12px/1.5 -apple-system,'Segoe UI',Roboto,Arial,sans-serif; color:#6b7280;">
+              <strong class="t-primary" style="color:#374151;">Director:</strong> {{ mprm_directors or mprm_director }}
+            </p>
+            <p class="t-secondary" style="margin:0 0 10px 0; font:400 12px/1.5 -apple-system,'Segoe UI',Roboto,Arial,sans-serif; color:#6b7280;">
+              <strong class="t-primary" style="color:#374151;">Stars:</strong> {{ mprm_cast }}
+            </p>
 
-    <tr>
-      <td colspan="2" style="padding: 6px 8px 12px 8px;">
-        <table role="presentation" style="width: 100%; font-size: 11px; background-color: #{{ mprm_bck_color }}; border-collapse: collapse; table-layout: fixed;">
-          <tbody>
-            {% for tr in torrents %}
-            <tr>
-              <td style="text-align: center; padding: 6px; width: 18%;">
-                <strong>{{ tr.trnt_trend }}</strong>
-              </td>
-              <td style="text-align: right; padding: 6px; width: 14%;">
-                <strong>{{ tr.trnt_resolution }}</strong>
-              </td>
-              <td style="text-align: right; padding: 6px; width: 14%;">
-                <strong>{{ tr.trnt_sizeGb }}</strong>
-              </td>
-              <td style="text-align: center; vertical-align: middle; padding: 6px; width: 12%;">
-                {% if tr.trnt_freeleech %}
-                  <img src="https://filelist.io/styles/images/tags/freeleech.png" alt="freeleech" style="display:inline-block; border:0; height:16px;" />
-                {% endif %}
-              </td>
-              <td style="text-align: center; height: 38px; padding: 6px;" width="160">
-                <a class="btnDw" href="{{ tr.trnt_torr_link_download }}" style="display:block; width:100%; box-sizing:border-box; padding:10px 14px; font-size:13px; white-space:nowrap; text-align:center; text-decoration:none;">DOWNLOAD</a>
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </td>
-    </tr>
-  </tbody>
+            {% if mprm_trailer %}
+            <p style="margin:0 0 4px 0; font:600 12px/1 -apple-system,'Segoe UI',Roboto,Arial,sans-serif;">{{ mprm_trailer | safe }}</p>
+            {% endif %}
+          </td>
+        </tr>
+      </table>
+
+      <!-- Torrents -->
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:14px; border-top:1px solid #e5e7eb;" >
+        {% for tr in torrents %}
+        <tr>
+          <td class="divider" valign="middle" style="padding:10px 0; border-bottom:1px solid #f3f4f6;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td valign="middle" style="font:600 13px/1.4 -apple-system,'Segoe UI',Roboto,Arial,sans-serif;">
+                  <span class="t-primary" style="color:#111827;">{{ tr.trnt_resolution }}</span>
+                  <span class="t-secondary" style="color:#9ca3af; font-weight:400;">&middot; {{ tr.trnt_sizeGb }} GB</span>
+                  {% if tr.trnt_freeleech %}
+                  <span style="display:inline-block; margin-left:6px; padding:1px 7px; border-radius:999px; background:#fef3c7; color:#92400e; font-size:11px; font-weight:700;">FREELEECH</span>
+                  {% endif %}
+                </td>
+                <td align="right" valign="middle" style="white-space:nowrap;">
+                  {% if tr.trnt_torr_link_seed %}
+                  <a class="btnSd" href="{{ tr.trnt_torr_link_seed }}">SEED</a>
+                  {% endif %}
+                  <a class="btnDw" href="{{ tr.trnt_torr_link_download }}">DOWNLOAD</a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        {% endfor %}
+      </table>
+    </td>
+  </tr>
 </table>
-<p style="margin: 12px 0;"></p>

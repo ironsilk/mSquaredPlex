@@ -26,6 +26,7 @@ TORR_PORT = int(os.getenv('TORR_PORT')) if os.getenv('TORR_PORT') else 9091
 TRANSMISSION_USER = os.getenv('TRANSMISSION_USER')
 TRANSMISSION_PASS = os.getenv('TRANSMISSION_PASS')
 TORR_API_HOST = os.getenv('TORR_API_HOST')
+TORR_API_PUBLIC_HOST = os.getenv('TORR_API_PUBLIC_HOST') or TORR_API_HOST
 TORR_API_PORT = os.getenv('TORR_API_PORT')
 TORR_API_PATH = os.getenv('TORR_API_PATH')
 TORR_SEED_FOLDER = os.getenv('TORR_SEED_FOLDER')
@@ -279,7 +280,7 @@ def generate_torr_links(item, user_telegram_id, cypher=None):
         # pkg = cypher.encrypt(json.dumps(pkg))
         # No Cypher alternative
         pkg = urllib.parse.urlencode(pkg)
-        return f"http://{TORR_API_HOST}:{TORR_API_PORT}{TORR_API_PATH}?{pkg}"
+        return f"http://{TORR_API_PUBLIC_HOST}:{TORR_API_PORT}{TORR_API_PATH}?{pkg}"
 
     seed = {
         'torr_id': item['id'],

@@ -30,7 +30,7 @@ def torr_api_is_available(timeout=3):
     Returns True if TORR API health endpoint responds 200 OK.
     Treats 403/503 and any exception as unavailable.
     """
-    host = os.getenv('TORR_API_HOST') or '127.0.0.1'
+    host = os.getenv('TORR_API_INTERNAL_HOST') or '127.0.0.1'
     port = os.getenv('TORR_API_PORT') or '9092'
     base = _resolve_torr_api_base()
     url = f"http://{host}:{port}/{base}/health"
