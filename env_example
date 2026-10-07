@@ -62,6 +62,9 @@ TORR_API_INTERNAL_HOST=127.0.0.1
 TORR_API_PUBLIC_HOST={tailscale ip here}
 TORR_API_PATH=/torr_api
 TORR_API_PORT=9092
+TORR_API_HMAC_SECRET=change-me
+TORR_API_PUBLIC_URL=https://torr.<yourdomain>/torr_api
+TORR_API_LINK_TTL_DAYS=30
 TORR_HOST=192.168.1.99
 # Choose whether we should remove lower resolution torrents for the same movie
 # gets triggered at every torrent check routine (See SYNC_INTERVAL)

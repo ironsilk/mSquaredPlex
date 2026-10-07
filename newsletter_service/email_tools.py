@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
+import hashlib
+import hmac
 import os
+import time
 import urllib.parse
 from itertools import groupby
 
@@ -31,6 +34,9 @@ TORR_API_PORT = os.getenv('TORR_API_PORT')
 TORR_API_PATH = os.getenv('TORR_API_PATH')
 TORR_SEED_FOLDER = os.getenv('TORR_SEED_FOLDER')
 TORR_DOWNLOAD_FOLDER = os.getenv('TORR_DOWNLOAD_FOLDER')
+TORR_API_PUBLIC_URL = os.getenv('TORR_API_PUBLIC_URL')
+TORR_API_HMAC_SECRET = os.getenv('TORR_API_HMAC_SECRET')
+TORR_API_LINK_TTL_DAYS = int(os.getenv('TORR_API_LINK_TTL_DAYS') or 30)
 
 logger = setup_logger('EmailSender')
 
@@ -276,11 +282,17 @@ def check_in_my_movies(new_movies, email):
 
 def generate_torr_links(item, user_telegram_id, cypher=None):
     def compose_link(pkg):
-        # Cypher alternative
-        # pkg = cypher.encrypt(json.dumps(pkg))
-        # No Cypher alternative
-        pkg = urllib.parse.urlencode(pkg)
-        return f"http://{TORR_API_PUBLIC_HOST}:{TORR_API_PORT}{TORR_API_PATH}?{pkg}"
+        # Sign the fields torr_api trusts (torr_id, requested_by) with an expiry so the
+        # public (Cloudflare-tunnelled) endpoint cannot be abused by unsigned requests.
+        if TORR_API_HMAC_SECRET:
+            exp = int(time.time()) + TORR_API_LINK_TTL_DAYS * 86400
+            pkg['exp'] = exp
+            msg = f"{pkg['torr_id']}:{pkg['requested_by']}:{exp}".encode()
+            pkg['sig'] = hmac.new(TORR_API_HMAC_SECRET.encode(), msg, hashlib.sha256).hexdigest()
+        query = urllib.parse.urlencode(pkg)
+        if TORR_API_PUBLIC_URL:
+            return f"{TORR_API_PUBLIC_URL}?{query}"
+        return f"http://{TORR_API_PUBLIC_HOST}:{TORR_API_PORT}{TORR_API_PATH}?{query}"
 
     seed = {
         'torr_id': item['id'],

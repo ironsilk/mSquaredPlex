@@ -1,3 +1,5 @@
+import hashlib
+import hmac
 import os
 import time
 import uuid
@@ -7,6 +9,7 @@ import falcon
 from utils import setup_logger, send_torrent, compose_link, update_many, Torrent, get_torrent_by_torr_id_user
 
 TORR_KEEP_TIME = int(os.getenv('TORR_KEEP_TIME')) if os.getenv('TORR_KEEP_TIME') else 60
+TORR_API_HMAC_SECRET = os.getenv('TORR_API_HMAC_SECRET')
 
 logger = setup_logger('TorrUtils')
 
@@ -18,6 +21,12 @@ def gtfo(resp, message="Provide required parameters"):
     }
     resp.media = pkg
     resp.status = falcon.HTTP_400
+    return
+
+
+def forbidden(resp, message="forbidden"):
+    resp.media = {'error': 'forbidden', 'message': message}
+    resp.status = falcon.HTTP_403
     return
 
 
@@ -57,6 +66,31 @@ class TORRAPI:
             requested_by_int = int(requested_by)
         except Exception:
             return gtfo(resp, "Parameters torr_id and requested_by must be integers")
+
+        # Verify HMAC signature + expiry (public endpoint protection). Signed by the
+        # newsletter over the canonical string "torr_id:requested_by:exp".
+        if TORR_API_HMAC_SECRET:
+            exp = params.get('exp')
+            sig = params.get('sig')
+            if not exp or not sig:
+                self.logger.warning(f"[{rid}] missing signature for torr_id={torr_id_int}")
+                return forbidden(resp, "Missing signature")
+            try:
+                if int(exp) < int(time.time()):
+                    self.logger.warning(f"[{rid}] expired link for torr_id={torr_id_int}")
+                    return forbidden(resp, "Link expired")
+            except Exception:
+                return forbidden(resp, "Invalid expiry")
+            expected = hmac.new(
+                TORR_API_HMAC_SECRET.encode(),
+                f"{torr_id}:{requested_by}:{exp}".encode(),
+                hashlib.sha256,
+            ).hexdigest()
+            if not hmac.compare_digest(expected, sig):
+                self.logger.warning(f"[{rid}] invalid signature for torr_id={torr_id_int}")
+                return forbidden(resp, "Invalid signature")
+        else:
+            self.logger.warning(f"[{rid}] TORR_API_HMAC_SECRET unset; serving unauthenticated request")
 
         # Attempt torrent queueing
         try:
