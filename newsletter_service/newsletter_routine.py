@@ -1,4 +1,5 @@
 import os
+import re
 from datetime import datetime, date
 
 import requests
@@ -115,6 +116,16 @@ def get_latest_torrents(n=100, category=MOVIE_HDRO):
         name = torrent.get('name') or ''
         parsed = parse_torr_name(name)
         year = parsed.get('year') if parsed else None
+        # PTN's bundled year regex only matches up to 2019, so any 2020+ release
+        # parses to year=None and would be silently dropped by the window filter
+        # below. Fall back to extracting a plausible 4-digit year from the name.
+        if not year:
+            candidates = [int(y) for y in re.findall(r'(?:19|20)\d{2}', name)]
+            candidates = [y for y in candidates if y <= date.today().year + 1]
+            if candidates:
+                year = max(candidates)
+                parsed = parsed or {}
+                parsed['year'] = year
         if year in [date.today().year, date.today().year - 1]:
             if parsed:
                 torrent.update(parsed)
